@@ -112,7 +112,7 @@ def theoremMatches (declName : Name) (theoremField : String) : Bool :=
 
 def validateMatchingManifestEntry
     (declName : Name) (entries : Array EvalProblemMetadata) (moduleName : String) :
-    Except String Unit := do
+    Except String EvalProblemMetadata := do
   let matchingEntries := entries.filter fun entry =>
     entry.moduleName == moduleName && theoremMatches declName entry.theoremName
   if matchingEntries.isEmpty then
@@ -121,8 +121,55 @@ def validateMatchingManifestEntry
   if matchingEntries.size > 1 then
     throw
       s!"The theorem `{declName}` is marked with @[eval_problem], but `manifests/problems.toml` has multiple matching entries in module `{moduleName}`."
+  match matchingEntries[0]? with
+  | some metadata => return metadata
+  | none => throw "internal error: missing manifest entry after nonempty match set"
 
-def ensureEvalProblemManifestEntry (declName : Name) : AttrM Unit := do
+def formatManifestHover (metadata : EvalProblemMetadata) : String :=
+  Id.run do
+    let mut lines := #[
+      "Benchmark problem metadata.",
+      "",
+      s!"- id: `{metadata.id}`",
+      s!"- title: {metadata.title}",
+      s!"- test: `{metadata.test}`",
+      s!"- module: `{metadata.moduleName}`",
+      s!"- theorem: `{metadata.theoremName}`",
+      s!"- author: {metadata.author}"
+    ]
+    if let some notes := metadata.notes then
+      lines := lines.push s!"- notes: {notes}"
+    if let some source := metadata.source then
+      lines := lines.push s!"- source: {source}"
+    if let some informalSolution := metadata.informalSolution then
+      lines := lines.push s!"- informal_solution: {informalSolution}"
+    "\n".intercalate lines.toList
+
+def mkEvalProblemExpr (env : Environment) (declName : Name) : Expr :=
+  match env.find? declName with
+  | some info => .const declName (info.levelParams.map Level.param)
+  | none => .const declName []
+
+def pushEvalProblemHoverInfo (declName : Name) (attrStx : Syntax) (metadata : EvalProblemMetadata) :
+    AttrM Unit := do
+  let tokenStx := attrStx[0]
+  let env ← getEnv
+  let info : Elab.Info := .ofDelabTermInfo {
+    toTermInfo := {
+      elaborator := `eval_problem
+      stx := tokenStx
+      lctx := {}
+      expectedType? := none
+      expr := mkEvalProblemExpr env declName
+      isBinder := false
+      isDisplayableTerm := false
+    }
+    docString? := some (formatManifestHover metadata)
+    explicit := true
+  }
+  Elab.pushInfoLeaf info
+
+def ensureEvalProblemManifestEntry (declName : Name) : AttrM EvalProblemMetadata := do
   let env ← getEnv
   match env.find? declName with
   | some (.thmInfo _) | some (.opaqueInfo _) => pure ()
@@ -140,15 +187,51 @@ def ensureEvalProblemManifestEntry (declName : Name) : AttrM Unit := do
     | .error err => throwError "{err}"
   let moduleName := moduleNameForDecl env declName
   match validateMatchingManifestEntry declName entries moduleName with
-  | .ok () => pure ()
+  | .ok metadata => pure metadata
   | .error err => throwError "{err}"
 
-initialize evalProblemAttr : TagAttribute ←
-  registerTagAttribute `eval_problem
-    "Marks theorem declarations as benchmark problems and validates their manifest metadata."
-    ensureEvalProblemManifestEntry
+initialize evalProblemExt : PersistentEnvExtension Name Name NameSet ←
+  registerPersistentEnvExtension {
+    name := `EvalTools.evalProblemExt
+    mkInitial := pure {}
+    addImportedFn := fun _ _ => pure {}
+    addEntryFn := fun (s : NameSet) n => s.insert n
+    exportEntriesFnEx := fun env es =>
+      let entries : Array Name := es.foldl (fun acc entry => acc.push entry) #[]
+      let entries := entries.filter (env.contains (skipRealize := false))
+      .uniform <| entries.qsort Name.quickLt
+    statsFn := fun s => "eval_problem attribute" ++ Format.line ++ "number of local entries: " ++ format s.size
+    asyncMode := .mainOnly
+    replay? := some fun _ newState newConsts s =>
+      newConsts.foldl (init := s) fun acc c =>
+        if newState.contains c then acc.insert c else acc
+  }
+
+initialize evalProblemAttr : AttributeImpl ←
+  let attrImpl : AttributeImpl := {
+    ref := `eval_problem
+    name := `eval_problem
+    descr := "Marks theorem declarations as benchmark problems and validates their manifest metadata."
+    applicationTime := AttributeApplicationTime.afterTypeChecking
+    add := fun decl stx kind => do
+      Attribute.Builtin.ensureNoArgs stx
+      unless kind == AttributeKind.global do
+        throwAttrMustBeGlobal `eval_problem kind
+      let env ← getEnv
+      unless (env.getModuleIdxFor? decl).isNone do
+        throwAttrDeclInImportedModule `eval_problem decl
+      unless evalProblemExt.toEnvExtension.asyncMayModify env decl do
+        throwAttrNotInAsyncCtx `eval_problem decl env.asyncPrefix?
+      let metadata ← ensureEvalProblemManifestEntry decl
+      pushEvalProblemHoverInfo decl stx metadata
+      modifyEnv fun env => evalProblemExt.addEntry (asyncDecl := decl) env decl
+  }
+  registerBuiltinAttribute attrImpl
+  pure attrImpl
 
 def hasEvalProblemTag (env : Environment) (declName : Name) : Bool :=
-  evalProblemAttr.hasTag env declName
+  match env.getModuleIdxFor? declName with
+  | some modIdx => (evalProblemExt.getModuleEntries env modIdx).binSearchContains declName Name.quickLt
+  | none => (evalProblemExt.getState (asyncDecl := declName) env).contains declName
 
 end EvalTools
