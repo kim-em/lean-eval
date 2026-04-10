@@ -169,10 +169,90 @@ def pushEvalProblemHoverInfo (declName : Name) (attrStx : Syntax) (metadata : Ev
   }
   Elab.pushInfoLeaf info
 
+def binderInfoDescription (binderInfo : BinderInfo) : String :=
+  match binderInfo with
+  | .default => "explicit"
+  | .implicit => "implicit"
+  | .strictImplicit => "strict implicit"
+  | .instImplicit => "instance implicit"
+
+structure TheoremBinder where
+  name : Name
+  type : Expr
+  binderInfo : BinderInfo
+  fvar : Expr
+
+partial def collectTheoremBinders (type : Expr) : MetaM (Array TheoremBinder × Expr) := do
+  let rec go (type : Expr) (acc : Array TheoremBinder) : MetaM (Array TheoremBinder × Expr) := do
+    match type.consumeMData with
+    | .forallE binderName binderType body binderInfo =>
+        let binderType ← Meta.whnfD binderType
+        Meta.withLocalDecl binderName binderInfo binderType fun localDecl => do
+          let acc := acc.push {
+            name := binderName
+            type := binderType
+            binderInfo := binderInfo
+            fvar := localDecl
+          }
+          go (body.instantiate1 localDecl) acc
+    | _ => pure (acc, type)
+  go type #[]
+
+def exprDependsOnFVar (expr fvar : Expr) : Bool :=
+  (expr.find? fun subexpr => subexpr == fvar).isSome
+
+def collectForbiddenImplicitBinders (type : Expr) : MetaM (Array (Name × Expr × BinderInfo)) := do
+  let (binders, resultType) ← collectTheoremBinders type
+  let explicitBinderTypes :=
+    binders.foldl (init := #[]) fun acc binder =>
+      if binder.binderInfo == .default then
+        acc.push binder.type
+      else
+        acc
+  let forbidden := binders.filterMap fun binder =>
+    if binder.binderInfo != .implicit && binder.binderInfo != .strictImplicit then
+      none
+    else if binder.type.isSort then
+      none
+    else
+      let inferable :=
+        explicitBinderTypes.any (fun explicitType => exprDependsOnFVar explicitType binder.fvar) ||
+        exprDependsOnFVar resultType binder.fvar
+      if inferable then
+        none
+      else
+        some (binder.name, binder.type, binder.binderInfo)
+  pure forbidden
+
+def validateEvalProblemBinders (declName : Name) (type : Expr) : AttrM Unit := do
+  let forbiddenBinders ←
+    ({ env := ← getEnv, opts := ← getOptions } : PPContext).runMetaM do
+      collectForbiddenImplicitBinders type
+  if forbiddenBinders.isEmpty then
+    return
+  let binderLines ←
+    ({ env := ← getEnv, opts := ← getOptions } : PPContext).runMetaM do
+      forbiddenBinders.mapM fun (binderName, binderType, binderInfo) => do
+        let binderTypeFmt ← Meta.ppExpr binderType
+        let binderName :=
+          if binderName == Name.anonymous then "_" else binderName.toString
+        pure s!"- `{binderName}` : {binderTypeFmt} ({binderInfoDescription binderInfo})"
+  let details := "\n".intercalate binderLines.toList
+  throwError
+    "{String.intercalate "\n"
+      [s!"The theorem `{declName}` uses implicit value parameters that are not inferable from the explicit hypotheses or the conclusion, which @[eval_problem] does not allow."
+      , "Generated benchmark wrappers must be able to call the theorem by ordinary application, without named arguments or `@`."
+      , "Keep implicit type parameters like `{α : Type*}` and instance parameters like `[Field K]`."
+      , "For benchmark inputs that are not recoverable from later explicit binders, use explicit binders `(x : τ)` instead of implicit ones `{x : τ}`."
+      , s!"Non-inferable implicit binders:\n{details}"]}"
+
 def ensureEvalProblemManifestEntry (declName : Name) : AttrM EvalProblemMetadata := do
   let env ← getEnv
   match env.find? declName with
-  | some (.thmInfo _) | some (.opaqueInfo _) => pure ()
+  | some (.thmInfo info) =>
+      validateEvalProblemBinders declName info.type
+  | some (.opaqueInfo info) =>
+      validateEvalProblemBinders declName info.type
   | _ =>
       throwError
         "The attribute @[eval_problem] may only be applied to theorem or opaque theorem declarations, but `{declName}` is not one."

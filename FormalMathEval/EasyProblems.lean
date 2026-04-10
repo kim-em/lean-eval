@@ -28,6 +28,28 @@ Add a corresponding problem entry to the manifest.
 theorem eval_problem_manifest_guard : (1 : Nat) = 1 := by
   rfl
 
+/--
+error: The theorem `FormalMathEval.eval_problem_implicit_binder_guard` uses implicit value parameters that are not inferable from the explicit hypotheses or the conclusion, which @[eval_problem] does not allow.
+Generated benchmark wrappers must be able to call the theorem by ordinary application, without named arguments or `@`.
+Keep implicit type parameters like `{α : Type*}` and instance parameters like `[Field K]`.
+For benchmark inputs that are not recoverable from later explicit binders, use explicit binders `(x : τ)` instead of implicit ones `{x : τ}`.
+Non-inferable implicit binders:
+- `n` : ℕ (implicit)
+-/
+#guard_msgs in
+@[eval_problem]
+theorem eval_problem_implicit_binder_guard {n : Nat} [NeZero n] : True := by
+  trivial
+
+/--
+error: The theorem `FormalMathEval.eval_problem_inferable_implicit_guard` is marked with @[eval_problem], but `manifests/problems.toml` has no matching `theorem = ...` entry.
+Add a corresponding problem entry to the manifest.
+-/
+#guard_msgs in
+@[eval_problem]
+theorem eval_problem_inferable_implicit_guard {n : Nat} (h : n = n) : n = n := by
+  exact h
+
 def starterNumber : Nat := 4
 
 end FormalMathEval
