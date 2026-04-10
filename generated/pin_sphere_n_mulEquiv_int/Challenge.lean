@@ -1,6 +1,4 @@
-import ChallengeDeps
-
-open FormalMathEval.Topology
+import Mathlib
 
 theorem pin_sphere_n_mulEquiv_int (n : ℕ)
     (x : Metric.sphere (0 : EuclideanSpace ℝ (Fin (n + 2))) 1) :

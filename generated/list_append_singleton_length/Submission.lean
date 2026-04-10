@@ -1,7 +1,5 @@
-import ChallengeDeps
+import Mathlib
 import Submission.Helpers
-
-open FormalMathEval
 
 namespace Submission
 

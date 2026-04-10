@@ -596,6 +596,20 @@ def binder_application_args(theorem_statement: str) -> list[str]:
     return args
 
 
+def explicit_binder_application_args(theorem_statement: str) -> list[str]:
+    args: list[str] = []
+    for opener, body in leading_binders(theorem_statement):
+        if opener != "(":
+            continue
+        names, sep, _type = body.partition(":")
+        if not sep:
+            continue
+        for name in names.split():
+            if name:
+                args.append(name)
+    return args
+
+
 def render_workspace(
     problem: ProblemSpec,
     extracted: ExtractedTheorem,
@@ -604,8 +618,8 @@ def render_workspace(
 ) -> dict[str, str]:
     theorem_name = local_theorem_name(extracted)
     theorem_statement = extract_statement_text(problem, extracted)
-    solution_args = binder_application_args(theorem_statement)
-    solution_exact = f"@Submission.{theorem_name}"
+    solution_args = explicit_binder_application_args(theorem_statement)
+    solution_exact = f"Submission.{theorem_name}"
     if solution_args:
         solution_exact += " " + " ".join(solution_args)
     challenge_deps = render_challenge_deps(problem, extracted)

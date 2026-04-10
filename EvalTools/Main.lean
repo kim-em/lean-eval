@@ -86,9 +86,6 @@ def runGenerateCmd (p : Parsed) : IO UInt32 := do
   args := appendFlag args "--check" (p.hasFlag "check")
   runPythonScript "scripts/generate_projects.py" args
 
-def runCheckGeneratedCmd (_ : Parsed) : IO UInt32 :=
-  runPythonScript "scripts/check_generated.py"
-
 def runCheckGeneratedBuildsCmd (p : Parsed) : IO UInt32 := do
   let problems :=
     match p.flag? "problem" with
@@ -156,11 +153,6 @@ def generateCmd : Cmd := `[Cli|
     check;             "Check whether generated output is up to date without rewriting files."
 ]
 
-def checkGeneratedCmd : Cmd := `[Cli|
-  "check-generated" VIA runCheckGeneratedCmd;
-  "Verify that committed generated workspaces are current."
-]
-
 def checkGeneratedBuildsCmd : Cmd := `[Cli|
   "check-generated-builds" VIA runCheckGeneratedBuildsCmd;
   "Build generated workspaces to catch breakage in emitted projects."
@@ -218,7 +210,6 @@ def leanEvalCmd : Cmd := `[Cli|
     validateManifestCmd;
     checkProblemBuildCmd;
     generateCmd;
-    checkGeneratedCmd;
     checkGeneratedBuildsCmd;
     startProblemCmd;
     checkComparatorInstallationCmd;

@@ -1,7 +1,6 @@
-import ChallengeDeps
+import Mathlib
 import Submission
 
-open FormalMathEval.LinearAlgebra
 open scoped NNReal
 
 theorem irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius {n : Type*} [Fintype n] [DecidableEq n]

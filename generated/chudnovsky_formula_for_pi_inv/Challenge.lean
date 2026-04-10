@@ -1,6 +1,5 @@
-import ChallengeDeps
+import Mathlib
 
-open FormalMathEval.Analysis
 open scoped Real
 
 theorem chudnovsky_formula_for_pi_inv :

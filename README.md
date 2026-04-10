@@ -20,7 +20,7 @@ Use this path if you are adding or editing benchmark problems.
 ### 1. Install and fetch dependencies
 
 ```bash
-lake update
+lake exe cache get
 lake build
 ```
 
@@ -98,7 +98,6 @@ Check whether committed generated output is stale:
 
 ```bash
 lake exe lean-eval generate --check
-lake exe lean-eval check-generated
 ```
 
 ### 6. Build the generated workspaces

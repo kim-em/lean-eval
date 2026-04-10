@@ -4,7 +4,7 @@ Chudnovsky formula for pi inverse
 
 - Problem ID: `chudnovsky_formula_for_pi_inv`
 - Test Problem: no
-- Author: OpenAI Codex
+- Author: Kim Morrison
 - Notes: Uses the existing Mathlib definition of the Chudnovsky series and asks for the missing identity with pi inverse.
 - Source: https://link.springer.com/article/10.1007/s40316-018-0102-6
 - Informal solution: Evaluate the Chudnovsky series and prove that it sums to 1 / pi.

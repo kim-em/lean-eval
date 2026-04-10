@@ -1,6 +1,5 @@
-import ChallengeDeps
+import Mathlib
 
-open FormalMathEval.ComplexAnalysis
 open ValueDistribution
 
 theorem rouche_logCounting_zero_eq {f g : ℂ → ℂ} {R : ℝ}

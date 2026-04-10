@@ -1,7 +1,6 @@
-import ChallengeDeps
+import Mathlib
 import Submission.Helpers
 
-open FormalMathEval.ComplexAnalysis
 open ValueDistribution
 
 namespace Submission

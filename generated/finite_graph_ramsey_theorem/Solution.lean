@@ -1,7 +1,6 @@
-import ChallengeDeps
+import Mathlib
 import Submission
 
-open FormalMathEval.Combinatorics
 open SimpleGraph
 
 theorem finite_graph_ramsey_theorem :

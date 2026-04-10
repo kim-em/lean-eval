@@ -113,7 +113,7 @@ jobs:
         run: python scripts/check_eval_workflow.py
 
       - name: Verify Generated Output
-        run: python scripts/check_generated.py
+        run: python scripts/generate_projects.py --check
 
       - name: Build Generated Workspaces
         run: python scripts/check_generated_builds.py

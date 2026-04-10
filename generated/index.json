@@ -54,6 +54,15 @@
     "generated_path": "generated/finite_graph_ramsey_theorem"
   },
   {
+    "id": "dvd_card_connectedComponent_markoffGraph",
+    "title": "Chen theorem for Markoff graphs",
+    "test": false,
+    "author": "Kim Morrison",
+    "module": "FormalMathEval.Combinatorics.MarkoffGraph",
+    "theorem": "dvd_card_connectedComponent_markoffGraph",
+    "generated_path": "generated/dvd_card_connectedComponent_markoffGraph"
+  },
+  {
     "id": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
     "title": "Burnside p^a q^b theorem",
     "test": false,
@@ -72,6 +81,15 @@
     "generated_path": "generated/rouche_logCounting_zero_eq"
   },
   {
+    "id": "exists_complementary_polynomial_on_unit_circle",
+    "title": "Complementary polynomial on the unit circle",
+    "test": false,
+    "author": "Kim Morrison",
+    "module": "FormalMathEval.ComplexAnalysis.ComplementaryPolynomials",
+    "theorem": "exists_complementary_polynomial_on_unit_circle",
+    "generated_path": "generated/exists_complementary_polynomial_on_unit_circle"
+  },
+  {
     "id": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
     "title": "Perron-Frobenius for irreducible nonnegative matrices",
     "test": false,
@@ -84,7 +102,7 @@
     "id": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
     "title": "Minkowski-Caratheodory theorem",
     "test": false,
-    "author": "OpenAI Codex",
+    "author": "Kim Morrison",
     "module": "FormalMathEval.ConvexGeometry.MinkowskiCaratheodory",
     "theorem": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
     "generated_path": "generated/mem_convexHull_finset_extremePoints_of_mem_compact_convex"
@@ -93,7 +111,7 @@
     "id": "chudnovsky_formula_for_pi_inv",
     "title": "Chudnovsky formula for pi inverse",
     "test": false,
-    "author": "OpenAI Codex",
+    "author": "Kim Morrison",
     "module": "FormalMathEval.Analysis.Chudnovsky",
     "theorem": "chudnovsky_formula_for_pi_inv",
     "generated_path": "generated/chudnovsky_formula_for_pi_inv"

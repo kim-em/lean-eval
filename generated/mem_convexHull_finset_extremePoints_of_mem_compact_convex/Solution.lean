@@ -1,7 +1,6 @@
-import ChallengeDeps
+import Mathlib
 import Submission
 
-open FormalMathEval.ConvexGeometry
 open Set
 
 theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

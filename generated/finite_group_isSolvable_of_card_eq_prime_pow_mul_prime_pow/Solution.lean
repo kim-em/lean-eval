@@ -1,7 +1,5 @@
-import ChallengeDeps
+import Mathlib
 import Submission
-
-open FormalMathEval.GroupTheory
 
 theorem finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow {G : Type*} [Group G] [Fintype G]
     {p q a b : ℕ}
