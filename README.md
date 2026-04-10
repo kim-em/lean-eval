@@ -223,6 +223,11 @@ The current validator accepts:
 - `generated/<problem-id>/Submission.lean`
 - `generated/<problem-id>/Submission/**/*.lean`
 
+It only allows ordinary modifications to the top-level bridge files
+`Solution.lean` and `Submission.lean`. Extra helper files under `Submission/` may be
+added, modified, deleted, renamed, or copied, but they must stay as `.lean` files
+within that subtree.
+
 In practice, solvers should normally work in `Submission.lean` and `Submission/`.
 
 ## Repository Layout

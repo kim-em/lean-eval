@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: leanprover/lean-action@v1
         with:
@@ -48,6 +50,53 @@ jobs:
 
       - name: Submission Policy Check
         run: python scripts/validate_submission.py --file generated/two_plus_two/Solution.lean
+
+      - name: Submission Policy Diff Check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BASE_SHA="$PR_BASE_SHA"
+            HEAD_SHA="$PR_HEAD_SHA"
+          else
+            BASE_SHA="$PUSH_BEFORE_SHA"
+            HEAD_SHA="$CURRENT_SHA"
+          fi
+
+          if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            BASE_SHA="$(git rev-list --max-parents=0 "$HEAD_SHA" | tail -n 1)"
+          fi
+
+          mapfile -t CHANGED_FILES < <(git diff --name-only "$BASE_SHA..$HEAD_SHA")
+
+          if [ "${#CHANGED_FILES[@]}" -eq 0 ]; then
+            echo "No changed files in $BASE_SHA..$HEAD_SHA; skipping submission diff validation."
+            exit 0
+          fi
+
+          IS_SUBMISSION_DIFF=true
+          for path in "${CHANGED_FILES[@]}"; do
+            if [[ ! "$path" =~ ^generated/ ]]; then
+              IS_SUBMISSION_DIFF=false
+              break
+            fi
+          done
+
+          if [ "$IS_SUBMISSION_DIFF" = false ]; then
+            echo "Diff includes non-generated paths; treating this as repo development and skipping submission diff validation."
+            exit 0
+          fi
+
+          python scripts/validate_submission.py --base "$BASE_SHA" --head "$HEAD_SHA"
+
+      - name: Run Submission Policy Tests
+        run: python -m unittest tests.test_validate_submission
 
       - name: Run Generator Tests
         run: python -m unittest tests.test_generate_projects

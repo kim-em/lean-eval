@@ -6,6 +6,7 @@ Validate that a submission only edits participant-owned files.
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import json
 import pathlib
 import re
@@ -20,20 +21,148 @@ ALLOWED_PATTERNS = [
     re.compile(r"^generated/[^/]+/Submission\.lean$"),
     re.compile(r"^generated/[^/]+/Submission/.+\.lean$"),
 ]
+TOP_LEVEL_ALLOWED_STATUSES = {"M"}
+SUBMISSION_TREE_ALLOWED_STATUSES = {"A", "C", "D", "M", "R"}
 
 
-def changed_files_from_git(base_ref: str, head_ref: str) -> list[str]:
+@dataclass(frozen=True)
+class SubmissionChange:
+    status: str
+    paths: tuple[str, ...]
+
+
+def changed_files_from_git(base_ref: str, head_ref: str) -> list[SubmissionChange]:
     result = subprocess.run(
-        ["git", "diff", "--name-only", f"{base_ref}..{head_ref}"],
+        [
+            "git",
+            "diff",
+            "--find-renames",
+            "--find-copies",
+            "--name-status",
+            "-z",
+            f"{base_ref}..{head_ref}",
+        ],
         cwd=gp.REPO_ROOT,
         check=False,
-        text=True,
         capture_output=True,
     )
     if result.returncode != 0:
-        stderr = (result.stderr or result.stdout).strip()
-        raise gp.GenerationError(f"git diff failed:\n{stderr}")
-    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        stderr = result.stderr.decode("utf-8", errors="replace").strip()
+        stdout = result.stdout.decode("utf-8", errors="replace").strip()
+        details = "\n".join(part for part in [stderr, stdout] if part)
+        raise gp.GenerationError(f"git diff failed:\n{details}")
+    return parse_name_status_output(result.stdout)
+
+
+def parse_name_status_output(raw_output: bytes) -> list[SubmissionChange]:
+    text = raw_output.decode("utf-8", errors="surrogateescape")
+    fields = [field for field in text.split("\0") if field]
+    changes: list[SubmissionChange] = []
+    index = 0
+    while index < len(fields):
+        status = fields[index]
+        index += 1
+        if not status:
+            continue
+        status_code = status[0]
+        path_count = 2 if status_code in {"R", "C"} else 1
+        if index + path_count > len(fields):
+            raise gp.GenerationError(f"Malformed git diff --name-status output near status '{status}'")
+        paths = tuple(fields[index : index + path_count])
+        index += path_count
+        changes.append(SubmissionChange(status=status, paths=paths))
+    return changes
+
+
+def normalize_submission_path(path: str) -> str:
+    pure_path = pathlib.PurePosixPath(path)
+    if pure_path.is_absolute():
+        raise gp.GenerationError(f"Submission path must be relative to the repo root: {path}")
+    if any(part in {"..", ""} for part in pure_path.parts):
+        raise gp.GenerationError(f"Submission path is not a clean relative repo path: {path}")
+    normalized = pure_path.as_posix()
+    if normalized == ".":
+        raise gp.GenerationError("Submission path cannot be the repository root.")
+    return normalized
+
+
+def path_policy_error(path: str, status_code: str, valid_problem_ids: set[str]) -> str | None:
+    normalized = normalize_submission_path(path)
+    if not any(pattern.fullmatch(normalized) for pattern in ALLOWED_PATTERNS):
+        return "path is outside the submission whitelist"
+    parts = normalized.split("/")
+    if len(parts) < 3 or parts[1] not in valid_problem_ids:
+        return "path does not belong to a known generated problem workspace"
+
+    is_top_level_file = parts[-1] in {"Solution.lean", "Submission.lean"} and len(parts) == 3
+    allowed_statuses = (
+        TOP_LEVEL_ALLOWED_STATUSES if is_top_level_file else SUBMISSION_TREE_ALLOWED_STATUSES
+    )
+    if status_code not in allowed_statuses:
+        if is_top_level_file:
+            return f"top-level submission files only allow statuses: {sorted(TOP_LEVEL_ALLOWED_STATUSES)}"
+        return f"submission helper files only allow statuses: {sorted(SUBMISSION_TREE_ALLOWED_STATUSES)}"
+    return None
+
+
+def flatten_touched_paths(changes: list[SubmissionChange]) -> list[str]:
+    paths: list[str] = []
+    for change in changes:
+        for path in change.paths:
+            paths.append(normalize_submission_path(path))
+    return paths
+
+
+def validate_changed_files(
+    changes: list[SubmissionChange],
+) -> tuple[list[SubmissionChange], list[dict[str, object]]]:
+    problems = gp.load_manifest(gp.DEFAULT_MANIFEST)
+    valid_problem_ids = {problem.id for problem in problems}
+    allowed: list[SubmissionChange] = []
+    forbidden: list[dict[str, object]] = []
+
+    for change in changes:
+        status_code = change.status[0]
+        reasons: list[str] = []
+        normalized_paths: list[str] = []
+        for path in change.paths:
+            try:
+                normalized = normalize_submission_path(path)
+            except gp.GenerationError as exc:
+                reasons.append(str(exc))
+                normalized_paths.append(path)
+                continue
+            normalized_paths.append(normalized)
+            reason = path_policy_error(normalized, status_code, valid_problem_ids)
+            if reason is not None:
+                reasons.append(f"{normalized}: {reason}")
+
+        if status_code not in TOP_LEVEL_ALLOWED_STATUSES | SUBMISSION_TREE_ALLOWED_STATUSES:
+            reasons.append(f"unsupported git change status '{change.status}'")
+
+        if reasons:
+            forbidden.append(
+                {
+                    "status": change.status,
+                    "paths": normalized_paths,
+                    "reasons": reasons,
+                }
+            )
+        else:
+            allowed.append(SubmissionChange(status=change.status, paths=tuple(normalized_paths)))
+
+    return allowed, forbidden
+
+
+def parse_explicit_file_changes(files: list[str]) -> list[SubmissionChange]:
+    return [SubmissionChange(status="M", paths=(file_path,)) for file_path in files]
+
+
+def serialize_change(change: SubmissionChange) -> dict[str, object]:
+    return {
+        "status": change.status,
+        "paths": list(change.paths),
+    }
 
 
 def parse_args() -> argparse.Namespace:
@@ -54,35 +183,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate_changed_files(files: list[str]) -> tuple[list[str], list[str]]:
-    problems = gp.load_manifest(gp.DEFAULT_MANIFEST)
-    valid_problem_ids = {problem.id for problem in problems}
-    allowed: list[str] = []
-    forbidden: list[str] = []
-    for file_path in files:
-        normalized = pathlib.PurePosixPath(file_path).as_posix()
-        if not any(pattern.fullmatch(normalized) for pattern in ALLOWED_PATTERNS):
-            forbidden.append(normalized)
-            continue
-        parts = normalized.split("/")
-        if len(parts) < 3 or parts[1] not in valid_problem_ids:
-            forbidden.append(normalized)
-            continue
-        allowed.append(normalized)
-    return allowed, forbidden
-
-
 def main() -> int:
     args = parse_args()
     try:
         if args.file:
-            changed_files = args.file
+            changes = parse_explicit_file_changes(args.file)
         elif args.base and args.head:
-            changed_files = changed_files_from_git(args.base, args.head)
+            changes = changed_files_from_git(args.base, args.head)
         else:
             raise gp.GenerationError("Provide either --base/--head or one or more --file arguments.")
 
-        allowed, forbidden = validate_changed_files(changed_files)
+        allowed, forbidden = validate_changed_files(changes)
     except gp.GenerationError as exc:
         if args.json:
             print(json.dumps({"status": "error", "message": str(exc)}, indent=2))
@@ -93,17 +204,29 @@ def main() -> int:
     status = 0 if not forbidden else 1
     payload = {
         "status": "ok" if status == 0 else "forbidden_changes",
-        "changed_files": changed_files,
-        "allowed_files": allowed,
-        "forbidden_files": forbidden,
+        "changes": [serialize_change(change) for change in changes],
+        "changed_files": flatten_touched_paths(changes),
+        "allowed_changes": [serialize_change(change) for change in allowed],
+        "allowed_files": flatten_touched_paths(allowed),
+        "forbidden_changes": forbidden,
+        "forbidden_files": [
+            path
+            for entry in forbidden
+            for path in entry["paths"]
+        ],
     }
     if args.json:
         print(json.dumps(payload, indent=2))
     else:
         if forbidden:
             print("Forbidden submission changes detected:", file=sys.stderr)
-            for file_path in forbidden:
-                print(file_path, file=sys.stderr)
+            for entry in forbidden:
+                print(
+                    f"{entry['status']} {' -> '.join(entry['paths'])}",
+                    file=sys.stderr,
+                )
+                for reason in entry["reasons"]:
+                    print(f"  - {reason}", file=sys.stderr)
         else:
             print("Submission changes are limited to participant-owned files.")
     return status
