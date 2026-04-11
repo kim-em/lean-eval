@@ -3,7 +3,7 @@ import Mathlib
 open NumberField
 
 theorem cyclotomic_integer_house_le_two {K : Type*} [Field K] [NumberField K] [Algebra ℚ K]
-    {n : ℕ} [NeZero n] [IsCyclotomicExtension {n} ℚ K] {β : K}
+    (n : ℕ) [NeZero n] [IsCyclotomicExtension {n} ℚ K] {β : K}
     (hβ_int : IsIntegral ℤ β)
     (hβ_real : β ∈ NumberField.maximalRealSubfield K) :
     house β ≤ 2 →

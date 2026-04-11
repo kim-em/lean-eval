@@ -6,4 +6,4 @@ theorem pin_sphere_n_mulEquiv_int (n : ℕ)
     Nonempty
       (HomotopyGroup.Pi (n + 1) (Metric.sphere (0 : EuclideanSpace ℝ (Fin (n + 2))) 1) x ≃*
         Multiplicative ℤ) := by
-  exact @Submission.pin_sphere_n_mulEquiv_int n x
+  exact Submission.pin_sphere_n_mulEquiv_int n x

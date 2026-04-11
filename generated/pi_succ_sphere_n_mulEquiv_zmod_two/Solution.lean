@@ -6,4 +6,4 @@ theorem pi_succ_sphere_n_mulEquiv_zmod_two (n : ℕ) (hn : 3 ≤ n)
     Nonempty
       (HomotopyGroup.Pi (n + 1) (Metric.sphere (0 : EuclideanSpace ℝ (Fin (n + 1))) 1) x ≃*
         Multiplicative (ZMod 2)) := by
-  exact @Submission.pi_succ_sphere_n_mulEquiv_zmod_two n hn x
+  exact Submission.pi_succ_sphere_n_mulEquiv_zmod_two n hn x

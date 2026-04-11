@@ -9,4 +9,4 @@ theorem irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadiu
     ∃ v : n → ℝ,
       Module.End.HasEigenvector (Matrix.toLin' A) (spectralRadius ℝ A).toReal v ∧
       (∀ i, 0 < v i) := by
-  exact @Submission.irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius n _ _ A hA
+  exact Submission.irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius A hA

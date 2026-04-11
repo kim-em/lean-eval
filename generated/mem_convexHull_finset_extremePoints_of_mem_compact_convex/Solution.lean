@@ -12,4 +12,4 @@ theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex {E : Type*} [N
       (↑t : Set E) ⊆ s.extremePoints ℝ ∧
       t.card ≤ Module.finrank ℝ E + 1 ∧
       x ∈ convexHull ℝ (↑t : Set E) := by
-  exact @Submission.mem_convexHull_finset_extremePoints_of_mem_compact_convex E _ _ _ s x hscomp hsconv hx
+  exact Submission.mem_convexHull_finset_extremePoints_of_mem_compact_convex hscomp hsconv hx

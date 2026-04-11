@@ -8,4 +8,4 @@ theorem finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow {G : Type*} [
     (hpq : p ≠ q)
     (hcard : Fintype.card G = p ^ a * q ^ b) :
     IsSolvable G := by
-  exact @Submission.finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow G _ _ _ hp hq hpq hcard
+  exact Submission.finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow hp hq hpq hcard
