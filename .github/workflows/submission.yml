@@ -98,7 +98,12 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    permissions: {}
+    # Deliberately minimal: contents:read is only enough to clone this
+    # public benchmark repo. No issues:write, no contents:write, no
+    # packages. persist-credentials:false + rm -rf .git below ensures the
+    # token cannot persist into the lake runtime.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
