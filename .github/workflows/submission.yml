@@ -171,7 +171,8 @@ jobs:
             --generated-root generated \
             --manifest manifests/problems.toml \
             --output-dir /tmp/evaluate-out \
-            --repo-root "$PWD"
+            --repo-root "$PWD" \
+            --shared-packages "$PWD/.lake/packages"
 
       - name: Copy frozen metadata through to record
         if: always()
@@ -188,7 +189,6 @@ jobs:
 
   record:
     needs: evaluate
-    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

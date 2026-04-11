@@ -217,11 +217,39 @@ def _overlay_submission_dir(
     return copied
 
 
+def _share_packages(
+    target: pathlib.Path,
+    packages_source: pathlib.Path,
+) -> str | None:
+    """Symlink target/.lake/packages → packages_source to avoid duplicating
+    unpacked Mathlib. Returns None on success, or a reason string if the
+    share could not be set up.
+
+    Assumes the benchmark and its generated workspaces stay in lock-step on
+    every dependency rev; no rev assertion is performed.
+    """
+    resolved_source = packages_source.resolve()
+    if not resolved_source.is_dir():
+        return f"packages source {resolved_source} not a directory"
+
+    target_lake = target / ".lake"
+    target_packages = target_lake / "packages"
+    target_lake.mkdir(parents=True, exist_ok=True)
+    if target_packages.exists() or target_packages.is_symlink():
+        if target_packages.is_symlink():
+            target_packages.unlink()
+        else:
+            shutil.rmtree(target_packages)
+    target_packages.symlink_to(resolved_source)
+    return None
+
+
 def overlay_match(
     match: WorkspaceMatch,
     *,
     generated_root: pathlib.Path,
     workspaces_root: pathlib.Path,
+    shared_packages: pathlib.Path | None = None,
 ) -> dict:
     """Copy generated/<id>/ to workspaces/<id>/, overlay submitter content.
 
@@ -230,6 +258,7 @@ def overlay_match(
       - overlaid: bool
       - skip_reason: str | None
       - overlaid_files: list[str]
+      - shared_packages: bool | str (True if symlinked, else reason it was not)
     """
     target = workspaces_root / match.problem_id
     if target.exists():
@@ -241,8 +270,14 @@ def overlay_match(
             "overlaid": False,
             "skip_reason": f"no pristine workspace at {pristine}",
             "overlaid_files": [],
+            "shared_packages": False,
         }
     _copy_tree(pristine, target)
+
+    shared_state: bool | str = False
+    if shared_packages is not None:
+        reason = _share_packages(target, shared_packages)
+        shared_state = True if reason is None else reason
 
     if match.skip_reason is not None:
         return {
@@ -250,6 +285,7 @@ def overlay_match(
             "overlaid": False,
             "skip_reason": match.skip_reason,
             "overlaid_files": [],
+            "shared_packages": shared_state,
         }
 
     # 1. Overlay Submission.lean
@@ -260,6 +296,7 @@ def overlay_match(
             "overlaid": False,
             "skip_reason": "Submission.lean is a symlink",
             "overlaid_files": [],
+            "shared_packages": shared_state,
         }
     if not source_submission_lean.is_file():
         return {
@@ -267,6 +304,7 @@ def overlay_match(
             "overlaid": False,
             "skip_reason": "Submission.lean missing in submitter content",
             "overlaid_files": [],
+            "shared_packages": shared_state,
         }
     shutil.copyfile(source_submission_lean, target / "Submission.lean")
 
@@ -283,6 +321,7 @@ def overlay_match(
             "overlaid": False,
             "skip_reason": "Submission.lean missing post-overlay (internal)",
             "overlaid_files": [],
+            "shared_packages": shared_state,
         }
     if (target / "Submission.lean").stat().st_size == 0:
         return {
@@ -290,6 +329,7 @@ def overlay_match(
             "overlaid": False,
             "skip_reason": "Submission.lean is empty",
             "overlaid_files": [],
+            "shared_packages": shared_state,
         }
 
     return {
@@ -297,6 +337,7 @@ def overlay_match(
         "overlaid": True,
         "skip_reason": None,
         "overlaid_files": ["Submission.lean"] + [f"Submission/{p}" for p in overlaid_sub],
+        "shared_packages": shared_state,
     }
 
 
@@ -390,12 +431,18 @@ def evaluate_submission(
     manifest_path: pathlib.Path,
     output_dir: pathlib.Path,
     repo_root: pathlib.Path,
+    shared_packages: pathlib.Path | None = None,
     run_eval_runner=None,
 ) -> dict:
     """Run the full evaluation pipeline and write results.json + summary.json.
 
     `run_eval_runner` is an optional injection point for tests. If None, the
     real `lake exe lean-eval run-eval` is used.
+
+    `shared_packages` optionally points at a directory containing an
+    already-populated `.lake/packages/...` layout (e.g. the benchmark
+    repo's `.lake/packages`) that per-workspace builds can reuse instead of
+    re-unpacking Mathlib for each.
     """
     manifest_ids = _load_manifest_ids(manifest_path)
     matches = detect_matches(source_dir, manifest_ids)
@@ -410,6 +457,7 @@ def evaluate_submission(
                 match,
                 generated_root=generated_root,
                 workspaces_root=workspaces_root,
+                shared_packages=shared_packages,
             )
             overlay_records.append(record)
             if record["overlaid"]:
@@ -467,6 +515,17 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=gp.REPO_ROOT,
         help="Repo root where `lake exe lean-eval` should run. Defaults to detection.",
     )
+    parser.add_argument(
+        "--shared-packages",
+        type=pathlib.Path,
+        default=None,
+        help=(
+            "Directory containing an already-populated .lake/packages tree "
+            "that per-workspace builds should reuse via symlink. Typically "
+            "<repo-root>/.lake/packages. Assumes every generated workspace "
+            "stays in lock-step with the benchmark on dep revs."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -479,6 +538,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest_path=args.manifest,
             output_dir=args.output_dir,
             repo_root=args.repo_root,
+            shared_packages=args.shared_packages,
         )
     except EvaluateError as exc:
         print(str(exc), file=sys.stderr)
