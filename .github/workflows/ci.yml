@@ -104,6 +104,15 @@ jobs:
       - name: Run Scoring Tests
         run: python -m unittest tests.test_run_eval
 
+      - name: Run Leaderboard Update Tests
+        run: python -m unittest tests.test_update_leaderboard
+
+      - name: Run Fetch Submission Tests
+        run: python -m unittest tests.test_fetch_submission
+
+      - name: Run Evaluate Submission Tests
+        run: python -m unittest tests.test_evaluate_submission
+
       - name: Run Comparator Installation Checks
         run: |
           python -m unittest tests.test_check_comparator_installation
