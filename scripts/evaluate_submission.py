@@ -365,15 +365,24 @@ def _run_run_eval(
         capture_output=True,
         text=True,
     )
+    stderr = (result.stderr or "").strip()
+    stdout = (result.stdout or "").strip()
     if result.returncode != 0:
-        stderr = (result.stderr or "").strip()
-        stdout = (result.stdout or "").strip()
-        details = "\n".join(part for part in [stderr, stdout] if part)
-        raise EvaluateError(f"lake exe lean-eval run-eval failed:\n{details}")
+        details = "\n".join(
+            part for part in [f"stderr:\n{stderr}" if stderr else "", f"stdout:\n{stdout}" if stdout else ""] if part
+        )
+        raise EvaluateError(
+            f"lake exe lean-eval run-eval failed with exit code {result.returncode}:\n{details}"
+        )
     try:
         return json.loads(result.stdout)
     except json.JSONDecodeError as exc:
-        raise EvaluateError(f"run-eval produced invalid JSON: {exc}") from exc
+        details = "\n".join(
+            part for part in [f"stdout:\n{stdout or '(empty)'}", f"stderr:\n{stderr or '(empty)'}"] if part
+        )
+        raise EvaluateError(
+            f"run-eval exited 0 but produced invalid JSON ({exc}):\n{details}"
+        ) from exc
 
 
 def _extract_passed(run_eval_output: dict) -> list[str]:
