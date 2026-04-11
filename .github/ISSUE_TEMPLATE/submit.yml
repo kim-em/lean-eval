@@ -10,9 +10,9 @@ body:
         Submit a Lean proof for one or more lean-eval benchmark problems.
 
         You can submit anything that contains at least one `lakefile.toml`
-        whose `name` field matches a benchmark problem id. The CI walks the
-        content you point at and tries every match it finds. That means all of
-        these work:
+        whose `name` field matches a benchmark problem id **and** has a
+        `Submission.lean` alongside it. The CI walks the content you point at
+        and tries every match it finds. That means all of these work:
 
         - a repo that is a single generated workspace
         - a fork of `kim-em/lean-eval` with changes under `generated/`
@@ -22,6 +22,14 @@ body:
         The CI only reads `Submission.lean` and files under `Submission/`
         inside each matched workspace. Nothing else from your submission is
         ever inspected or published.
+
+        **v1 limitations**:
+
+        - Only `lakefile.toml` is supported; `lakefile.lean` (Lean-syntax
+          lakefiles) is not detected.
+        - Secret (unlisted) gists are rejected. Make your gist public, or
+          host your proof in a public or App-accessible private GitHub
+          repository.
 
         If your submission is in a private repository, install the
         `lean-eval-bot` GitHub App on it so the CI can clone it. The install

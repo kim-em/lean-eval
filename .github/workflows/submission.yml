@@ -1,0 +1,286 @@
+name: Submission
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: submission-${{ github.event.issue.user.login }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    if: github.event.label.name == 'submission'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Mint lean-eval-bot installation token
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        continue-on-error: true
+        with:
+          app-id: ${{ secrets.LEAN_EVAL_BOT_APP_ID }}
+          private-key: ${{ secrets.LEAN_EVAL_BOT_PRIVATE_KEY }}
+
+      - name: Fetch submission
+        id: fetch
+        env:
+          APP_INSTALLATION_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          python scripts/fetch_submission.py \
+            --event-path "$GITHUB_EVENT_PATH" \
+            --output-dir /tmp/fetch-out
+
+      - name: Upload submission source artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: submission-source
+          path: |
+            /tmp/fetch-out/source.tar.gz
+            /tmp/fetch-out/metadata.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Comment on fetch failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --body "❌ Submission fetch failed. See the workflow logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. If your submission repo is private, make sure the \`lean-eval-bot\` GitHub App is installed on it."
+          gh issue close ${{ github.event.issue.number }} --repo "${{ github.repository }}" --reason "not planned" || true
+
+  evaluate:
+    needs: fetch
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions: {}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Strip git state before running untrusted Lean
+        run: rm -rf .git
+
+      - uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: true
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Install landrun
+        run: |
+          go install github.com/zouuup/landrun/cmd/landrun@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Build lean4export
+        run: |
+          git clone https://github.com/leanprover/lean4export.git .ci/lean4export
+          cd .ci/lean4export
+          lake build lean4export
+          echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
+
+      - name: Build comparator
+        run: |
+          git clone https://github.com/leanprover/comparator.git .ci/comparator
+          cd .ci/comparator
+          lake build comparator
+          echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: submission-source
+          path: /tmp/submission-artifact
+
+      - name: Extract submission source
+        run: |
+          mkdir -p /tmp/submission-src
+          tar -xzf /tmp/submission-artifact/source.tar.gz -C /tmp/submission-src --strip-components=1
+
+      - name: Run evaluate_submission.py
+        run: |
+          python scripts/evaluate_submission.py \
+            --source-dir /tmp/submission-src \
+            --generated-root generated \
+            --manifest manifests/problems.toml \
+            --output-dir /tmp/evaluate-out \
+            --repo-root "$PWD"
+
+      - name: Copy frozen metadata through to record
+        if: always()
+        run: cp /tmp/submission-artifact/metadata.json /tmp/evaluate-out/metadata.json || true
+
+      - name: Upload evaluate results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: submission-results
+          path: /tmp/evaluate-out/*
+          if-no-files-found: warn
+          retention-days: 7
+
+  record:
+    needs: evaluate
+    if: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: lean-eval
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: submission-results
+          path: /tmp/submission-results
+
+      - uses: actions/checkout@v4
+        with:
+          repository: kim-em/lean-eval-leaderboard
+          token: ${{ secrets.LEADERBOARD_WRITE_TOKEN }}
+          path: leaderboard
+
+      - name: Configure git identity
+        run: |
+          git -C leaderboard config user.email "lean-eval-bot@users.noreply.github.com"
+          git -C leaderboard config user.name "lean-eval-bot"
+
+      - name: Record submission with push-retry
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          METADATA_PATH: /tmp/submission-results/metadata.json
+          RESULTS_PATH: /tmp/submission-results/results.json
+          SUMMARY_PATH: /tmp/submission-results/summary.json
+        run: |
+          set -euo pipefail
+          if [ ! -f "$METADATA_PATH" ] || [ ! -f "$RESULTS_PATH" ]; then
+            echo "missing metadata or results artifact; evaluate likely failed"
+            gh issue comment ${{ github.event.issue.number }} \
+              --repo "${{ github.repository }}" \
+              --body "❌ Evaluation did not produce results. See: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            exit 1
+          fi
+
+          # Read frozen metadata fields
+          SUBMITTED_BY=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submitted_by'])" "$METADATA_PATH")
+          MODEL=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['model'])" "$METADATA_PATH")
+          SUBMISSION_REPO=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_repo'])" "$METADATA_PATH")
+          SUBMISSION_REF=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_ref'])" "$METADATA_PATH")
+          SUBMISSION_PUBLIC=$(python -c "import json,sys; print(str(json.load(open(sys.argv[1]))['submission_public']).lower())" "$METADATA_PATH")
+          if [ "$SUBMISSION_PUBLIC" = "true" ]; then
+            PUBLIC_FLAG="--submission-public"
+          else
+            PUBLIC_FLAG="--no-submission-public"
+          fi
+
+          MAX_ATTEMPTS=5
+          for attempt in $(seq 1 $MAX_ATTEMPTS); do
+            git -C leaderboard fetch origin main
+            git -C leaderboard reset --hard origin/main
+
+            OUTPUT=$(python lean-eval/scripts/update_leaderboard.py \
+              --user "$SUBMITTED_BY" \
+              --leaderboard-dir leaderboard \
+              --results-json "$RESULTS_PATH" \
+              --benchmark-commit "${{ github.sha }}" \
+              --submission-repo "$SUBMISSION_REPO" \
+              --submission-ref "$SUBMISSION_REF" \
+              $PUBLIC_FLAG \
+              --model "$MODEL" \
+              --issue-number "${{ github.event.issue.number }}")
+
+            CHANGED=$(python -c "import json,sys; print(json.loads(sys.argv[1])['changed'])" "$OUTPUT")
+            if [ "$CHANGED" != "True" ]; then
+              echo "no new records to commit"
+              break
+            fi
+
+            COMMIT_MSG=$(python -c "import json,sys; print(json.loads(sys.argv[1])['commit_message'])" "$OUTPUT")
+            git -C leaderboard add results/
+            git -C leaderboard commit -m "$COMMIT_MSG"
+            if git -C leaderboard push origin main; then
+              echo "leaderboard push succeeded on attempt $attempt"
+              break
+            fi
+            echo "leaderboard push rejected on attempt $attempt; retrying"
+            sleep $((attempt * 2))
+            if [ $attempt -eq $MAX_ATTEMPTS ]; then
+              gh issue comment ${{ github.event.issue.number }} \
+                --repo "${{ github.repository }}" \
+                --body "⚠️ Could not push to the leaderboard after $MAX_ATTEMPTS attempts (race). An operator will need to retry this submission."
+              exit 1
+            fi
+          done
+
+      - name: Comment submission summary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESULTS_PATH: /tmp/submission-results/results.json
+          SUMMARY_PATH: /tmp/submission-results/summary.json
+        run: |
+          set -euo pipefail
+          BODY=$(python - <<'PY'
+          import json, os
+          results = json.load(open(os.environ["RESULTS_PATH"]))
+          summary = json.load(open(os.environ["SUMMARY_PATH"]))
+          lines = ["## Submission result", ""]
+          passed = results.get("passed") or []
+          if passed:
+              lines.append(f"✅ Newly-solved problems: {', '.join(passed)}")
+          else:
+              lines.append("No new problems solved in this submission.")
+          lines.append("")
+          re = summary.get("run_eval") or {}
+          total = re.get("total_problems", 0)
+          attempted = re.get("attempted_problems", 0)
+          succeeded = re.get("succeeded_problems", 0)
+          lines.append(f"Attempted {attempted} / {total}; succeeded on {succeeded}.")
+          lines.append("")
+          lines.append("### Per-problem")
+          for entry in (re.get("problems") or [])[:50]:
+              status = "pass" if entry.get("succeeded") else (
+                  "fail" if entry.get("attempted") else "skipped"
+              )
+              lines.append(f"- `{entry.get('id')}`: {status}")
+          body = "\n".join(lines)
+          CAP = 40000
+          if len(body) > CAP:
+              body = body[:CAP] + "\n\n...truncated..."
+          print(body)
+          PY
+          )
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --body "$BODY"
+
+      - name: Close issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue close ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --reason "completed"
