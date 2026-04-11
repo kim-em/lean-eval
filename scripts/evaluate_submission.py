@@ -245,13 +245,24 @@ def _share_packages(
 
 
 def _prime_workspace(target: pathlib.Path) -> None:
-    """Run `lake update` + `lake exe cache get` outside of landrun so that
-    comparator's sandboxed `lake build` does not try to clone packages
-    into paths landrun will deny.
+    """Populate the workspace's packages and pre-build Challenge, Solution,
+    and Submission *outside* of landrun, so comparator's sandboxed
+    `lake build` is effectively a no-op.
 
-    Matches the pattern in check_comparator_installation.py.
+    Comparator's safeLakeBuild whitelists reads on `projectDir` and writes
+    on `projectDir/.lake` only. If lake tries to touch `lake-manifest.json`
+    (not inside `.lake`) or clone packages into scratch dirs, landrun
+    denies. Pre-building everything outside the sandbox avoids every
+    such write.
+
+    Matches the priming in scripts/check_comparator_installation.py.
     """
-    for args in (["lake", "update"], ["lake", "exe", "cache", "get"]):
+    commands = (
+        ["lake", "update"],
+        ["lake", "exe", "cache", "get"],
+        ["lake", "build", "Challenge", "Solution", "Submission"],
+    )
+    for args in commands:
         result = subprocess.run(
             args,
             cwd=target,
