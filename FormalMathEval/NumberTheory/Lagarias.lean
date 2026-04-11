@@ -22,12 +22,10 @@ def LagariasElementaryCriterion : Prop :=
         (harmonic n : ℝ) +
           Real.exp (harmonic n : ℝ) * Real.log (harmonic n : ℝ)
 
--- ANCHOR: riemann_hypothesis_iff_lagarias_elementary_criterion
 @[eval_problem]
 theorem riemann_hypothesis_iff_lagarias_elementary_criterion :
     RiemannHypothesis ↔ LagariasElementaryCriterion := by
   sorry
--- ANCHOR_END: riemann_hypothesis_iff_lagarias_elementary_criterion
 
 end NumberTheory
 end FormalMathEval

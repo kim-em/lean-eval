@@ -13,7 +13,6 @@ The hypotheses are intentionally phrased in terms of the existing meromorphic/an
 `ValueDistribution.logCounting` APIs.
 -/
 
--- ANCHOR: rouche_logCounting_zero_eq
 @[eval_problem]
 theorem rouche_logCounting_zero_eq
     {f g : ℂ → ℂ} {R : ℝ}
@@ -23,7 +22,6 @@ theorem rouche_logCounting_zero_eq
     (hbound : ∀ z : ℂ, ‖z‖ = R → ‖g z‖ < ‖f z‖) :
     logCounting (f + g) 0 R = logCounting f 0 R := by
   sorry
--- ANCHOR_END: rouche_logCounting_zero_eq
 
 end ComplexAnalysis
 end FormalMathEval

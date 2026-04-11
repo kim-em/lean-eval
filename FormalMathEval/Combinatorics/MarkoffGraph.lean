@@ -56,13 +56,11 @@ def markoffGraph (p : ℕ) : SimpleGraph (MarkoffTriple p) where
 
 /-- For prime `p > 3`, every connected component of the nonzero Markoff graph over `ZMod p`
 has cardinality divisible by `p`. -/
--- ANCHOR: dvd_card_connectedComponent_markoffGraph
 @[eval_problem]
 theorem dvd_card_connectedComponent_markoffGraph
     {p : ℕ} (hp : Nat.Prime p) (hgt : 3 < p) :
     ∀ c : (markoffGraph p).ConnectedComponent, p ∣ Nat.card c := by
   sorry
--- ANCHOR_END: dvd_card_connectedComponent_markoffGraph
 
 end Combinatorics
 end FormalMathEval

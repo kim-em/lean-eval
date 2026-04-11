@@ -12,7 +12,6 @@ Mathlib already contains solvability infrastructure, so the statement is natural
 `IsSolvable G` for a finite group of order `p ^ a * q ^ b`.
 -/
 
--- ANCHOR: finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow
 @[eval_problem]
 theorem finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow
     {G : Type*} [Group G] [Fintype G]
@@ -23,7 +22,6 @@ theorem finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow
     (hcard : Fintype.card G = p ^ a * q ^ b) :
     IsSolvable G := by
   sorry
--- ANCHOR_END: finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow
 
 end GroupTheory
 end FormalMathEval

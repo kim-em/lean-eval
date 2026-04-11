@@ -10,18 +10,14 @@ independent comparator workspaces from these shared source files, so benchmark a
 do not need to hand-maintain per-problem packages.
 -/
 
--- ANCHOR: two_plus_two
 @[eval_problem]
 theorem two_plus_two_eq_four : (2 : Nat) + 2 = 4 := by
   sorry
--- ANCHOR_END: two_plus_two
 
--- ANCHOR: list_append_singleton_length
 @[eval_problem]
 theorem list_append_singleton_length :
     (([1, 2] : List Nat).append [3]).length = 3 := by
   sorry
--- ANCHOR_END: list_append_singleton_length
 
 /--
 error: The theorem `FormalMathEval.eval_problem_manifest_guard` is marked with @[eval_problem], but `manifests/problems.toml` has no matching `theorem = ...` entry.

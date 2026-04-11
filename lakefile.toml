@@ -14,11 +14,6 @@ name = "Cli"
 git = "https://github.com/leanprover/lean4-cli"
 rev = "v4.30.0-rc1"
 
-[[require]]
-name = "subverso"
-git = "https://github.com/leanprover/subverso"
-rev = "main"
-
 [[lean_lib]]
 name = "FormalMathEval"
 

@@ -15,15 +15,12 @@ where homotopy groups are based.
 -/
 
 /-- The fundamental group of the complex unit circle is infinite cyclic. -/
--- ANCHOR: pi1_circle_mulEquiv_int
 @[eval_problem]
 theorem pi1_circle_mulEquiv_int :
     Nonempty (HomotopyGroup.Pi 1 Circle (1 : Circle) ≃* Multiplicative ℤ) := by
   sorry
--- ANCHOR_END: pi1_circle_mulEquiv_int
 
 /-- The third homotopy group of the 2-sphere is infinite cyclic. -/
--- ANCHOR: pi3_sphere_two_mulEquiv_int
 @[eval_problem]
 theorem pi3_sphere_two_mulEquiv_int
     (x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) :
@@ -31,10 +28,8 @@ theorem pi3_sphere_two_mulEquiv_int
       (HomotopyGroup.Pi 3 (Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) x ≃*
         Multiplicative ℤ) := by
   sorry
--- ANCHOR_END: pi3_sphere_two_mulEquiv_int
 
 /-- For every `n ≥ 1`, the `n`th homotopy group of the `n`-sphere is infinite cyclic. -/
--- ANCHOR: pin_sphere_n_mulEquiv_int
 @[eval_problem]
 theorem pin_sphere_n_mulEquiv_int
     (n : ℕ)
@@ -43,10 +38,8 @@ theorem pin_sphere_n_mulEquiv_int
       (HomotopyGroup.Pi (n + 1) (Metric.sphere (0 : EuclideanSpace ℝ (Fin (n + 2))) 1) x ≃*
         Multiplicative ℤ) := by
   sorry
--- ANCHOR_END: pin_sphere_n_mulEquiv_int
 
 /-- A concrete stable-family statement: for `n ≥ 3`, `π_(n+1)(S^n) ≃ ℤ/2`. -/
--- ANCHOR: pi_succ_sphere_n_mulEquiv_zmod_two
 @[eval_problem]
 theorem pi_succ_sphere_n_mulEquiv_zmod_two
     (n : ℕ) (hn : 3 ≤ n)
@@ -55,7 +48,6 @@ theorem pi_succ_sphere_n_mulEquiv_zmod_two
       (HomotopyGroup.Pi (n + 1) (Metric.sphere (0 : EuclideanSpace ℝ (Fin (n + 1))) 1) x ≃*
         Multiplicative (ZMod 2)) := by
   sorry
--- ANCHOR_END: pi_succ_sphere_n_mulEquiv_zmod_two
 
 end Topology
 end FormalMathEval

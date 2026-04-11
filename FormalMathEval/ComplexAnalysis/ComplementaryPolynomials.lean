@@ -17,7 +17,6 @@ whose squared moduli add up to `1` on the circle.
 
 /-- If `P` is bounded by `1` on the unit circle, then there is a polynomial `Q` of the same degree
 whose squared moduli complement `P` to `1` on the unit circle. -/
--- ANCHOR: exists_complementary_polynomial_on_unit_circle
 @[eval_problem]
 theorem exists_complementary_polynomial_on_unit_circle
     (P : ℂ[X])
@@ -26,7 +25,6 @@ theorem exists_complementary_polynomial_on_unit_circle
       Q.natDegree = P.natDegree ∧
         ∀ z : Circle, ‖P.eval (z : ℂ)‖ ^ 2 + ‖Q.eval (z : ℂ)‖ ^ 2 = 1 := by
   sorry
--- ANCHOR_END: exists_complementary_polynomial_on_unit_circle
 
 end ComplexAnalysis
 end FormalMathEval

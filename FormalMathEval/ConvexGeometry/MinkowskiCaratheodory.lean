@@ -14,7 +14,6 @@ This formulation packages the theorem as a finite extreme-point representation f
 compact convex set, with the expected `finrank + 1` bound on the number of points used.
 -/
 
--- ANCHOR: mem_convexHull_finset_extremePoints_of_mem_compact_convex
 @[eval_problem]
 theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
@@ -27,7 +26,6 @@ theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex
       t.card ≤ Module.finrank ℝ E + 1 ∧
       x ∈ convexHull ℝ (↑t : Set E) := by
   sorry
--- ANCHOR_END: mem_convexHull_finset_extremePoints_of_mem_compact_convex
 
 end ConvexGeometry
 end FormalMathEval
