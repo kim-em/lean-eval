@@ -13,6 +13,7 @@ def main() -> int:
         problems = gp.load_manifest(manifest_path)
         gp.validate_problems(problems)
         gp.validate_manifest_against_inventory(problems)
+        gp.validate_theorem_proof_shape(problems)
     except gp.GenerationError as exc:
         print(str(exc), file=sys.stderr)
         return 1

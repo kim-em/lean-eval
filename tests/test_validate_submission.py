@@ -35,7 +35,58 @@ class ValidateSubmissionTests(unittest.TestCase):
         )
         self.assertEqual(allowed, [])
         self.assertEqual(len(forbidden), 1)
-        self.assertIn("top-level submission files only allow statuses", forbidden[0]["reasons"][0])
+        self.assertIn("not allowed for this path", forbidden[0]["reasons"][0])
+
+    def test_markdown_file_addition_is_allowed(self) -> None:
+        allowed, forbidden = vs.validate_changed_files(
+            [vs.SubmissionChange(status="A", paths=("generated/two_plus_two/NOTES.md",))]
+        )
+        self.assertEqual(forbidden, [])
+        self.assertEqual(len(allowed), 1)
+
+    def test_markdown_file_in_submission_subtree_addition_is_allowed(self) -> None:
+        allowed, forbidden = vs.validate_changed_files(
+            [vs.SubmissionChange(status="A", paths=("generated/two_plus_two/Submission/notes.md",))]
+        )
+        self.assertEqual(forbidden, [])
+        self.assertEqual(len(allowed), 1)
+
+    def test_readme_md_modification_is_rejected(self) -> None:
+        allowed, forbidden = vs.validate_changed_files(
+            [vs.SubmissionChange(status="M", paths=("generated/two_plus_two/README.md",))]
+        )
+        self.assertEqual(allowed, [])
+        self.assertEqual(len(forbidden), 1)
+        self.assertIn("outside the submission whitelist", forbidden[0]["reasons"][0])
+
+    def test_markdown_file_modification_is_rejected(self) -> None:
+        allowed, forbidden = vs.validate_changed_files(
+            [vs.SubmissionChange(status="M", paths=("generated/two_plus_two/NOTES.md",))]
+        )
+        self.assertEqual(allowed, [])
+        self.assertEqual(len(forbidden), 1)
+        self.assertIn("not allowed for this path", forbidden[0]["reasons"][0])
+
+    def test_licence_file_addition_is_allowed(self) -> None:
+        for filename in ("LICENCE", "LICENSE"):
+            with self.subTest(filename=filename):
+                allowed, forbidden = vs.validate_changed_files(
+                    [
+                        vs.SubmissionChange(
+                            status="A", paths=(f"generated/two_plus_two/{filename}",)
+                        )
+                    ]
+                )
+                self.assertEqual(forbidden, [])
+                self.assertEqual(len(allowed), 1)
+
+    def test_licence_file_deletion_is_rejected(self) -> None:
+        allowed, forbidden = vs.validate_changed_files(
+            [vs.SubmissionChange(status="D", paths=("generated/two_plus_two/LICENCE",))]
+        )
+        self.assertEqual(allowed, [])
+        self.assertEqual(len(forbidden), 1)
+        self.assertIn("not allowed for this path", forbidden[0]["reasons"][0])
 
     def test_submission_helpers_allow_rename_within_submission_tree(self) -> None:
         allowed, forbidden = vs.validate_changed_files(

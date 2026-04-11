@@ -13,6 +13,15 @@ import generate_projects as gp  # noqa: E402
 import run_eval as reval  # noqa: E402
 
 
+def _write_stub_ilean(repo_root: pathlib.Path, module_name: str) -> None:
+    parts = module_name.split(".")
+    ilean_path = repo_root.joinpath(
+        ".lake", "build", "lib", "lean", *parts[:-1], f"{parts[-1]}.ilean"
+    )
+    ilean_path.parent.mkdir(parents=True, exist_ok=True)
+    ilean_path.write_text('{"references": {}, "decls": {}}', encoding="utf-8")
+
+
 class RunEvalTests(unittest.TestCase):
     def test_problem_attempt_mismatches_empty_for_pristine_workspace(self) -> None:
         problem = gp.ProblemSpec(
@@ -26,7 +35,6 @@ class RunEvalTests(unittest.TestCase):
         extracted = gp.ExtractedTheorem(
             declaration_name="Demo.demo_theorem",
             module=problem.module,
-            theorem_type="True",
             source_range=(1, 0, 2, 9),
         )
         toolchain = "leanprover/lean4:v4.30.0-rc1\n"
@@ -41,6 +49,7 @@ class RunEvalTests(unittest.TestCase):
                 "theorem demo_theorem : True := by\n  trivial\n",
                 encoding="utf-8",
             )
+            _write_stub_ilean(repo_root, problem.module)
             old_repo_root = gp.REPO_ROOT
             old_generated_root = gp.GENERATED_ROOT
             old_source_path = gp.module_source_path
@@ -233,7 +242,6 @@ class RunEvalTests(unittest.TestCase):
         extracted = gp.ExtractedTheorem(
             declaration_name="Demo.demo_theorem",
             module=problem.module,
-            theorem_type="True",
             source_range=(1, 0, 2, 9),
         )
         toolchain = "leanprover/lean4:v4.30.0-rc1\n"
@@ -255,6 +263,7 @@ class RunEvalTests(unittest.TestCase):
                 "theorem demo_theorem : True := by\n  trivial\n",
                 encoding="utf-8",
             )
+            _write_stub_ilean(repo_root, problem.module)
             old_repo_root = gp.REPO_ROOT
             old_generated_root = gp.GENERATED_ROOT
             old_source_path = gp.module_source_path

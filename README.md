@@ -218,14 +218,14 @@ lake exe lean-eval validate-submission --file generated/two_plus_two/Solution.le
 
 The current validator accepts:
 
-- `generated/<problem-id>/Solution.lean`
-- `generated/<problem-id>/Submission.lean`
-- `generated/<problem-id>/Submission/**/*.lean`
-
-It only allows ordinary modifications to the top-level bridge files
-`Solution.lean` and `Submission.lean`. Extra helper files under `Submission/` may be
-added, modified, deleted, renamed, or copied, but they must stay as `.lean` files
-within that subtree.
+- modifications to `generated/<problem-id>/Solution.lean` and
+  `generated/<problem-id>/Submission.lean`
+- additions, modifications, deletions, renames, or copies of `.lean` files under
+  `generated/<problem-id>/Submission/`
+- additions (only) of markdown files anywhere inside
+  `generated/<problem-id>/`, other than the generated `README.md`
+- additions (only) of a top-level `generated/<problem-id>/LICENCE` or
+  `generated/<problem-id>/LICENSE` file
 
 In practice, solvers should normally work in `Submission.lean` and `Submission/`.
 

@@ -5,71 +5,7 @@ first scaffold pass.
 
 ## High-Priority Next Decisions
 
-### 0. Theorem Pretty-Printing In Generated Challenges
-
-This is partially addressed.
-
-The generator now slices theorem statements from the trusted authored source files using
-Lean declaration ranges, so generated `Challenge.lean` and `Solution.lean` preserve the
-notation the author wrote in source.
-
-Residual risk:
-
-- the fallback theorem type emitted by the extractor is still elaborated, so future generator
-  paths that rely on `theoremType` directly may reintroduce ugly output
-- the current source-slicing approach assumes theorem proofs are written in the simple
-  `:= by` style used by benchmark source files
-
-Follow-up needed:
-
-- support a wider range of theorem source layouts if authors start using them
-- decide whether the manifest/generator contract should explicitly require `:= by` proofs in
-  benchmark source files
-
-### 1. Source-of-Truth Authoring Format
-
-We want benchmark authors to write many problems in a few shared Lean files, not to
-hand-maintain one comparator package per problem.
-
-Open questions:
-
-- Should metadata live in Lean doc-comments, a TOML sidecar, or both?
-- Should each source theorem be written directly with `by sorry`, or should the source
-  file contain only statement declarations that the generator re-emits?
-- How should the generator extract theorem statements robustly enough to avoid accidental
-  proof leakage into generated workspaces?
-
-Recommended direction:
-
-- keep theorem statements in shared Lean files
-- keep metadata in a TOML manifest for V1
-- generate comparator workspaces from parsed theorem declarations once we pick an
-  extraction strategy we trust
-
-### 2. Submission File Policy
-
-We need a precise whitelist for what a participant commit may change.
-
-Proposed model:
-
-- allowed:
-  `solutions/<problem-id>/Solution.lean`
-  `solutions/<problem-id>/Submission.lean`
-  `solutions/<problem-id>/Submission/**/*.lean`
-- forbidden:
-  benchmark statements
-  manifests
-  generator code
-  leaderboard code
-  CI and deployment code
-  comparator configs
-
-Open questions:
-
-- Do we want to allow non-Lean files in submissions, such as generated data tables?
-- If so, under what size limits and in which directories?
-
-### 3. Private Submission Service
+### 1. Private Submission Service
 
 The user asked to start at the "private submissions from day one" model instead of a
 public-only workflow.
@@ -90,30 +26,31 @@ Recommended direction:
 - evaluate in an isolated worker that checks changed files before any Lean build occurs
 - publish only score, model name, submission timestamp, and an optional paper/repo link
 
-### 4. Generator Output
+### 2. Generator Output
 
-The generator should emit one independent problem workspace per problem.
-
-Each workspace should include:
+The generator emits one independent problem workspace per problem under `generated/`, and
+those workspaces are checked into the repo. Each workspace contains:
 
 - `Challenge.lean`
+- `ChallengeDeps.lean`
 - `Solution.lean`
 - `Submission.lean`
-- `Submission/`
+- `Submission/Helpers.lean`
 - `config.json`
 - `lakefile.toml`
 - `lean-toolchain`
 - `WorkspaceTest.lean`
-- a short problem README
+- `README.md`
+
+`lake test` invokes comparator; that is the canonical score check.
 
 Open questions:
 
-- Should generated workspaces live in the repo, or be purely build artifacts?
-- Should we also generate a one-command "single problem starter repo" tarball or template?
-- Should `lake test` always mean comparator, or should we also expose a faster local
-  pre-check?
+- Should we also generate a one-command "single problem starter repo" tarball or template,
+  beyond the existing `lake exe lean-eval start-problem` copy?
+- Should we expose a faster local pre-check in addition to comparator?
 
-### 5. Leaderboard Site
+### 3. Leaderboard Site
 
 We need a static or mostly-static leaderboard that supports:
 
@@ -151,27 +88,26 @@ Candidate families to investigate:
 - results with published formalization-adjacent proofs that help humans but do not make the
   Lean proof trivial
 
-The current repository only includes the trivial test problem `two_plus_two`.
+The repository currently contains ~17 problems across number theory, combinatorics,
+topology, complex analysis, group theory, convex geometry, and linear algebra, plus the
+trivial starter `two_plus_two`. Further curation should fill gaps in topic coverage and
+difficulty distribution.
 
 ## Immediate Follow-Up Work
 
 ### Repo Scaffolding
 
-- add invariant-file validation for participant commits
 - add result schemas for per-problem and per-submission outputs
 - extend CI beyond the current repository health checks as the submission pipeline lands
-- keep `lake exe lean-eval` as the only intended user-facing entrypoint
-- treat the current `lean-eval` shell-out implementation as transitional only
-- migrate operational tooling from Python scripts to native Lean implementations over time,
-  so manifest validation, generation, submission checks, scoring, and related repo
-  automation live inside the Lean toolchain rather than behind Python wrappers
+- continue migrating operational tooling from Python scripts to native Lean so manifest
+  validation, generation, submission checks, and scoring live inside the Lean toolchain
+  rather than behind Python wrappers (the `@[eval_problem]` attribute and manifest parser
+  are already native; generator, builder, and scorer are still Python shell-outs)
 
 ### UX
 
-- add a `scripts/start_problem.py` command that materializes a local cloneable workspace for
-  a selected problem
-- add a `scripts/check_submission.py` command for local dry runs before upload
 - decide whether participants work directly in this repo or in generated per-problem repos
+  when submitting (local workflow via `lake exe lean-eval start-problem` already exists)
 
 ### Trust / Security
 

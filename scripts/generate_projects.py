@@ -38,6 +38,13 @@ EXPECTED_FILES = {
 IGNORED_PATH_NAMES = {".lake", "build", ".cache", "lake-manifest.json"}
 
 
+def _theorem_by_pattern(theorem_name: str) -> re.Pattern[str]:
+    return re.compile(
+        rf"(?:^|\s)theorem\s+{re.escape(theorem_name)}\b(?P<body>.*?)(?:\s*:=\s*by\b)",
+        re.DOTALL,
+    )
+
+
 class GenerationError(Exception):
     pass
 
@@ -59,7 +66,6 @@ class ProblemSpec:
 class ExtractedTheorem:
     declaration_name: str
     module: str
-    theorem_type: str
     source_range: tuple[int, int, int, int]
 
 
@@ -251,7 +257,6 @@ def extract_theorem(problem: ProblemSpec) -> ExtractedTheorem:
         return ExtractedTheorem(
             declaration_name=str(payload["declarationName"]),
             module=str(payload["module"]),
-            theorem_type=str(payload["theoremType"]),
             source_range=(
                 int(payload["sourceRange"]["startLine"]),
                 int(payload["sourceRange"]["startColumn"]),
@@ -329,6 +334,24 @@ def validate_manifest_against_inventory(problems: list[ProblemSpec]) -> None:
         )
 
 
+def validate_theorem_proof_shape(problems: list[ProblemSpec]) -> None:
+    for problem in problems:
+        source_path = module_source_path(problem.module)
+        if not source_path.is_file():
+            raise GenerationError(
+                f"Source file for module '{problem.module}' not found: {source_path}"
+            )
+        source_text = source_path.read_text(encoding="utf-8")
+        theorem_name = problem.theorem.rsplit(".", maxsplit=1)[-1]
+        if not _theorem_by_pattern(theorem_name).search(source_text):
+            raise GenerationError(
+                f"Problem '{problem.id}' points at `theorem {theorem_name}` in "
+                f"{source_path.relative_to(REPO_ROOT)}, but the declaration does not match "
+                "the required `theorem <name> ... := by` shape used by the source slicer. "
+                "Rewrite the proof as `:= by <tactics-or-sorry>`."
+            )
+
+
 def local_theorem_name(extracted: ExtractedTheorem) -> str:
     return extracted.declaration_name.rsplit(".", maxsplit=1)[-1]
 
@@ -361,11 +384,7 @@ def extract_statement_text(problem: ProblemSpec, extracted: ExtractedTheorem) ->
     end = offset_for_line_column(source_text, end_line, end_column)
     declaration_text = source_text[start:end]
     theorem_name = local_theorem_name(extracted)
-    pattern = re.compile(
-        rf"(?:^|\s)theorem\s+{re.escape(theorem_name)}\b(?P<body>.*?)(?:\s*:=\s*by\b)",
-        re.DOTALL,
-    )
-    match = pattern.search(declaration_text)
+    match = _theorem_by_pattern(theorem_name).search(declaration_text)
     if not match:
         raise GenerationError(
             f"Could not recover theorem statement text for '{problem.id}' from {source_path}"
@@ -891,6 +910,8 @@ def generate(
         )
         if sync_mismatches:
             raise GenerationError("\n".join(sync_mismatches))
+
+    validate_theorem_proof_shape(problems)
 
     toolchain = (REPO_ROOT / "lean-toolchain").read_text(encoding="utf-8")
     mathlib_dependency = load_root_mathlib_dependency()

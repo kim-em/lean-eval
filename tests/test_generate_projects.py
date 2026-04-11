@@ -94,7 +94,7 @@ author = "Kim"
         ]
         self.assertEqual(gp.unique_modules(problems), ["M1", "M2"])
 
-    def test_extract_statement_text_uses_source_not_theorem_type(self) -> None:
+    def test_extract_statement_text_slices_source_range(self) -> None:
         problem = gp.ProblemSpec(
             id="two_plus_two",
             title="2 + 2 = 4",
@@ -106,7 +106,6 @@ author = "Kim"
         extracted = gp.ExtractedTheorem(
             declaration_name="FormalMathEval.two_plus_two_eq_four",
             module=problem.module,
-            theorem_type="Eq (instHAdd.hAdd 2 2) 4",
             source_range=(13, 0, 15, 7),
         )
         statement = gp.extract_statement_text(problem, extracted)
@@ -124,7 +123,6 @@ author = "Kim"
         extracted = gp.ExtractedTheorem(
             declaration_name="FormalMathEval.two_plus_two_eq_four",
             module=problem.module,
-            theorem_type="(2 : Nat) + 2 = 4",
             source_range=(13, 0, 15, 7),
         )
         dependency = gp.DependencySpec(
@@ -142,7 +140,11 @@ author = "Kim"
         self.assertIn("Submission.two_plus_two_eq_four", files["Solution.lean"])
         self.assertIn(": (2 : Nat) + 2 = 4 := by", files["Challenge.lean"])
         self.assertIn(
-            "theorem two_plus_two_eq_four : (2 : Nat) + 2 = 4 := Submission.two_plus_two_eq_four",
+            "theorem two_plus_two_eq_four : (2 : Nat) + 2 = 4 := by",
+            files["Solution.lean"],
+        )
+        self.assertIn(
+            "exact Submission.two_plus_two_eq_four",
             files["Solution.lean"],
         )
         self.assertIn("- Test Problem: yes", files["README.md"])
@@ -169,7 +171,6 @@ author = "Kim"
             )
         )
         self.assertEqual(extracted.declaration_name, "FormalMathEval.two_plus_two_eq_four")
-        self.assertEqual(extracted.theorem_type, "Eq (instHAdd.hAdd 2 2) 4")
         self.assertEqual(len(extracted.source_range), 4)
 
     def test_extract_theorem_rejects_unknown_declaration(self) -> None:

@@ -16,13 +16,19 @@ import sys
 import generate_projects as gp
 
 
-ALLOWED_PATTERNS = [
-    re.compile(r"^generated/[^/]+/Solution\.lean$"),
-    re.compile(r"^generated/[^/]+/Submission\.lean$"),
-    re.compile(r"^generated/[^/]+/Submission/.+\.lean$"),
+PATTERN_RULES: list[tuple[re.Pattern[str], frozenset[str]]] = [
+    (re.compile(r"^generated/[^/]+/Solution\.lean$"), frozenset({"M"})),
+    (re.compile(r"^generated/[^/]+/Submission\.lean$"), frozenset({"M"})),
+    (re.compile(r"^generated/[^/]+/Submission/.+\.lean$"), frozenset({"A", "C", "D", "M", "R"})),
+    (
+        re.compile(r"^generated/[^/]+/(?!README\.md$).+\.md$"),
+        frozenset({"A"}),
+    ),
+    (re.compile(r"^generated/[^/]+/LICEN[CS]E$"), frozenset({"A"})),
 ]
-TOP_LEVEL_ALLOWED_STATUSES = {"M"}
-SUBMISSION_TREE_ALLOWED_STATUSES = {"A", "C", "D", "M", "R"}
+ALL_ALLOWED_STATUSES: frozenset[str] = frozenset(
+    status for _, statuses in PATTERN_RULES for status in statuses
+)
 
 
 @dataclass(frozen=True)
@@ -88,20 +94,20 @@ def normalize_submission_path(path: str) -> str:
 
 def path_policy_error(path: str, status_code: str, valid_problem_ids: set[str]) -> str | None:
     normalized = normalize_submission_path(path)
-    if not any(pattern.fullmatch(normalized) for pattern in ALLOWED_PATTERNS):
+    matching_statuses: set[str] = set()
+    for pattern, statuses in PATTERN_RULES:
+        if pattern.fullmatch(normalized):
+            matching_statuses.update(statuses)
+    if not matching_statuses:
         return "path is outside the submission whitelist"
     parts = normalized.split("/")
     if len(parts) < 3 or parts[1] not in valid_problem_ids:
         return "path does not belong to a known generated problem workspace"
-
-    is_top_level_file = parts[-1] in {"Solution.lean", "Submission.lean"} and len(parts) == 3
-    allowed_statuses = (
-        TOP_LEVEL_ALLOWED_STATUSES if is_top_level_file else SUBMISSION_TREE_ALLOWED_STATUSES
-    )
-    if status_code not in allowed_statuses:
-        if is_top_level_file:
-            return f"top-level submission files only allow statuses: {sorted(TOP_LEVEL_ALLOWED_STATUSES)}"
-        return f"submission helper files only allow statuses: {sorted(SUBMISSION_TREE_ALLOWED_STATUSES)}"
+    if status_code not in matching_statuses:
+        return (
+            f"change status '{status_code}' is not allowed for this path; "
+            f"allowed: {sorted(matching_statuses)}"
+        )
     return None
 
 
@@ -137,7 +143,7 @@ def validate_changed_files(
             if reason is not None:
                 reasons.append(f"{normalized}: {reason}")
 
-        if status_code not in TOP_LEVEL_ALLOWED_STATUSES | SUBMISSION_TREE_ALLOWED_STATUSES:
+        if status_code not in ALL_ALLOWED_STATUSES:
             reasons.append(f"unsupported git change status '{change.status}'")
 
         if reasons:

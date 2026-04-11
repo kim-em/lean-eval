@@ -13,7 +13,6 @@ structure SourceRange where
 structure ExtractedTheorem where
   declarationName : String
   module : String
-  theoremType : String
   sourceRange : SourceRange
   deriving ToJson
 
@@ -70,12 +69,9 @@ def extractTheorem (moduleNameText declNameText : String) : IO ExtractedTheorem 
   }
   match constantInfo with
   | .thmInfo _ | .opaqueInfo _ =>
-      let theoremType := toString <| ← ({ env := env, opts := Options.empty.set `pp.width 240 } : PPContext).runMetaM do
-        Meta.ppExpr (← instantiateMVars constantInfo.type)
       return {
         declarationName := toString resolvedDeclName
         module := moduleNameText
-        theoremType := theoremType
         sourceRange := sourceRange
       }
   | _ =>
