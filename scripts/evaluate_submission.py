@@ -448,7 +448,13 @@ def evaluate_submission(
     matches = detect_matches(source_dir, manifest_ids)
 
     overlay_records: list[dict] = []
-    with tempfile.TemporaryDirectory() as tmp:
+    # Create the tempdir as an immediate child of repo_root so that:
+    #   (1) comparator's landrun sandbox, which whitelists paths rooted
+    #       at the repo, can reach the per-workspace .lake/build
+    #   (2) run_eval.score_problems can compute
+    #       workspace_path.relative_to(gp.REPO_ROOT) without ValueError
+    repo_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=repo_root, prefix=".submission-") as tmp:
         workspaces_root = pathlib.Path(tmp) / "workspaces"
         workspaces_root.mkdir(parents=True, exist_ok=True)
         overlaid_ids: list[str] = []
