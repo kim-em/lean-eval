@@ -151,6 +151,8 @@ jobs:
         run: |
           git clone https://github.com/leanprover/comparator.git .ci/comparator
           cd .ci/comparator
+          git checkout 0ff36dde148dfea82dbdcf3baf91d6e1a8195554
+          git apply "$GITHUB_WORKSPACE/patches/comparator-landrun.patch"
           lake build comparator
           echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
 

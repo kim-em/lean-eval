@@ -78,6 +78,7 @@ def run_problem_test(
     completed = subprocess.run(
         ["lake", "test"],
         cwd=problem_dir,
+        env=os.environ.copy(),
         text=True,
         check=False,
         stdout=sys.stderr,

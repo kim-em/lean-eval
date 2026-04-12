@@ -776,12 +776,9 @@ def render_workspace(
             "    pure 1\n"
             "  else\n"
             "    try\n"
-            "      let sandboxHome ← (← IO.currentDir) / \".lake\" / \"home\"\n"
-            "      IO.FS.createDirAll sandboxHome\n"
             "      let child ← IO.Process.spawn {\n"
             '        cmd := "lake"\n'
             '        args := #["env", comparatorBin, "config.json"]\n'
-            "        env := #[(\"HOME\", some sandboxHome.toString)]\n"
             "      }\n"
             "      let exitCode ← child.wait\n"
             "      pure exitCode\n"

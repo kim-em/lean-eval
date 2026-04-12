@@ -5,6 +5,7 @@ Run a real comparator check against a tiny generated workspace.
 
 from __future__ import annotations
 
+import os
 import pathlib
 import shutil
 import subprocess
@@ -16,7 +17,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 def run(cmd: list[str], *, cwd: pathlib.Path) -> None:
-    completed = subprocess.run(cmd, cwd=cwd, text=True, check=False)
+    completed = subprocess.run(cmd, cwd=cwd, env=os.environ.copy(), text=True, check=False)
     if completed.returncode != 0:
         raise RuntimeError(f"Command failed with exit code {completed.returncode}: {' '.join(cmd)}")
 
