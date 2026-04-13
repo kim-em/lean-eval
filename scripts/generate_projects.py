@@ -20,7 +20,6 @@ from typing import Callable
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_MANIFEST = REPO_ROOT / "manifests" / "problems.toml"
 GENERATED_ROOT = REPO_ROOT / "generated"
-ROOT_LAKEFILE = REPO_ROOT / "lakefile.toml"
 FIXED_AXIOMS = ["propext", "Quot.sound", "Classical.choice"]
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 EXPECTED_FILES = {
@@ -83,7 +82,9 @@ class InventoryEntry:
     basename: str
 
 
-def load_root_mathlib_dependency(path: pathlib.Path = ROOT_LAKEFILE) -> DependencySpec:
+def load_root_mathlib_dependency(path: pathlib.Path | None = None) -> DependencySpec:
+    if path is None:
+        path = REPO_ROOT / "lakefile.toml"
     with path.open("rb") as handle:
         data = tomllib.load(handle)
 
