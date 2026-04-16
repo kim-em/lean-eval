@@ -186,3 +186,14 @@ submitter = "Kim Morrison"
 notes = "A concrete stable-family homotopy-group computation."
 source = "Classical theorem in unstable homotopy theory."
 informal_solution = "Use suspension and the stable range to show the first stable stem is Z/2."
+
+[[problem]]
+id = "substInv_X_sub_X_sq_eq_catalan"
+title = "Catalan generating function via compositional inversion"
+test = false
+module = "FormalMathEval.Combinatorics.CatalanSubstInv"
+theorem = "substInv_X_sub_X_sq_eq_catalan"
+submitter = "Kim Morrison"
+notes = "The compositional inverse of X - X² is the generating function for Catalan numbers. This is a classical application of Lagrange inversion in enumerative combinatorics, connecting formal power series inversion to Dyck paths, binary trees, and triangulations."
+source = "E. Catalan, Note sur une équation aux différences finies, 1838; J.-L. Lagrange, Nouvelle méthode pour résoudre les équations littérales, 1770."
+informal_solution = "The compositional inverse C(x) satisfies C - C² = x, giving C = (1 - √(1-4x))/2. By the binomial series, its coefficients are the Catalan numbers C_n = (2n choose n)/(n+1)."
