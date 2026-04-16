@@ -62,6 +62,17 @@ class RunEvalTests(unittest.TestCase):
                     git="https://github.com/leanprover-community/mathlib4.git",
                     rev="v4.30.0-rc1",
                 )
+                (repo_root / "lakefile.toml").write_text(
+                    f'''name = "test"
+defaultTargets = ["Test"]
+
+[[require]]
+name = "{dependency.name}"
+git = "{dependency.git}"
+rev = "{dependency.rev}"
+''',
+                    encoding="utf-8",
+                )
                 files = gp.render_workspace(problem, extracted, toolchain, dependency)
                 for relative_path, content in files.items():
                     destination = problem_dir / relative_path
@@ -271,6 +282,17 @@ class RunEvalTests(unittest.TestCase):
                 gp.REPO_ROOT = repo_root
                 gp.GENERATED_ROOT = generated_root
                 gp.module_source_path = lambda _module_name: source_path
+                (repo_root / "lakefile.toml").write_text(
+                    f'''name = "test"
+defaultTargets = ["Test"]
+
+[[require]]
+name = "{dependency.name}"
+git = "{dependency.git}"
+rev = "{dependency.rev}"
+''',
+                    encoding="utf-8",
+                )
                 files = gp.render_workspace(problem, extracted, toolchain, dependency)
                 for base_dir in [generated_problem_dir, workspace_problem_dir]:
                     for relative_path, content in files.items():
