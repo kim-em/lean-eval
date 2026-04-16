@@ -208,3 +208,14 @@ submitter = "Kim Morrison"
 notes = "Uses the Fuglede-Putnam-Rosenblum theorem to show all four of a, star a, b, star b pairwise commute, then verifies the normality condition by direct computation."
 source = "B. Fuglede, A commutativity theorem for normal operators, 1950."
 informal_solution = "From Commute a b and normality, apply Fuglede-Putnam twice to get Commute (star a) b and Commute (star a) (star b). Then star(ab)·(ab) = b*·a*·a·b = b*·a·a*·b (a normal) = a·b*·b·a* (all commute) = a·b·b*·a* (b normal) = (ab)·star(ab)."
+
+[[problem]]
+id = "posSemidef_map_exp"
+title = "Entrywise exponential of a PSD matrix is PSD"
+test = false
+module = "FormalMathEval.LinearAlgebra.EntrywiseExpPSD"
+theorem = "posSemidef_map_exp"
+submitter = "Kim Morrison"
+notes = "Part of the Schur-Polya-Loewner theory of entrywise functions preserving PSD. The proof uses the Schur product theorem iteratively: exp_⊙(A) = ∑ A^{⊙k}/k!, each Hadamard power is PSD, and the convergent series of PSD matrices is PSD."
+source = "I.J. Schoenberg, Positive definite functions on spheres, 1942."
+informal_solution = "Write exp(a_{ij}) as the convergent series ∑ (a_{ij})^k / k!. The matrix with entries (a_{ij})^k is the k-fold Hadamard product A^{⊙k}, which is PSD by iterated Schur product. The partial sums are nonneg combinations of PSD matrices, hence PSD. PSD is a closed condition, so the limit is PSD."
