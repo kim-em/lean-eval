@@ -97,7 +97,12 @@ def main() -> int:
     try:
         ensure_repo_clean()
         problems = load_problems()
-        with tempfile.TemporaryDirectory(prefix="lean-eval-workflow-") as tmpdir:
+        # Place the tempdir under REPO_ROOT so `run_eval.score_problems` can
+        # compute `workspace_path.relative_to(gp.REPO_ROOT)` without ValueError
+        # (same workaround as `evaluate_submission.py`).
+        with tempfile.TemporaryDirectory(
+            prefix="lean-eval-workflow-", dir=gp.REPO_ROOT
+        ) as tmpdir:
             workspaces_root = pathlib.Path(tmpdir) / "workspaces"
 
             initial_summary = summarize_with_temp_workspaces(problems, workspaces_root)
