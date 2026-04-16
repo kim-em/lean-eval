@@ -36,6 +36,7 @@ class RunEvalTests(unittest.TestCase):
             declaration_name="Demo.demo_theorem",
             module=problem.module,
             source_range=(1, 0, 2, 9),
+            same_module_dependencies=(),
         )
         toolchain = "leanprover/lean4:v4.30.0-rc1\n"
 
@@ -254,6 +255,7 @@ rev = "{dependency.rev}"
             declaration_name="Demo.demo_theorem",
             module=problem.module,
             source_range=(1, 0, 2, 9),
+            same_module_dependencies=(),
         )
         toolchain = "leanprover/lean4:v4.30.0-rc1\n"
         dependency = gp.DependencySpec(
