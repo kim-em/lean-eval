@@ -219,3 +219,14 @@ submitter = "Kim Morrison"
 notes = "Part of the Schur-Polya-Loewner theory of entrywise functions preserving PSD. The proof uses the Schur product theorem iteratively: exp_⊙(A) = ∑ A^{⊙k}/k!, each Hadamard power is PSD, and the convergent series of PSD matrices is PSD."
 source = "I.J. Schoenberg, Positive definite functions on spheres, 1942."
 informal_solution = "Write exp(a_{ij}) as the convergent series ∑ (a_{ij})^k / k!. The matrix with entries (a_{ij})^k is the k-fold Hadamard product A^{⊙k}, which is PSD by iterated Schur product. The partial sums are nonneg combinations of PSD matrices, hence PSD. PSD is a closed condition, so the limit is PSD."
+
+[[problem]]
+id = "mulCayley_connected_iff_closure_eq_top"
+title = "Cayley graph connected iff generators generate the group"
+test = false
+module = "FormalMathEval.Combinatorics.CayleyConnected"
+theorem = "mulCayley_connected_iff_closure_eq_top"
+submitter = "Kim Morrison"
+notes = "A foundational result in geometric group theory using the newly defined Cayley graph. Connectivity of the Cayley graph is equivalent to the generating set S generating G as a group."
+source = "A. Cayley, On the theory of groups, as depending on the symbolic equation θ^n = 1, 1878."
+informal_solution = "Forward: if connected, any g ∈ G is reached from 1 by a path, which corresponds to a product of generators. Reverse: if S generates, any g is a product of generators, giving a path from 1 to g."
