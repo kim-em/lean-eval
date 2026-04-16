@@ -107,6 +107,7 @@ submitter = "Kim"
             declaration_name="FormalMathEval.two_plus_two_eq_four",
             module=problem.module,
             source_range=(13, 0, 15, 7),
+            same_module_dependencies=(),
         )
         statement = gp.extract_statement_text(problem, extracted)
         self.assertEqual(statement, ": (2 : Nat) + 2 = 4")
@@ -124,6 +125,7 @@ submitter = "Kim"
             declaration_name="FormalMathEval.two_plus_two_eq_four",
             module=problem.module,
             source_range=(13, 0, 15, 7),
+            same_module_dependencies=(),
         )
         dependency = gp.DependencySpec(
             name="mathlib",
