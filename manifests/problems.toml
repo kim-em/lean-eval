@@ -197,3 +197,14 @@ submitter = "Kim Morrison"
 notes = "The compositional inverse of X - X² is the generating function for Catalan numbers. This is a classical application of Lagrange inversion in enumerative combinatorics, connecting formal power series inversion to Dyck paths, binary trees, and triangulations."
 source = "E. Catalan, Note sur une équation aux différences finies, 1838; J.-L. Lagrange, Nouvelle méthode pour résoudre les équations littérales, 1770."
 informal_solution = "The compositional inverse C(x) satisfies C - C² = x, giving C = (1 - √(1-4x))/2. By the binomial series, its coefficients are the Catalan numbers C_n = (2n choose n)/(n+1)."
+
+[[problem]]
+id = "isStarNormal_mul_of_commute"
+title = "Product of commuting normal elements is normal"
+test = false
+module = "FormalMathEval.Algebra.NormalProduct"
+theorem = "isStarNormal_mul_of_commute"
+submitter = "Kim Morrison"
+notes = "Uses the Fuglede-Putnam-Rosenblum theorem to show all four of a, star a, b, star b pairwise commute, then verifies the normality condition by direct computation."
+source = "B. Fuglede, A commutativity theorem for normal operators, 1950."
+informal_solution = "From Commute a b and normality, apply Fuglede-Putnam twice to get Commute (star a) b and Commute (star a) (star b). Then star(ab)·(ab) = b*·a*·a·b = b*·a·a*·b (a normal) = a·b*·b·a* (all commute) = a·b·b*·a* (b normal) = (ab)·star(ab)."
