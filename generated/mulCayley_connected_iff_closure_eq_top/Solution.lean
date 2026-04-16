@@ -1,0 +1,7 @@
+import Mathlib
+import Submission
+
+theorem mulCayley_connected_iff_closure_eq_top {G : Type*} [Group G]
+    (S : Set G) :
+    (SimpleGraph.mulCayley S).Connected ↔ Subgroup.closure S = ⊤ := by
+  exact Submission.mulCayley_connected_iff_closure_eq_top S

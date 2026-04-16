@@ -1,4 +1,4 @@
-name = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
+name = "mulCayley_connected_iff_closure_eq_top"
 testDriver = "workspace_test"
 defaultTargets = ["Challenge", "Solution", "Submission"]
 
