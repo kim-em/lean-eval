@@ -14,6 +14,11 @@ structure ExtractedTheorem where
   declarationName : String
   module : String
   sourceRange : SourceRange
+  /-- Names of declarations from the same module that appear (transitively) in the
+  type or value of this theorem. Computed from the elaborated terms, so this captures
+  uses introduced by typeclass synthesis (which the `.ilean` references metadata
+  records as textual matches only). -/
+  sameModuleDependencies : Array String
   deriving ToJson
 
 def parseName (text : String) : Name :=
@@ -50,6 +55,26 @@ def resolveDeclName (env : Environment) (moduleName declName : Name) : IO Name :
       return candidate
   findDeclByBasename env moduleName declName
 
+/-- Compute the set of names of declarations in `moduleName` that are reachable from
+the type or value of `start`, following the same-module subgraph of the constant
+dependency relation. The starting declaration itself is excluded from the result. -/
+def collectSameModuleDependencies (env : Environment) (moduleName start : Name) :
+    Array Name := Id.run do
+  let some moduleIdx := env.getModuleIdx? moduleName | return #[]
+  let mut closure : NameSet := {}
+  let mut stack : Array Name := #[start]
+  while !stack.isEmpty do
+    let current := stack.back!
+    stack := stack.pop
+    if closure.contains current then continue
+    closure := closure.insert current
+    let some info := env.find? current | continue
+    for c in info.getUsedConstantsAsSet do
+      if env.getModuleIdxFor? c == some moduleIdx
+          && c != current && !closure.contains c then
+        stack := stack.push c
+  return (closure.erase start).toArray
+
 def extractTheorem (moduleNameText declNameText : String) : IO ExtractedTheorem := do
   let moduleName := parseName moduleNameText
   let declName := parseName declNameText
@@ -69,10 +94,12 @@ def extractTheorem (moduleNameText declNameText : String) : IO ExtractedTheorem 
   }
   match constantInfo with
   | .thmInfo _ | .opaqueInfo _ =>
+      let deps := collectSameModuleDependencies env moduleName resolvedDeclName
       return {
         declarationName := toString resolvedDeclName
         module := moduleNameText
         sourceRange := sourceRange
+        sameModuleDependencies := deps.map toString
       }
   | _ =>
       throw <| IO.userError s!"Declaration '{resolvedDeclName}' is not a theorem or opaque theorem."
