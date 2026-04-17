@@ -188,8 +188,8 @@ lake exe lean-eval check-comparator-installation
 ```
 
 Comparator setup also requires the upstream external tools, including `landrun` and
-`lean4export`. Install `landrun` from its git `master` branch
-(`go install github.com/zouuup/landrun/cmd/landrun@master`); the latest tagged
+`lean4export`. Install `landrun` from its git `main` branch
+(`go install github.com/zouuup/landrun/cmd/landrun@main`); the latest tagged
 release (v0.1.15) is missing fixes that comparator's sandbox relies on.
 
 ### 6. Check your local score

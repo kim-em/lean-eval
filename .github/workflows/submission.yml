@@ -137,7 +137,7 @@ jobs:
 
       - name: Install landrun
         run: |
-          go install github.com/zouuup/landrun/cmd/landrun@master
+          go install github.com/zouuup/landrun/cmd/landrun@main
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Build lean4export
