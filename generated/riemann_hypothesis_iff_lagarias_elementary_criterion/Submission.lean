@@ -1,6 +1,7 @@
 import ChallengeDeps
 import Submission.Helpers
 
+open FormalMathEval.NumberTheory
 open scoped ArithmeticFunction.sigma
 
 namespace Submission
