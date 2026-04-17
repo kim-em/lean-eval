@@ -137,7 +137,7 @@ jobs:
 
       - name: Install landrun
         run: |
-          go install github.com/zouuup/landrun/cmd/landrun@latest
+          go install github.com/zouuup/landrun/cmd/landrun@master
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Build lean4export
@@ -151,8 +151,6 @@ jobs:
         run: |
           git clone https://github.com/leanprover/comparator.git .ci/comparator
           cd .ci/comparator
-          git checkout 0ff36dde148dfea82dbdcf3baf91d6e1a8195554
-          git apply "$GITHUB_WORKSPACE/patches/comparator-landrun.patch"
           lake build comparator
           echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
 

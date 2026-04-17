@@ -188,13 +188,9 @@ lake exe lean-eval check-comparator-installation
 ```
 
 Comparator setup also requires the upstream external tools, including `landrun` and
-`lean4export`.
-
-On Linux, this repo currently checks out comparator commit
-`0ff36dde148dfea82dbdcf3baf91d6e1a8195554` in CI and applies
-[patches/comparator-landrun.patch](patches/comparator-landrun.patch). The patch
-makes comparator run the real toolchain `lake` binary instead of the elan shim
-and explicitly whitelists the ELF loader that landrun otherwise misses.
+`lean4export`. Install `landrun` from its git `master` branch
+(`go install github.com/zouuup/landrun/cmd/landrun@master`); the latest tagged
+release (v0.1.15) is missing fixes that comparator's sandbox relies on.
 
 ### 6. Check your local score
 
