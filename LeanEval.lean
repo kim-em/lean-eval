@@ -14,4 +14,5 @@ import LeanEval.LinearAlgebra.Oppenheim
 import LeanEval.LinearAlgebra.PerronFrobenius
 import LeanEval.NumberTheory.Lagarias
 import LeanEval.NumberTheory.SmallHouse
+import LeanEval.Topology.CerfGammaFour
 import LeanEval.Topology.HomotopyGroups
