@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -137,5 +138,45 @@ jobs:
       - name: Verify Generated Output
         run: python scripts/generate_projects.py --check
 
+      # Detect whether generated/ files changed to skip the expensive
+      # workspace build step on PRs that only touch problem sources or
+      # manifests.
+      - name: Detect generated workspace changes
+        id: changes
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            echo "generated_changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BASE"..HEAD | grep -q '^generated/'; then
+            echo "generated_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "generated_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Download Mathlib cache once in the first workspace, then hard-link
+      # its .lake/packages tree into every other workspace so that each
+      # subsequent `lake build` skips the ~2 GB download + decompression.
+      - name: Prepare shared Mathlib cache for workspaces
+        if: steps.changes.outputs.generated_changed == 'true'
+        run: |
+          set -euo pipefail
+          FIRST=$(find generated -maxdepth 1 -mindepth 1 -type d -exec test -f '{}/lakefile.toml' \; -print | sort | head -1)
+          if [ -z "$FIRST" ]; then
+            echo "No generated workspaces found; skipping."
+            exit 0
+          fi
+          echo "==> Fetching Mathlib cache in $FIRST"
+          (cd "$FIRST" && lake update && lake exe cache get)
+          for ws in generated/*/; do
+            [ -f "${ws}lakefile.toml" ] || continue
+            [ "$(realpath "$ws")" = "$(realpath "$FIRST/")" ] && continue
+            echo "==> Linking Mathlib packages into $ws"
+            mkdir -p "${ws}.lake"
+            rm -rf "${ws}.lake/packages"
+            cp -al "${FIRST}/.lake/packages" "${ws}.lake/packages"
+            cp "${FIRST}/lake-manifest.json" "${ws}lake-manifest.json"
+          done
+
       - name: Build Generated Workspaces
+        if: steps.changes.outputs.generated_changed == 'true'
         run: python scripts/check_generated_builds.py
