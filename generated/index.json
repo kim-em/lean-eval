@@ -151,5 +151,104 @@
     "module": "LeanEval.Topology.HomotopyGroups",
     "theorem": "pi_succ_sphere_n_mulEquiv_zmod_two",
     "generated_path": "generated/pi_succ_sphere_n_mulEquiv_zmod_two"
+  },
+  {
+    "id": "substInv_X_sub_X_sq_eq_catalan",
+    "title": "Catalan generating function via compositional inversion",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Combinatorics.CatalanSubstInv",
+    "theorem": "substInv_X_sub_X_sq_eq_catalan",
+    "generated_path": "generated/substInv_X_sub_X_sq_eq_catalan"
+  },
+  {
+    "id": "isStarNormal_mul_of_commute",
+    "title": "Product of commuting normal elements is normal",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Algebra.NormalProduct",
+    "theorem": "isStarNormal_mul_of_commute",
+    "generated_path": "generated/isStarNormal_mul_of_commute"
+  },
+  {
+    "id": "posSemidef_map_exp",
+    "title": "Entrywise exponential of a PSD matrix is PSD",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.LinearAlgebra.EntrywiseExpPSD",
+    "theorem": "posSemidef_map_exp",
+    "generated_path": "generated/posSemidef_map_exp"
+  },
+  {
+    "id": "mulCayley_connected_iff_closure_eq_top",
+    "title": "Cayley graph connected iff generators generate the group",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Combinatorics.CayleyConnected",
+    "theorem": "mulCayley_connected_iff_closure_eq_top",
+    "generated_path": "generated/mulCayley_connected_iff_closure_eq_top"
+  },
+  {
+    "id": "oppenheim_inequality",
+    "title": "Oppenheim's inequality for Hadamard products",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.LinearAlgebra.Oppenheim",
+    "theorem": "oppenheim_inequality",
+    "generated_path": "generated/oppenheim_inequality"
+  },
+  {
+    "id": "symAction_range_eq_centralizer_glAction",
+    "title": "Schur-Weyl duality: S_k image equals centralizer of GL(V) image",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.RepresentationTheory.SchurWeyl",
+    "theorem": "symAction_range_eq_centralizer_glAction",
+    "generated_path": "generated/symAction_range_eq_centralizer_glAction"
+  },
+  {
+    "id": "glAction_range_eq_centralizer_symAction",
+    "title": "Schur-Weyl duality: GL(V) image equals centralizer of S_k image",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.RepresentationTheory.SchurWeyl",
+    "theorem": "glAction_range_eq_centralizer_symAction",
+    "generated_path": "generated/glAction_range_eq_centralizer_symAction"
+  },
+  {
+    "id": "g2_irrep_tensor_square_decomp",
+    "title": "Tensor square decomposition of a 64-dim irreducible g\u2082-representation",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.RepresentationTheory.ExceptionalLieTensorSquare",
+    "theorem": "g2_irrep_tensor_square_decomp",
+    "generated_path": "generated/g2_irrep_tensor_square_decomp"
+  },
+  {
+    "id": "e8_irrep_tensor_square_decomp",
+    "title": "Tensor square decomposition of a 779247-dim irreducible e\u2088-representation",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.RepresentationTheory.ExceptionalLieTensorSquare",
+    "theorem": "e8_irrep_tensor_square_decomp",
+    "generated_path": "generated/e8_irrep_tensor_square_decomp"
+  },
+  {
+    "id": "cerf_gamma_four",
+    "title": "Cerf's theorem: every self-diffeomorphism of S3 is smoothly isotopic to a linear isometry",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Topology.CerfGammaFour",
+    "theorem": "cerf_gamma_four",
+    "generated_path": "generated/cerf_gamma_four"
+  },
+  {
+    "id": "smale_conjecture",
+    "title": "Smale conjecture (Hatcher) in relative parameterized form",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Topology.SmaleConjecture",
+    "theorem": "smale_conjecture",
+    "generated_path": "generated/smale_conjecture"
   }
 ]
