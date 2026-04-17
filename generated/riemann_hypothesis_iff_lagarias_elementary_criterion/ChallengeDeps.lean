@@ -1,6 +1,6 @@
 import Mathlib
 
-namespace FormalMathEval
+namespace LeanEval
 namespace NumberTheory
 
 open scoped ArithmeticFunction.sigma
@@ -22,4 +22,4 @@ def LagariasElementaryCriterion : Prop :=
 
 
 end NumberTheory
-end FormalMathEval
+end LeanEval

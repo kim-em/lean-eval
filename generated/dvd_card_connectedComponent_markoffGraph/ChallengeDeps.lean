@@ -1,6 +1,6 @@
 import Mathlib
 
-namespace FormalMathEval
+namespace LeanEval
 namespace Combinatorics
 
 open scoped BigOperators
@@ -55,4 +55,4 @@ def markoffGraph (p : ℕ) : SimpleGraph (MarkoffTriple p) where
 
 
 end Combinatorics
-end FormalMathEval
+end LeanEval

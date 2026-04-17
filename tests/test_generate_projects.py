@@ -17,7 +17,7 @@ class GenerateProjectsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         subprocess.run(
-            ["lake", "build", "FormalMathEval.EasyProblems", "extract_theorem"],
+            ["lake", "build", "LeanEval.EasyProblems", "extract_theorem"],
             cwd=REPO_ROOT,
             check=True,
         )
@@ -32,7 +32,7 @@ version = 1
 [[problem]]
 id = "bad/id"
 title = "Bad"
-module = "FormalMathEval.EasyProblems"
+module = "LeanEval.EasyProblems"
 theorem = "two_plus_two_eq_four"
 submitter = "Kim"
 """.strip()
@@ -99,12 +99,12 @@ submitter = "Kim"
             id="two_plus_two",
             title="2 + 2 = 4",
             test=True,
-            module="FormalMathEval.EasyProblems",
+            module="LeanEval.EasyProblems",
             theorem="two_plus_two_eq_four",
             submitter="Kim",
         )
         extracted = gp.ExtractedTheorem(
-            declaration_name="FormalMathEval.two_plus_two_eq_four",
+            declaration_name="LeanEval.two_plus_two_eq_four",
             module=problem.module,
             source_range=(13, 0, 15, 7),
         )
@@ -116,12 +116,12 @@ submitter = "Kim"
             id="two_plus_two",
             title="2 + 2 = 4",
             test=True,
-            module="FormalMathEval.EasyProblems",
+            module="LeanEval.EasyProblems",
             theorem="two_plus_two_eq_four",
             submitter="Kim",
         )
         extracted = gp.ExtractedTheorem(
-            declaration_name="FormalMathEval.two_plus_two_eq_four",
+            declaration_name="LeanEval.two_plus_two_eq_four",
             module=problem.module,
             source_range=(13, 0, 15, 7),
         )
@@ -165,12 +165,12 @@ submitter = "Kim"
                 id="two_plus_two",
                 title="2 + 2 = 4",
                 test=True,
-                module="FormalMathEval.EasyProblems",
-                theorem="FormalMathEval.two_plus_two_eq_four",
+                module="LeanEval.EasyProblems",
+                theorem="LeanEval.two_plus_two_eq_four",
                 submitter="Kim",
             )
         )
-        self.assertEqual(extracted.declaration_name, "FormalMathEval.two_plus_two_eq_four")
+        self.assertEqual(extracted.declaration_name, "LeanEval.two_plus_two_eq_four")
         self.assertEqual(len(extracted.source_range), 4)
 
     def test_extract_theorem_rejects_unknown_declaration(self) -> None:
@@ -180,7 +180,7 @@ submitter = "Kim"
                     id="missing",
                     title="Missing",
                     test=False,
-                    module="FormalMathEval.EasyProblems",
+                    module="LeanEval.EasyProblems",
                     theorem="does_not_exist",
                     submitter="Kim",
                 )
@@ -193,7 +193,7 @@ submitter = "Kim"
                     id="starter_number",
                     title="starterNumber",
                     test=False,
-                    module="FormalMathEval.EasyProblems",
+                    module="LeanEval.EasyProblems",
                     theorem="starterNumber",
                     submitter="Kim",
                 )
@@ -210,7 +210,7 @@ version = 1
 id = "bad_test_flag"
 title = "Bad"
 test = "yes"
-module = "FormalMathEval.EasyProblems"
+module = "LeanEval.EasyProblems"
 theorem = "two_plus_two_eq_four"
 submitter = "Kim"
 """.strip()

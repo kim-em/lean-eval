@@ -1,7 +1,7 @@
 import Mathlib.Analysis.Real.Pi.Chudnovsky
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace Analysis
 
 open scoped Real
@@ -19,4 +19,4 @@ theorem chudnovsky_formula_for_pi_inv :
   sorry
 
 end Analysis
-end FormalMathEval
+end LeanEval

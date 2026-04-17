@@ -3,7 +3,7 @@ import Mathlib.LinearAlgebra.Eigenspace.Basic
 import Mathlib.LinearAlgebra.Matrix.Irreducible.Defs
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace LinearAlgebra
 
 open scoped NNReal
@@ -26,4 +26,4 @@ theorem irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadiu
   sorry
 
 end LinearAlgebra
-end FormalMathEval
+end LeanEval

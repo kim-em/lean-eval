@@ -2,7 +2,7 @@ import Mathlib.Analysis.Convex.Caratheodory
 import Mathlib.Analysis.Convex.KreinMilman
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace ConvexGeometry
 
 open Set
@@ -28,4 +28,4 @@ theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex
   sorry
 
 end ConvexGeometry
-end FormalMathEval
+end LeanEval

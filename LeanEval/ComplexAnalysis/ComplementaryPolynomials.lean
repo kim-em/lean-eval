@@ -2,7 +2,7 @@ import Mathlib.Algebra.Polynomial.Basic
 import Mathlib.Analysis.Complex.Circle
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace ComplexAnalysis
 
 open Polynomial
@@ -27,4 +27,4 @@ theorem exists_complementary_polynomial_on_unit_circle
   sorry
 
 end ComplexAnalysis
-end FormalMathEval
+end LeanEval

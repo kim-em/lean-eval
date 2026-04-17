@@ -4,7 +4,7 @@ import Mathlib.Geometry.Manifold.Instances.Sphere
 import Mathlib.Topology.Homotopy.HomotopyGroup
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace Topology
 
 /-!
@@ -50,4 +50,4 @@ theorem pi_succ_sphere_n_mulEquiv_zmod_two
   sorry
 
 end Topology
-end FormalMathEval
+end LeanEval

@@ -1,5 +1,5 @@
-name = "formal-math-eval"
-defaultTargets = ["FormalMathEval"]
+name = "lean-eval"
+defaultTargets = ["LeanEval"]
 
 [leanOptions]
 autoImplicit = false
@@ -15,7 +15,7 @@ git = "https://github.com/leanprover/lean4-cli"
 rev = "v4.30.0-rc1"
 
 [[lean_lib]]
-name = "FormalMathEval"
+name = "LeanEval"
 
 [[lean_lib]]
 name = "EvalTools"

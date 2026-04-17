@@ -1,7 +1,7 @@
 import Mathlib.Combinatorics.SimpleGraph.Clique
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace Combinatorics
 
 open SimpleGraph
@@ -20,4 +20,4 @@ theorem finite_graph_ramsey_theorem :
   sorry
 
 end Combinatorics
-end FormalMathEval
+end LeanEval

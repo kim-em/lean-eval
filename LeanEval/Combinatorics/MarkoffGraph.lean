@@ -2,7 +2,7 @@ import Mathlib.Combinatorics.SimpleGraph.Connectivity.Finite
 import Mathlib.Data.ZMod.Basic
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace Combinatorics
 
 open scoped BigOperators
@@ -63,4 +63,4 @@ theorem dvd_card_connectedComponent_markoffGraph
   sorry
 
 end Combinatorics
-end FormalMathEval
+end LeanEval

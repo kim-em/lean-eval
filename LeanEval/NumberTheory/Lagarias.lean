@@ -3,7 +3,7 @@ import Mathlib.NumberTheory.Harmonic.Defs
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace NumberTheory
 
 open scoped ArithmeticFunction.sigma
@@ -28,4 +28,4 @@ theorem riemann_hypothesis_iff_lagarias_elementary_criterion :
   sorry
 
 end NumberTheory
-end FormalMathEval
+end LeanEval

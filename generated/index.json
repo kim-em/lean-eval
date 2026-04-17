@@ -4,7 +4,7 @@
     "title": "2 + 2 = 4",
     "test": true,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.EasyProblems",
+    "module": "LeanEval.EasyProblems",
     "theorem": "two_plus_two_eq_four",
     "generated_path": "generated/two_plus_two"
   },
@@ -13,7 +13,7 @@
     "title": "Appending a singleton increases the list length",
     "test": true,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.EasyProblems",
+    "module": "LeanEval.EasyProblems",
     "theorem": "list_append_singleton_length",
     "generated_path": "generated/list_append_singleton_length"
   },
@@ -22,7 +22,7 @@
     "title": "Real cyclotomic integer with house at most 2",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.NumberTheory.SmallHouse",
+    "module": "LeanEval.NumberTheory.SmallHouse",
     "theorem": "cyclotomic_integer_house_le_two",
     "generated_path": "generated/cyclotomic_integer_house_le_two"
   },
@@ -31,7 +31,7 @@
     "title": "Real cyclotomic integer with house in (2, 76/33)",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.NumberTheory.SmallHouse",
+    "module": "LeanEval.NumberTheory.SmallHouse",
     "theorem": "cyclotomic_integer_house_between_two_and_76_33",
     "generated_path": "generated/cyclotomic_integer_house_between_two_and_76_33"
   },
@@ -40,7 +40,7 @@
     "title": "Lagarias criterion is equivalent to RH",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.NumberTheory.Lagarias",
+    "module": "LeanEval.NumberTheory.Lagarias",
     "theorem": "riemann_hypothesis_iff_lagarias_elementary_criterion",
     "generated_path": "generated/riemann_hypothesis_iff_lagarias_elementary_criterion"
   },
@@ -49,7 +49,7 @@
     "title": "Finite Ramsey theorem for graphs",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Combinatorics.Ramsey",
+    "module": "LeanEval.Combinatorics.Ramsey",
     "theorem": "finite_graph_ramsey_theorem",
     "generated_path": "generated/finite_graph_ramsey_theorem"
   },
@@ -58,7 +58,7 @@
     "title": "Chen theorem for Markoff graphs",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Combinatorics.MarkoffGraph",
+    "module": "LeanEval.Combinatorics.MarkoffGraph",
     "theorem": "dvd_card_connectedComponent_markoffGraph",
     "generated_path": "generated/dvd_card_connectedComponent_markoffGraph"
   },
@@ -67,7 +67,7 @@
     "title": "Burnside p^a q^b theorem",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.GroupTheory.Burnside",
+    "module": "LeanEval.GroupTheory.Burnside",
     "theorem": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
     "generated_path": "generated/finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
   },
@@ -76,7 +76,7 @@
     "title": "Rouche theorem via zero counting",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.ComplexAnalysis.Rouche",
+    "module": "LeanEval.ComplexAnalysis.Rouche",
     "theorem": "rouche_logCounting_zero_eq",
     "generated_path": "generated/rouche_logCounting_zero_eq"
   },
@@ -85,7 +85,7 @@
     "title": "Complementary polynomial on the unit circle",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.ComplexAnalysis.ComplementaryPolynomials",
+    "module": "LeanEval.ComplexAnalysis.ComplementaryPolynomials",
     "theorem": "exists_complementary_polynomial_on_unit_circle",
     "generated_path": "generated/exists_complementary_polynomial_on_unit_circle"
   },
@@ -94,7 +94,7 @@
     "title": "Perron-Frobenius for irreducible nonnegative matrices",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.LinearAlgebra.PerronFrobenius",
+    "module": "LeanEval.LinearAlgebra.PerronFrobenius",
     "theorem": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
     "generated_path": "generated/irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
   },
@@ -103,7 +103,7 @@
     "title": "Minkowski-Caratheodory theorem",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.ConvexGeometry.MinkowskiCaratheodory",
+    "module": "LeanEval.ConvexGeometry.MinkowskiCaratheodory",
     "theorem": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
     "generated_path": "generated/mem_convexHull_finset_extremePoints_of_mem_compact_convex"
   },
@@ -112,7 +112,7 @@
     "title": "Chudnovsky formula for pi inverse",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Analysis.Chudnovsky",
+    "module": "LeanEval.Analysis.Chudnovsky",
     "theorem": "chudnovsky_formula_for_pi_inv",
     "generated_path": "generated/chudnovsky_formula_for_pi_inv"
   },
@@ -121,7 +121,7 @@
     "title": "pi_1 of the circle is Z",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Topology.HomotopyGroups",
+    "module": "LeanEval.Topology.HomotopyGroups",
     "theorem": "pi1_circle_mulEquiv_int",
     "generated_path": "generated/pi1_circle_mulEquiv_int"
   },
@@ -130,7 +130,7 @@
     "title": "pi_3 of the 2-sphere is Z",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Topology.HomotopyGroups",
+    "module": "LeanEval.Topology.HomotopyGroups",
     "theorem": "pi3_sphere_two_mulEquiv_int",
     "generated_path": "generated/pi3_sphere_two_mulEquiv_int"
   },
@@ -139,7 +139,7 @@
     "title": "pi_n of the n-sphere is Z",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Topology.HomotopyGroups",
+    "module": "LeanEval.Topology.HomotopyGroups",
     "theorem": "pin_sphere_n_mulEquiv_int",
     "generated_path": "generated/pin_sphere_n_mulEquiv_int"
   },
@@ -148,7 +148,7 @@
     "title": "pi_(n+1) of S^n is Z/2 for n at least 3",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "FormalMathEval.Topology.HomotopyGroups",
+    "module": "LeanEval.Topology.HomotopyGroups",
     "theorem": "pi_succ_sphere_n_mulEquiv_zmod_two",
     "generated_path": "generated/pi_succ_sphere_n_mulEquiv_zmod_two"
   }

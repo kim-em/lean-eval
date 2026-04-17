@@ -2,7 +2,7 @@ import Mathlib.GroupTheory.Solvable
 import Mathlib.Data.Nat.Prime.Basic
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace GroupTheory
 
 /-!
@@ -24,4 +24,4 @@ theorem finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow
   sorry
 
 end GroupTheory
-end FormalMathEval
+end LeanEval

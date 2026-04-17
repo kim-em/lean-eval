@@ -1,7 +1,7 @@
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace ComplexAnalysis
 
 open ValueDistribution
@@ -24,4 +24,4 @@ theorem rouche_logCounting_zero_eq
   sorry
 
 end ComplexAnalysis
-end FormalMathEval
+end LeanEval

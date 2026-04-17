@@ -2,7 +2,7 @@ import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 import Mathlib.NumberTheory.NumberField.House
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace NumberTheory
 
 open NumberField
@@ -40,4 +40,4 @@ theorem cyclotomic_integer_house_between_two_and_76_33
   sorry
 
 end NumberTheory
-end FormalMathEval
+end LeanEval
