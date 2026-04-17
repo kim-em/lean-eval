@@ -389,12 +389,25 @@ def extract_statement_text(problem: ProblemSpec, extracted: ExtractedTheorem) ->
     end = offset_for_line_column(source_text, end_line, end_column)
     declaration_text = source_text[start:end]
     theorem_name = local_theorem_name(extracted)
-    match = _theorem_by_pattern(theorem_name).search(declaration_text)
-    if not match:
+    # Find the theorem header to locate the start of the body.
+    header = re.search(
+        rf"(?:^|\s)theorem\s+{re.escape(theorem_name)}\b",
+        declaration_text,
+        re.DOTALL,
+    )
+    if not header:
         raise GenerationError(
             f"Could not recover theorem statement text for '{problem.id}' from {source_path}"
         )
-    return match.group("body").strip()
+    # Use rfind to locate the *last* `:= by` in the declaration text.
+    # This handles theorems whose type contains nested `haveI ... := by`
+    # clauses: the outer proof marker is always the last one.
+    last_by = declaration_text.rfind(":= by")
+    if last_by == -1:
+        raise GenerationError(
+            f"Could not recover theorem statement text for '{problem.id}' from {source_path}"
+        )
+    return declaration_text[header.end():last_by].strip()
 
 
 def extract_source_text_for_range(source_text: str, source_range: tuple[int, int, int, int]) -> str:
