@@ -296,3 +296,14 @@ submitter = "Kim Morrison"
 notes = "Cerf's 1968 theorem, the X = point (unparameterized) case of the Smale conjecture. Stated as the existence of a smooth isotopy [0,1] x S3 -> S3 from f to a linear isometry, witnessed by a smooth slice-inverse to encode the diffeomorphism property of each slice without needing a topology on Diffeomorph."
 source = "J. Cerf, Sur les diffeomorphismes de la sphere de dimension trois, Lecture Notes in Mathematics 53, Springer (1968)."
 informal_solution = "Cerf's original proof uses pseudo-isotopy theory: a self-diffeomorphism of S3 extends to a pseudo-isotopy of D4, and Cerf's theorem on the triviality of pi_0 of the pseudo-isotopy space in dimension 4 implies the extension is isotopic to a genuine isotopy. Hatcher (1983) reproved this as a corollary of the full Smale conjecture using configurations of 2-spheres."
+
+[[problem]]
+id = "smale_conjecture"
+title = "Smale conjecture (Hatcher) in relative parameterized form"
+test = false
+module = "LeanEval.Topology.SmaleConjecture"
+theorem = "smale_conjecture"
+submitter = "Kim Morrison"
+notes = "Hatcher's 1983 theorem that Diff(S3) is homotopy equivalent to O(4), stated in the relative-parameterized-family form (families on a compact manifold-with-boundary X whose boundary already factors through O(4) deform rel boundary to a family fully factoring through O(4)). Mathlib does not yet carry the C-infinity topology on Diffeomorph, which would be needed for the direct homotopy-equivalence formulation."
+source = "A. Hatcher, A proof of the Smale conjecture, Diff(S3) = O(4), Ann. of Math. 117 (1983)."
+informal_solution = "Hatcher proves Diff(S3) is homotopy equivalent to O(4) by analyzing configurations of 2-spheres in S3 (the bigon criterion) and deducing by induction that every self-diffeomorphism is isotopic to a linear one, with all higher parameterized versions handled by the same incompressible-surface machinery."

@@ -241,5 +241,14 @@
     "module": "LeanEval.Topology.CerfGammaFour",
     "theorem": "cerf_gamma_four",
     "generated_path": "generated/cerf_gamma_four"
+  },
+  {
+    "id": "smale_conjecture",
+    "title": "Smale conjecture (Hatcher) in relative parameterized form",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Topology.SmaleConjecture",
+    "theorem": "smale_conjecture",
+    "generated_path": "generated/smale_conjecture"
   }
 ]
