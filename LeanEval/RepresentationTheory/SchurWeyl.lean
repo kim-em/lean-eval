@@ -4,7 +4,7 @@ import Mathlib.Algebra.Algebra.Subalgebra.Centralizer
 import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace RepresentationTheory
 
 open scoped TensorProduct
@@ -69,4 +69,4 @@ theorem glAction_range_eq_centralizer_symAction
   sorry
 
 end RepresentationTheory
-end FormalMathEval
+end LeanEval

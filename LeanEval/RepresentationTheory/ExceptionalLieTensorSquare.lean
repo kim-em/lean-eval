@@ -7,7 +7,7 @@ import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.RingTheory.SimpleModule.Isotypic
 import EvalTools.Markers
 
-namespace FormalMathEval
+namespace LeanEval
 namespace RepresentationTheory
 
 open scoped TensorProduct
@@ -31,17 +31,21 @@ algebra: a `LieModule R L M` extends to a `Module (UniversalEnvelopingAlgebra R 
 via the universal property.
 -/
 
+noncomputable instance lieModuleToEnvelopingModule
+    (R L M : Type*) [CommRing R] [LieRing L] [LieAlgebra R L]
+    [AddCommGroup M] [Module R M] [LieRingModule L M] [LieModule R L M] :
+    Module (UniversalEnvelopingAlgebra R L) M :=
+  Module.compHom M
+    (UniversalEnvelopingAlgebra.lift R (LieModule.toEnd R L M)).toRingHom
+
 @[eval_problem]
 theorem g2_irrep_tensor_square_decomp :
     ∃ (V : Type) (_ : AddCommGroup V) (_ : Module ℂ V)
       (_ : LieRingModule (LieAlgebra.g₂ ℂ) V) (_ : LieModule ℂ (LieAlgebra.g₂ ℂ) V),
       Module.finrank ℂ V = 64 ∧
       LieModule.IsIrreducible ℂ (LieAlgebra.g₂ ℂ) V ∧
-      (letI : Module (UniversalEnvelopingAlgebra ℂ (LieAlgebra.g₂ ℂ)) (V ⊗[ℂ] V) :=
-        Module.compHom _ (UniversalEnvelopingAlgebra.lift ℂ
-          (LieModule.toEnd ℂ _ (V ⊗[ℂ] V))).toRingHom
-       (isotypicComponents (UniversalEnvelopingAlgebra ℂ (LieAlgebra.g₂ ℂ))
-          (V ⊗[ℂ] V)).ncard = 14) := by
+      (isotypicComponents (UniversalEnvelopingAlgebra ℂ (LieAlgebra.g₂ ℂ))
+        (V ⊗[ℂ] V)).ncard = 14 := by
   sorry
 
 @[eval_problem]
@@ -50,12 +54,9 @@ theorem e8_irrep_tensor_square_decomp :
       (_ : LieRingModule (LieAlgebra.e₈ ℂ) V) (_ : LieModule ℂ (LieAlgebra.e₈ ℂ) V),
       Module.finrank ℂ V = 779247 ∧
       LieModule.IsIrreducible ℂ (LieAlgebra.e₈ ℂ) V ∧
-      (letI : Module (UniversalEnvelopingAlgebra ℂ (LieAlgebra.e₈ ℂ)) (V ⊗[ℂ] V) :=
-        Module.compHom _ (UniversalEnvelopingAlgebra.lift ℂ
-          (LieModule.toEnd ℂ _ (V ⊗[ℂ] V))).toRingHom
-       (isotypicComponents (UniversalEnvelopingAlgebra ℂ (LieAlgebra.e₈ ℂ))
-          (V ⊗[ℂ] V)).ncard = 40) := by
+      (isotypicComponents (UniversalEnvelopingAlgebra ℂ (LieAlgebra.e₈ ℂ))
+        (V ⊗[ℂ] V)).ncard = 40 := by
   sorry
 
 end RepresentationTheory
-end FormalMathEval
+end LeanEval
