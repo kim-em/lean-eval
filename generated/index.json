@@ -250,5 +250,14 @@
     "module": "LeanEval.Topology.SmaleConjecture",
     "theorem": "smale_conjecture",
     "generated_path": "generated/smale_conjecture"
+  },
+  {
+    "id": "vonNeumann_doubleCommutant_tfae",
+    "title": "von Neumann double commutant theorem",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.VonNeumannDoubleCommutant",
+    "theorem": "vonNeumann_doubleCommutant_tfae",
+    "generated_path": "generated/vonNeumann_doubleCommutant_tfae"
   }
 ]
