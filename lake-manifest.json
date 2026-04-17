@@ -91,6 +91,6 @@
    "inputRev": "v4.30.0-rc1",
    "inherited": true,
    "configFile": "lakefile.toml"}],
- "name": "«formal-math-eval»",
+ "name": "«lean-eval»",
  "lakeDir": ".lake",
  "fixedToolchain": false}

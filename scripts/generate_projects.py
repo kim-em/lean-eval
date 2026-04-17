@@ -66,6 +66,7 @@ class ExtractedTheorem:
     declaration_name: str
     module: str
     source_range: tuple[int, int, int, int]
+    same_module_dependencies: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -264,6 +265,9 @@ def extract_theorem(problem: ProblemSpec) -> ExtractedTheorem:
                 int(payload["sourceRange"]["endLine"]),
                 int(payload["sourceRange"]["endColumn"]),
             ),
+            same_module_dependencies=tuple(
+                str(name) for name in payload.get("sameModuleDependencies", [])
+            ),
         )
     except KeyError as exc:
         raise GenerationError(
@@ -440,44 +444,6 @@ def load_ilean_metadata(module_name: str) -> dict:
         raise GenerationError(f"Invalid JSON in compiled metadata for module '{module_name}': {exc}") from exc
 
 
-def same_module_dependency_closure(module_name: str, declaration_name: str) -> set[str]:
-    metadata = load_ilean_metadata(module_name)
-    graph: dict[str, set[str]] = {}
-    for raw_key, value in metadata.get("references", {}).items():
-        try:
-            parsed_key = json.loads(raw_key)
-            constant = parsed_key["c"]
-            referenced_module = str(constant["m"])
-            referenced_name = str(constant["n"])
-        except (json.JSONDecodeError, KeyError, TypeError) as exc:
-            raise GenerationError(
-                f"Unexpected reference metadata shape in {ilean_path(module_name)}"
-            ) from exc
-
-        if referenced_module != module_name:
-            continue
-        usages = value.get("usages")
-        if not isinstance(usages, list):
-            continue
-        for usage in usages:
-            if not isinstance(usage, list) or len(usage) < 5:
-                continue
-            user_name = str(usage[4])
-            if user_name == referenced_name:
-                continue
-            graph.setdefault(user_name, set()).add(referenced_name)
-
-    closure: set[str] = set()
-    stack = list(graph.get(declaration_name, set()))
-    while stack:
-        dependency = stack.pop()
-        if dependency in closure:
-            continue
-        closure.add(dependency)
-        stack.extend(graph.get(dependency, set()))
-    return closure
-
-
 def find_top_level_end_offset(source_text: str, start: int) -> int:
     match = re.search(r"(?m)^end(?:\s+\S+)?\s*$", source_text[start:])
     if match is None:
@@ -493,7 +459,7 @@ def render_challenge_deps(problem: ProblemSpec, extracted: ExtractedTheorem) -> 
     source_text = source_path.read_text(encoding="utf-8")
     body_start = import_prelude_length(source_text)
     metadata = load_ilean_metadata(problem.module)
-    keep_declarations = same_module_dependency_closure(problem.module, extracted.declaration_name)
+    keep_declarations = set(extracted.same_module_dependencies)
     if not keep_declarations:
         return None
     all_declarations = {

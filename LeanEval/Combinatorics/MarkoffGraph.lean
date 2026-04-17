@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.Combinatorics.SimpleGraph.Connectivity.Finite
+import Mathlib.Data.ZMod.Basic
+import EvalTools.Markers
 
 namespace LeanEval
 namespace Combinatorics
@@ -52,7 +54,13 @@ def markoffGraph (p : ℕ) : SimpleGraph (MarkoffTriple p) where
         · exact ⟨by simp [h0], by simp [h1]⟩
   loopless := ⟨fun _ h => h.1 rfl⟩
 
-
+/-- For prime `p > 3`, every connected component of the nonzero Markoff graph over `ZMod p`
+has cardinality divisible by `p`. -/
+@[eval_problem]
+theorem dvd_card_connectedComponent_markoffGraph
+    {p : ℕ} (hp : Nat.Prime p) (hgt : 3 < p) :
+    ∀ c : (markoffGraph p).ConnectedComponent, p ∣ Nat.card c := by
+  sorry
 
 end Combinatorics
 end LeanEval

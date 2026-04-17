@@ -1,4 +1,4 @@
-# Formal Math Eval
+# Lean Eval
 
 This repository is a comparator-based Lean benchmark for formal mathematics.
 Benchmark authors write trusted problem statements once in shared Lean modules, and the
@@ -26,7 +26,7 @@ lake build
 
 ### 2. Add or edit a trusted theorem
 
-Put the statement in one of the shared modules under `FormalMathEval/` and mark it with
+Put the statement in one of the shared modules under `LeanEval/` and mark it with
 `@[eval_problem]`.
 
 ```lean
@@ -37,10 +37,10 @@ theorem my_new_problem : ... := by
 
 Current source modules live in topic folders such as:
 
-- `FormalMathEval/NumberTheory/`
-- `FormalMathEval/Topology/`
-- `FormalMathEval/ComplexAnalysis/`
-- `FormalMathEval/EasyProblems.lean`
+- `LeanEval/NumberTheory/`
+- `LeanEval/Topology/`
+- `LeanEval/ComplexAnalysis/`
+- `LeanEval/EasyProblems.lean`
 
 ### 3. Add the manifest entry
 
@@ -52,7 +52,7 @@ Each tagged theorem must have exactly one matching entry in
 id = "my_new_problem"
 title = "My new problem"
 test = false
-module = "FormalMathEval.SomeModule"
+module = "LeanEval.SomeModule"
 theorem = "my_new_problem"
 submitter = "Your Name"
 notes = "Optional notes."
@@ -237,7 +237,7 @@ In practice, solvers should normally work in `Submission.lean` and `Submission/`
 
 ## Repository Layout
 
-- [`FormalMathEval/`](/home/kim/lean-evals/FormalMathEval): trusted authored problem statements
+- [`LeanEval/`](/home/kim/lean-evals/LeanEval): trusted authored problem statements
 - [`manifests/problems.toml`](/home/kim/lean-evals/manifests/problems.toml): problem metadata
 - [`generated/`](/home/kim/lean-evals/generated): generated comparator workspaces
 - [`scripts/`](/home/kim/lean-evals/scripts): generation, validation, and scoring helpers
