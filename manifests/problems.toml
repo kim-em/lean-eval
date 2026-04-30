@@ -23,116 +23,6 @@ source = "Internal starter problem."
 informal_solution = "Compute the length after append."
 
 [[problem]]
-id = "cyclotomic_integer_house_le_two"
-title = "Real cyclotomic integer with house at most 2"
-test = false
-module = "LeanEval.NumberTheory.SmallHouse"
-theorem = "cyclotomic_integer_house_le_two"
-submitter = "Kim Morrison"
-notes = "The <= 2 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
-source = "https://arxiv.org/pdf/1004.0665"
-informal_solution = "If the house is at most 2, then it equals 2 cos(pi / m) for some positive integer m."
-
-[[problem]]
-id = "cyclotomic_integer_house_between_two_and_76_33"
-title = "Real cyclotomic integer with house in (2, 76/33)"
-test = false
-module = "LeanEval.NumberTheory.SmallHouse"
-theorem = "cyclotomic_integer_house_between_two_and_76_33"
-submitter = "Kim Morrison"
-notes = "The 2 < house < 76/33 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
-source = "https://arxiv.org/pdf/1004.0665"
-informal_solution = "If the house lies in (2, 76/33), then it is one of the five explicitly listed values."
-
-[[problem]]
-id = "riemann_hypothesis_iff_lagarias_elementary_criterion"
-title = "Lagarias criterion is equivalent to RH"
-test = false
-module = "LeanEval.NumberTheory.Lagarias"
-theorem = "riemann_hypothesis_iff_lagarias_elementary_criterion"
-submitter = "Kim Morrison"
-notes = "Lagarias' elementary divisor-sum criterion stated using Mathlib's RiemannHypothesis, harmonic numbers, and sigma notation."
-source = "https://arxiv.org/abs/math/0008177"
-informal_solution = "Prove that the Riemann hypothesis is equivalent to the inequality σ(n) ≤ H_n + exp(H_n) log(H_n) for all positive integers n."
-
-[[problem]]
-id = "finite_graph_ramsey_theorem"
-title = "Finite Ramsey theorem for graphs"
-test = false
-module = "LeanEval.Combinatorics.Ramsey"
-theorem = "finite_graph_ramsey_theorem"
-submitter = "Kim Morrison"
-notes = "States finite Ramsey existence for red/blue edge colourings of complete graphs, encoded by a graph and its complement."
-source = "Classical theorem in Ramsey theory."
-informal_solution = "Show that for every r and s there is an n such that every graph on n vertices contains either a clique of size r or an independent set of size s."
-
-[[problem]]
-id = "dvd_card_connectedComponent_markoffGraph"
-title = "Chen theorem for Markoff graphs"
-test = false
-module = "LeanEval.Combinatorics.MarkoffGraph"
-theorem = "dvd_card_connectedComponent_markoffGraph"
-submitter = "Kim Morrison"
-notes = "For prime p > 3, every connected component of the nonzero Markoff graph over ZMod p has cardinality divisible by p."
-source = "https://link.springer.com/article/10.1007/s00222-025-01346-9"
-informal_solution = "Exploit the Vieta involution symmetries of the Markoff graph over F_p and show each connected component has size divisible by p."
-
-[[problem]]
-id = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
-title = "Burnside p^a q^b theorem"
-test = false
-module = "LeanEval.GroupTheory.Burnside"
-theorem = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
-submitter = "Kim Morrison"
-notes = "Burnside's theorem that a finite group of order p^a q^b is solvable."
-source = "Classical theorem in finite group theory."
-informal_solution = "Use character theory and induction on the group order to prove solvability."
-
-[[problem]]
-id = "rouche_logCounting_zero_eq"
-title = "Rouche theorem via zero counting"
-test = false
-module = "LeanEval.ComplexAnalysis.Rouche"
-theorem = "rouche_logCounting_zero_eq"
-submitter = "Kim Morrison"
-notes = "Phrases Rouché's theorem as equality of zero-counting functions for f and f + g."
-source = "Classical theorem in complex analysis."
-informal_solution = "If |g| < |f| on the boundary circle, then f and f + g have the same number of zeros inside, counted with multiplicity."
-
-[[problem]]
-id = "exists_complementary_polynomial_on_unit_circle"
-title = "Complementary polynomial on the unit circle"
-test = false
-module = "LeanEval.ComplexAnalysis.ComplementaryPolynomials"
-theorem = "exists_complementary_polynomial_on_unit_circle"
-submitter = "Kim Morrison"
-notes = "If a complex polynomial has modulus at most 1 on the unit circle, then there is a same-degree complementary polynomial whose squared moduli add to 1 on the circle."
-source = "https://link.springer.com/article/10.1007/s00220-025-05302-9"
-informal_solution = "Construct a polynomial Q so that |P(z)|^2 + |Q(z)|^2 = 1 for all z on the unit circle."
-
-[[problem]]
-id = "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
-title = "Perron-Frobenius for irreducible nonnegative matrices"
-test = false
-module = "LeanEval.LinearAlgebra.PerronFrobenius"
-theorem = "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
-submitter = "Kim Morrison"
-notes = "A Perron-Frobenius style eigenvector existence statement at the spectral radius."
-source = "Classical theorem in linear algebra."
-informal_solution = "Show that an irreducible nonnegative matrix has a strictly positive eigenvector with eigenvalue equal to its spectral radius."
-
-[[problem]]
-id = "mem_convexHull_finset_extremePoints_of_mem_compact_convex"
-title = "Minkowski-Caratheodory theorem"
-test = false
-module = "LeanEval.ConvexGeometry.MinkowskiCaratheodory"
-theorem = "mem_convexHull_finset_extremePoints_of_mem_compact_convex"
-submitter = "Kim Morrison"
-notes = "Finite-dimensional compact convex sets are generated by their extreme points, with a finrank + 1 bound."
-source = "Classical theorem in convex geometry."
-informal_solution = "Combine Krein-Milman with Caratheodory to represent each point as a convex combination of at most finrank + 1 extreme points."
-
-[[problem]]
 id = "chudnovsky_formula_for_pi_inv"
 title = "Chudnovsky formula for pi inverse"
 test = false
@@ -153,6 +43,61 @@ submitter = "Kim Morrison"
 notes = "Computes the fundamental group of the complex unit circle."
 source = "Classical theorem in algebraic topology."
 informal_solution = "Use winding number to identify loops in the circle up to homotopy with the integers."
+
+[[problem]]
+id = "finite_graph_ramsey_theorem"
+title = "Finite Ramsey theorem for graphs"
+test = false
+module = "LeanEval.Combinatorics.Ramsey"
+theorem = "finite_graph_ramsey_theorem"
+submitter = "Kim Morrison"
+notes = "States finite Ramsey existence for red/blue edge colourings of complete graphs, encoded by a graph and its complement."
+source = "Classical theorem in Ramsey theory."
+informal_solution = "Show that for every r and s there is an n such that every graph on n vertices contains either a clique of size r or an independent set of size s."
+
+[[problem]]
+id = "substInv_X_sub_X_sq_eq_catalan"
+title = "Catalan generating function via compositional inversion"
+test = false
+module = "LeanEval.Combinatorics.CatalanSubstInv"
+theorem = "substInv_X_sub_X_sq_eq_catalan"
+submitter = "Kim Morrison"
+notes = "The compositional inverse of X - X² is the generating function for Catalan numbers. This is a classical application of Lagrange inversion in enumerative combinatorics, connecting formal power series inversion to Dyck paths, binary trees, and triangulations."
+source = "E. Catalan, Note sur une équation aux différences finies, 1838; J.-L. Lagrange, Nouvelle méthode pour résoudre les équations littérales, 1770."
+informal_solution = "The compositional inverse C(x) satisfies C - C² = x, giving C = (1 - √(1-4x))/2. By the binomial series, its coefficients are the Catalan numbers C_n = (2n choose n)/(n+1)."
+
+[[problem]]
+id = "riemann_hypothesis_iff_lagarias_elementary_criterion"
+title = "Lagarias criterion is equivalent to RH"
+test = false
+module = "LeanEval.NumberTheory.Lagarias"
+theorem = "riemann_hypothesis_iff_lagarias_elementary_criterion"
+submitter = "Kim Morrison"
+notes = "Lagarias' elementary divisor-sum criterion stated using Mathlib's RiemannHypothesis, harmonic numbers, and sigma notation."
+source = "https://arxiv.org/abs/math/0008177"
+informal_solution = "Prove that the Riemann hypothesis is equivalent to the inequality σ(n) ≤ H_n + exp(H_n) log(H_n) for all positive integers n."
+
+[[problem]]
+id = "dvd_card_connectedComponent_markoffGraph"
+title = "Chen theorem for Markoff graphs"
+test = false
+module = "LeanEval.Combinatorics.MarkoffGraph"
+theorem = "dvd_card_connectedComponent_markoffGraph"
+submitter = "Kim Morrison"
+notes = "For prime p > 3, every connected component of the nonzero Markoff graph over ZMod p has cardinality divisible by p."
+source = "https://link.springer.com/article/10.1007/s00222-025-01346-9"
+informal_solution = "Exploit the Vieta involution symmetries of the Markoff graph over F_p and show each connected component has size divisible by p."
+
+[[problem]]
+id = "mulCayley_connected_iff_closure_eq_top"
+title = "Cayley graph connected iff generators generate the group"
+test = false
+module = "LeanEval.Combinatorics.CayleyConnected"
+theorem = "mulCayley_connected_iff_closure_eq_top"
+submitter = "Kim Morrison"
+notes = "A foundational result in geometric group theory using the newly defined Cayley graph. Connectivity of the Cayley graph is equivalent to the generating set S generating G as a group."
+source = "A. Cayley, On the theory of groups, as depending on the symbolic equation θ^n = 1, 1878."
+informal_solution = "Forward: if connected, any g ∈ G is reached from 1 by a path, which corresponds to a product of generators. Reverse: if S generates, any g is a product of generators, giving a path from 1 to g."
 
 [[problem]]
 id = "pi3_sphere_two_mulEquiv_int"
@@ -188,15 +133,59 @@ source = "Classical theorem in unstable homotopy theory."
 informal_solution = "Use suspension and the stable range to show the first stable stem is Z/2."
 
 [[problem]]
-id = "substInv_X_sub_X_sq_eq_catalan"
-title = "Catalan generating function via compositional inversion"
+id = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
+title = "Burnside p^a q^b theorem"
 test = false
-module = "LeanEval.Combinatorics.CatalanSubstInv"
-theorem = "substInv_X_sub_X_sq_eq_catalan"
+module = "LeanEval.GroupTheory.Burnside"
+theorem = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
 submitter = "Kim Morrison"
-notes = "The compositional inverse of X - X² is the generating function for Catalan numbers. This is a classical application of Lagrange inversion in enumerative combinatorics, connecting formal power series inversion to Dyck paths, binary trees, and triangulations."
-source = "E. Catalan, Note sur une équation aux différences finies, 1838; J.-L. Lagrange, Nouvelle méthode pour résoudre les équations littérales, 1770."
-informal_solution = "The compositional inverse C(x) satisfies C - C² = x, giving C = (1 - √(1-4x))/2. By the binomial series, its coefficients are the Catalan numbers C_n = (2n choose n)/(n+1)."
+notes = "Burnside's theorem that a finite group of order p^a q^b is solvable."
+source = "Classical theorem in finite group theory."
+informal_solution = "Use character theory and induction on the group order to prove solvability."
+
+[[problem]]
+id = "rouche_logCounting_zero_eq"
+title = "Rouche theorem via zero counting"
+test = false
+module = "LeanEval.ComplexAnalysis.Rouche"
+theorem = "rouche_logCounting_zero_eq"
+submitter = "Kim Morrison"
+notes = "Phrases Rouché's theorem as equality of zero-counting functions for f and f + g."
+source = "Classical theorem in complex analysis."
+informal_solution = "If |g| < |f| on the boundary circle, then f and f + g have the same number of zeros inside, counted with multiplicity."
+
+[[problem]]
+id = "mem_convexHull_finset_extremePoints_of_mem_compact_convex"
+title = "Minkowski-Caratheodory theorem"
+test = false
+module = "LeanEval.ConvexGeometry.MinkowskiCaratheodory"
+theorem = "mem_convexHull_finset_extremePoints_of_mem_compact_convex"
+submitter = "Kim Morrison"
+notes = "Finite-dimensional compact convex sets are generated by their extreme points, with a finrank + 1 bound."
+source = "Classical theorem in convex geometry."
+informal_solution = "Combine Krein-Milman with Caratheodory to represent each point as a convex combination of at most finrank + 1 extreme points."
+
+[[problem]]
+id = "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
+title = "Perron-Frobenius for irreducible nonnegative matrices"
+test = false
+module = "LeanEval.LinearAlgebra.PerronFrobenius"
+theorem = "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
+submitter = "Kim Morrison"
+notes = "A Perron-Frobenius style eigenvector existence statement at the spectral radius."
+source = "Classical theorem in linear algebra."
+informal_solution = "Show that an irreducible nonnegative matrix has a strictly positive eigenvector with eigenvalue equal to its spectral radius."
+
+[[problem]]
+id = "exists_complementary_polynomial_on_unit_circle"
+title = "Complementary polynomial on the unit circle"
+test = false
+module = "LeanEval.ComplexAnalysis.ComplementaryPolynomials"
+theorem = "exists_complementary_polynomial_on_unit_circle"
+submitter = "Kim Morrison"
+notes = "If a complex polynomial has modulus at most 1 on the unit circle, then there is a same-degree complementary polynomial whose squared moduli add to 1 on the circle."
+source = "https://link.springer.com/article/10.1007/s00220-025-05302-9"
+informal_solution = "Construct a polynomial Q so that |P(z)|^2 + |Q(z)|^2 = 1 for all z on the unit circle."
 
 [[problem]]
 id = "isStarNormal_mul_of_commute"
@@ -221,17 +210,6 @@ source = "I.J. Schoenberg, Positive definite functions on spheres, 1942."
 informal_solution = "Write exp(a_{ij}) as the convergent series ∑ (a_{ij})^k / k!. The matrix with entries (a_{ij})^k is the k-fold Hadamard product A^{⊙k}, which is PSD by iterated Schur product. The partial sums are nonneg combinations of PSD matrices, hence PSD. PSD is a closed condition, so the limit is PSD."
 
 [[problem]]
-id = "mulCayley_connected_iff_closure_eq_top"
-title = "Cayley graph connected iff generators generate the group"
-test = false
-module = "LeanEval.Combinatorics.CayleyConnected"
-theorem = "mulCayley_connected_iff_closure_eq_top"
-submitter = "Kim Morrison"
-notes = "A foundational result in geometric group theory using the newly defined Cayley graph. Connectivity of the Cayley graph is equivalent to the generating set S generating G as a group."
-source = "A. Cayley, On the theory of groups, as depending on the symbolic equation θ^n = 1, 1878."
-informal_solution = "Forward: if connected, any g ∈ G is reached from 1 by a path, which corresponds to a product of generators. Reverse: if S generates, any g is a product of generators, giving a path from 1 to g."
-
-[[problem]]
 id = "oppenheim_inequality"
 title = "Oppenheim's inequality for Hadamard products"
 test = false
@@ -241,6 +219,17 @@ submitter = "Kim Morrison"
 notes = "Oppenheim's 1930 inequality: for PSD matrices A, B, det(A ⊙ B) ≥ det(A) · ∏ᵢ Bᵢᵢ. Uses the Schur product theorem (newly formalized) as a key ingredient."
 source = "I. Schur, Bemerkungen zur Theorie der beschränkten Bilinearformen, 1911; A. Oppenheim, Inequalities connected with definite Hermitian forms, 1930."
 informal_solution = "Use induction on the matrix size, extracting a Schur complement at each step and applying the Schur product theorem to bound the determinant."
+
+[[problem]]
+id = "vonNeumann_doubleCommutant_tfae"
+title = "von Neumann double commutant theorem"
+test = false
+module = "LeanEval.Analysis.VonNeumannDoubleCommutant"
+theorem = "vonNeumann_doubleCommutant_tfae"
+submitter = "Kim Morrison"
+notes = "The classical double commutant theorem: for a unital *-subalgebra of bounded operators on a complex Hilbert space, equality with the double commutant is equivalent to closedness in the weak operator topology and to closedness in the strong operator topology. WOT and SOT live on Mathlib's irreducible type copies of H →L[ℂ] H (`ContinuousLinearMapWOT` and `PointwiseConvergenceCLM`), so each closure condition is phrased on the image of the carrier under the canonical inclusion."
+source = "J. von Neumann, Zur Algebra der Funktionaloperationen und Theorie der normalen Operatoren, Math. Ann. 102 (1930), 370-427."
+informal_solution = "One direction: centralizers are WOT-closed, so any set equal to its double commutant is WOT-closed; norm topology refines WOT refines SOT for continuity of evaluation, and closedness under a finer convex topology is implied by closedness under a coarser one (via Hahn-Banach for convex sets). Hard direction: given a unital *-subalgebra S that is SOT-closed, for any T in S'' and any finite family of vectors use the amplification S ⊗ 1_n acting diagonally on H^n together with the projection onto the closure of (S ⊗ 1_n) applied to the vector to produce a net in S converging SOT to T."
 
 [[problem]]
 id = "symAction_range_eq_centralizer_glAction"
@@ -309,12 +298,23 @@ source = "A. Hatcher, A proof of the Smale conjecture, Diff(S3) = O(4), Ann. of 
 informal_solution = "Hatcher proves Diff(S3) is homotopy equivalent to O(4) by analyzing configurations of 2-spheres in S3 (the bigon criterion) and deducing by induction that every self-diffeomorphism is isotopic to a linear one, with all higher parameterized versions handled by the same incompressible-surface machinery."
 
 [[problem]]
-id = "vonNeumann_doubleCommutant_tfae"
-title = "von Neumann double commutant theorem"
+id = "cyclotomic_integer_house_le_two"
+title = "Real cyclotomic integer with house at most 2"
 test = false
-module = "LeanEval.Analysis.VonNeumannDoubleCommutant"
-theorem = "vonNeumann_doubleCommutant_tfae"
+module = "LeanEval.NumberTheory.SmallHouse"
+theorem = "cyclotomic_integer_house_le_two"
 submitter = "Kim Morrison"
-notes = "The classical double commutant theorem: for a unital *-subalgebra of bounded operators on a complex Hilbert space, equality with the double commutant is equivalent to closedness in the weak operator topology and to closedness in the strong operator topology. WOT and SOT live on Mathlib's irreducible type copies of H →L[ℂ] H (`ContinuousLinearMapWOT` and `PointwiseConvergenceCLM`), so each closure condition is phrased on the image of the carrier under the canonical inclusion."
-source = "J. von Neumann, Zur Algebra der Funktionaloperationen und Theorie der normalen Operatoren, Math. Ann. 102 (1930), 370-427."
-informal_solution = "One direction: centralizers are WOT-closed, so any set equal to its double commutant is WOT-closed; norm topology refines WOT refines SOT for continuity of evaluation, and closedness under a finer convex topology is implied by closedness under a coarser one (via Hahn-Banach for convex sets). Hard direction: given a unital *-subalgebra S that is SOT-closed, for any T in S'' and any finite family of vectors use the amplification S ⊗ 1_n acting diagonally on H^n together with the projection onto the closure of (S ⊗ 1_n) applied to the vector to produce a net in S converging SOT to T."
+notes = "The <= 2 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
+source = "https://arxiv.org/pdf/1004.0665"
+informal_solution = "If the house is at most 2, then it equals 2 cos(pi / m) for some positive integer m."
+
+[[problem]]
+id = "cyclotomic_integer_house_between_two_and_76_33"
+title = "Real cyclotomic integer with house in (2, 76/33)"
+test = false
+module = "LeanEval.NumberTheory.SmallHouse"
+theorem = "cyclotomic_integer_house_between_two_and_76_33"
+submitter = "Kim Morrison"
+notes = "The 2 < house < 76/33 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
+source = "https://arxiv.org/pdf/1004.0665"
+informal_solution = "If the house lies in (2, 76/33), then it is one of the five explicitly listed values."
