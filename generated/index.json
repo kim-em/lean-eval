@@ -259,5 +259,23 @@
     "module": "LeanEval.NumberTheory.SmallHouse",
     "theorem": "cyclotomic_integer_house_between_two_and_76_33",
     "generated_path": "generated/cyclotomic_integer_house_between_two_and_76_33"
+  },
+  {
+    "id": "gleason_theorem_finite",
+    "title": "Gleason's theorem (finite-dimensional)",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.Gleason",
+    "theorem": "gleason_theorem_finite",
+    "generated_path": "generated/gleason_theorem_finite"
+  },
+  {
+    "id": "gleason_theorem_separable",
+    "title": "Gleason's theorem (separable Hilbert space)",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.Gleason",
+    "theorem": "gleason_theorem_separable",
+    "generated_path": "generated/gleason_theorem_separable"
   }
 ]

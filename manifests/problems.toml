@@ -318,3 +318,25 @@ submitter = "Kim Morrison"
 notes = "The 2 < house < 76/33 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
 source = "https://arxiv.org/pdf/1004.0665"
 informal_solution = "If the house lies in (2, 76/33), then it is one of the five explicitly listed values."
+
+[[problem]]
+id = "gleason_theorem_finite"
+title = "Gleason's theorem (finite-dimensional)"
+test = false
+module = "LeanEval.Analysis.Gleason"
+theorem = "gleason_theorem_finite"
+submitter = "Kim Morrison"
+notes = "Gleason's theorem in finite dimensions: every frame function on the orthogonal projections of a complex Hilbert space of dimension at least 3 is given by P ↦ Tr(ρ P) for the unique density operator ρ. Stated using a bespoke `FrameFunction` structure (non-negative, additive on orthogonal projection pairs, normalized at the identity) and the standard Mathlib trace `LinearMap.trace`. Finite additivity on orthogonal pairs already implies countable additivity in finite dimensions, so the hypothesis matches Gleason's original σ-additive frame functions."
+source = "A. M. Gleason, Measures on the closed subspaces of a Hilbert space, J. Math. Mech. 6 (1957), 885-893."
+informal_solution = "Gleason's original proof analyses regular frame functions on the unit sphere of R^3 by showing they are continuous and then quadratic, then promotes the resulting positive quadratic form on every 3-dimensional real subspace of H to a positive operator ρ on H whose diagonal in any orthonormal basis recovers the frame function, with Tr(ρ) = μ(I) = 1 ensuring ρ is a density operator."
+
+[[problem]]
+id = "gleason_theorem_separable"
+title = "Gleason's theorem (separable Hilbert space)"
+test = false
+module = "LeanEval.Analysis.Gleason"
+theorem = "gleason_theorem_separable"
+submitter = "Kim Morrison"
+notes = "Gleason's theorem for a separable complex Hilbert space H of dimension at least 3, in Gleason's original `frame function on the unit sphere' formulation: any non-negative function on the unit sphere whose values sum to 1 along every Hilbert basis is given by x ↦ re ⟨x, ρ x⟩ for some positive bounded operator ρ. The Lean conclusion does not assert that ρ is trace-class with Tr(ρ) = 1; stating that would require trace-class infrastructure not yet at this Mathlib pin. This side-steps the absence of Schatten 1 / trace-class infrastructure in Mathlib at the time of writing."
+source = "A. M. Gleason, Measures on the closed subspaces of a Hilbert space, J. Math. Mech. 6 (1957), 885-893."
+informal_solution = "Reduce to the real 3-dimensional case via restriction to real subspaces of H, where Gleason's continuity argument plus an analysis of regular frame functions on S^2 gives a positive quadratic form. Patch these forms together using rotation-invariance and the assumed basis-sum normalization to obtain a globally defined positive bounded operator ρ on H reproducing the frame function on every unit vector."
