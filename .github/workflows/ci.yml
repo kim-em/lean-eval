@@ -62,6 +62,37 @@ jobs:
       - name: Build Problem Modules
         run: python scripts/check_problem_build.py
 
+      # Decide whether to run workspace generation/build. Source-only PRs
+      # regenerate generated/ in the runner's working tree (the regenerate-main
+      # workflow is the only thing that commits generated/ to main); solver PRs
+      # build the committed tree as-is. Done early so that downstream steps
+      # which read generated/ (e.g. check_eval_workflow.py) see a tree that
+      # matches the source.
+      - name: Detect changes
+        id: changes
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            echo "source_changed=true" >> "$GITHUB_OUTPUT"
+            echo "generated_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            CHANGED=$(git diff --name-only "$BASE"..HEAD)
+            if echo "$CHANGED" | grep -Eq '^(LeanEval/|EvalTools/|manifests/problems\.toml$|scripts/generate_projects\.py$|lakefile\.toml$|lean-toolchain$)'; then
+              echo "source_changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "source_changed=false" >> "$GITHUB_OUTPUT"
+            fi
+            if echo "$CHANGED" | grep -q '^generated/'; then
+              echo "generated_changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "generated_changed=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Regenerate workspaces from source
+        if: steps.changes.outputs.source_changed == 'true'
+        run: python scripts/generate_projects.py
+
       - name: Submission Policy Check
         run: python scripts/validate_submission.py --file generated/two_plus_two/Solution.lean
 
@@ -134,35 +165,6 @@ jobs:
 
       - name: Run Eval Workflow Check
         run: python scripts/check_eval_workflow.py
-
-      # Decide whether to run workspace generation/build. Source-only PRs
-      # regenerate generated/ in the runner's working tree (the regenerate-main
-      # workflow is the only thing that commits generated/ to main); solver PRs
-      # build the committed tree as-is.
-      - name: Detect changes
-        id: changes
-        run: |
-          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            echo "source_changed=true" >> "$GITHUB_OUTPUT"
-            echo "generated_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            CHANGED=$(git diff --name-only "$BASE"..HEAD)
-            if echo "$CHANGED" | grep -Eq '^(LeanEval/|EvalTools/|manifests/problems\.toml$|scripts/generate_projects\.py$|lakefile\.toml$|lean-toolchain$)'; then
-              echo "source_changed=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "source_changed=false" >> "$GITHUB_OUTPUT"
-            fi
-            if echo "$CHANGED" | grep -q '^generated/'; then
-              echo "generated_changed=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "generated_changed=false" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-
-      - name: Regenerate workspaces from source
-        if: steps.changes.outputs.source_changed == 'true'
-        run: python scripts/generate_projects.py
 
       # Download Mathlib cache once in the first workspace, then hard-link
       # its .lake/packages tree into every other workspace so that each
