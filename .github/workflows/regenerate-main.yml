@@ -1,15 +1,12 @@
 name: Regenerate generated/ on main
 
+# DISABLED: GITHUB_TOKEN cannot push to main because of branch protection
+# (PRs required, "verify" status check required). A follow-up PR will switch
+# this workflow to mint an installation token from a dedicated GitHub App
+# whose principal is in the branch-protection bypass list, and re-enable the
+# push trigger.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'LeanEval/**'
-      - 'EvalTools/**'
-      - 'manifests/problems.toml'
-      - 'scripts/generate_projects.py'
-      - 'lakefile.toml'
-      - 'lean-toolchain'
+  workflow_dispatch:
 
 permissions:
   contents: write

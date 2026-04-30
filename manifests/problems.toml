@@ -12,14 +12,14 @@ source = "Internal starter problem."
 informal_solution = "By computation."
 
 [[problem]]
-id = "ci_smoke_2026_04_30"
-title = "CI smoke test"
+id = "ci_regenerate_main_check"
+title = "CI regenerate-main check"
 test = true
 module = "LeanEval.EasyProblems"
-theorem = "ci_smoke_2026_04_30"
+theorem = "ci_regenerate_main_check"
 submitter = "Kim Morrison"
-notes = "Internal smoke test for the auto-regenerate CI; remove after verification."
-source = "Internal smoke test."
+notes = "Internal trivial problem used to exercise the regenerate-main workflow end-to-end."
+source = "Internal CI check."
 informal_solution = "True is true."
 
 [[problem]]

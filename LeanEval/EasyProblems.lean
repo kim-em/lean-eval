@@ -51,7 +51,7 @@ theorem eval_problem_inferable_implicit_guard {n : Nat} (h : n = n) : n = n := b
   exact h
 
 @[eval_problem]
-theorem ci_smoke_2026_04_30 : True := by trivial
+theorem ci_regenerate_main_check : True := by trivial
 
 def starterNumber : Nat := 4
 

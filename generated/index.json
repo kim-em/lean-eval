@@ -9,6 +9,15 @@
     "generated_path": "generated/two_plus_two"
   },
   {
+    "id": "ci_regenerate_main_check",
+    "title": "CI regenerate-main check",
+    "test": true,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.EasyProblems",
+    "theorem": "ci_regenerate_main_check",
+    "generated_path": "generated/ci_regenerate_main_check"
+  },
+  {
     "id": "list_append_singleton_length",
     "title": "Appending a singleton increases the list length",
     "test": true,
