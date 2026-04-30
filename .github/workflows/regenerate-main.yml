@@ -1,0 +1,49 @@
+name: Regenerate generated/ on main
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'LeanEval/**'
+      - 'EvalTools/**'
+      - 'manifests/problems.toml'
+      - 'scripts/generate_projects.py'
+      - 'lakefile.toml'
+      - 'lean-toolchain'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-main
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: true
+
+      - name: Regenerate
+        run: python scripts/generate_projects.py
+
+      - name: Commit and push if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet generated/ && [ -z "$(git ls-files --others --exclude-standard generated/)" ]; then
+            echo "No changes to generated/."
+            exit 0
+          fi
+          git config user.name  "lean-eval-bot"
+          git config user.email "lean-eval-bot@users.noreply.github.com"
+          git add generated/
+          git commit -m "chore: regenerate generated/ workspaces"
+          git pull --rebase origin main
+          git push origin HEAD:main
