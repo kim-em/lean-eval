@@ -220,7 +220,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          repository: leanprover/lean-eval-leaderboard
+          repository: kim-em/lean-eval-leaderboard
           token: ${{ secrets.LEADERBOARD_WRITE_TOKEN }}
           path: leaderboard
 
@@ -251,10 +251,15 @@ jobs:
           SUBMISSION_REPO=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_repo'])" "$METADATA_PATH")
           SUBMISSION_REF=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_ref'])" "$METADATA_PATH")
           SUBMISSION_PUBLIC=$(python -c "import json,sys; print(str(json.load(open(sys.argv[1]))['submission_public']).lower())" "$METADATA_PATH")
+          PRODUCTION_DESCRIPTION=$(python -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get('production_description') or '')" "$METADATA_PATH")
           if [ "$SUBMISSION_PUBLIC" = "true" ]; then
             PUBLIC_FLAG="--submission-public"
           else
             PUBLIC_FLAG="--no-submission-public"
+          fi
+          DESCRIPTION_ARGS=()
+          if [ -n "$PRODUCTION_DESCRIPTION" ]; then
+            DESCRIPTION_ARGS+=(--production-description "$PRODUCTION_DESCRIPTION")
           fi
 
           MAX_ATTEMPTS=5
@@ -271,7 +276,8 @@ jobs:
               --submission-ref "$SUBMISSION_REF" \
               $PUBLIC_FLAG \
               --model "$MODEL" \
-              --issue-number "${{ github.event.issue.number }}")
+              --issue-number "${{ github.event.issue.number }}" \
+              "${DESCRIPTION_ARGS[@]}")
 
             CHANGED=$(python -c "import json,sys; print(json.loads(sys.argv[1])['changed'])" "$OUTPUT")
             if [ "$CHANGED" != "True" ]; then

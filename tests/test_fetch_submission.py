@@ -38,6 +38,7 @@ class ParseIssueBodyTests(unittest.TestCase):
             "https://github.com/alice/my-proofs/commit/8e1b9cf5e1d3c2b1a0f9e8d7c6b5a4938271605f",
         )
         self.assertEqual(fields["model"], "Claude Opus 4.6")
+        self.assertIsNone(fields["production_description"])
 
     def test_missing_url_section_is_fatal(self) -> None:
         body = "### Model\n\nClaude\n"
@@ -52,6 +53,38 @@ class ParseIssueBodyTests(unittest.TestCase):
     def test_empty_field_is_fatal(self) -> None:
         body = "### Submission URL\n\n_No response_\n\n### Model\n\nFoo\n"
         with self.assertRaisesRegex(fs.FetchError, "empty"):
+            fs.parse_issue_body(body)
+
+    def test_production_description_extracted(self) -> None:
+        body = (
+            "### Submission URL\n\nhttps://github.com/alice/my-proofs\n\n"
+            "### Model\n\nClaude Opus 4.6\n\n"
+            "### How this solution was produced (optional)\n\n"
+            "Driven by a custom orchestrator. ~30 min of human review.\n"
+        )
+        fields = fs.parse_issue_body(body)
+        self.assertEqual(
+            fields["production_description"],
+            "Driven by a custom orchestrator. ~30 min of human review.",
+        )
+
+    def test_production_description_no_response_treated_as_absent(self) -> None:
+        body = (
+            "### Submission URL\n\nhttps://github.com/alice/my-proofs\n\n"
+            "### Model\n\nClaude Opus 4.6\n\n"
+            "### How this solution was produced (optional)\n\n_No response_\n"
+        )
+        fields = fs.parse_issue_body(body)
+        self.assertIsNone(fields["production_description"])
+
+    def test_production_description_oversize_is_fatal(self) -> None:
+        oversize = "x" * (fs.PRODUCTION_DESCRIPTION_MAX_LEN + 1)
+        body = (
+            "### Submission URL\n\nhttps://github.com/alice/my-proofs\n\n"
+            "### Model\n\nClaude Opus 4.6\n\n"
+            f"### How this solution was produced (optional)\n\n{oversize}\n"
+        )
+        with self.assertRaisesRegex(fs.FetchError, "longer than"):
             fs.parse_issue_body(body)
 
 
@@ -290,10 +323,38 @@ class FetchSubmissionEndToEndTests(unittest.TestCase):
             self.assertEqual(metadata["model"], "Claude Opus 4.6")
             self.assertEqual(metadata["submitted_by"], "alice")
             self.assertEqual(metadata["issue_number"], 42)
+            self.assertNotIn("production_description", metadata)
             disk_metadata = json.loads(
                 (tmp_path / "out" / "metadata.json").read_text(encoding="utf-8")
             )
             self.assertEqual(disk_metadata, metadata)
+
+    def test_dry_run_emits_production_description_when_present(self) -> None:
+        body_with_description = (
+            SAMPLE_BODY.rstrip()
+            + "\n\n### How this solution was produced (optional)\n\n"
+            "Custom orchestrator + Claude Opus 4.7; ~30 min human review.\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            event = {
+                "issue": {
+                    "number": 42,
+                    "user": {"login": "alice"},
+                    "body": body_with_description,
+                }
+            }
+            with patch("fetch_submission.resolve_repo_visibility", return_value=True):
+                metadata = fs.fetch_submission(
+                    event_payload=event,
+                    output_dir=tmp_path / "out",
+                    app_token=None,
+                    skip_clone=True,
+                )
+            self.assertEqual(
+                metadata["production_description"],
+                "Custom orchestrator + Claude Opus 4.7; ~30 min human review.",
+            )
 
     def test_secret_gist_is_rejected(self) -> None:
         gist_body = SAMPLE_BODY.replace(

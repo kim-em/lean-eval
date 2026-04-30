@@ -15,7 +15,7 @@ body:
         and tries every match it finds. That means all of these work:
 
         - a repo that is a single generated workspace
-        - a fork of `leanprover/lean-eval` with changes under `generated/`
+        - a fork of `kim-em/lean-eval` with changes under `generated/`
         - a repo that contains several workspaces side by side
         - a gist that contains a `lakefile.toml` and a `Submission.lean`
 
@@ -58,6 +58,24 @@ body:
       placeholder: Claude Opus 4.6
     validations:
       required: true
+
+  - type: textarea
+    id: production_description
+    attributes:
+      label: How this solution was produced (optional)
+      description: |
+        You may describe how this solution was produced, including the
+        model and/or orchestrator, the level of human direction/review,
+        prior work the solution builds on, and an estimate of human and
+        AI time/token/money costs. This description will be included
+        with the listing of your solution on the leaderboard.
+      placeholder: |
+        e.g. Claude Opus 4.7 driving a custom orchestrator that calls
+        `aesop` and `polyrith`. ~30 min of human review per problem;
+        builds on the public Mathlib search index. Estimated cost: ~$5
+        of API spend per problem.
+    validations:
+      required: false
 
   - type: checkboxes
     id: acknowledgements
