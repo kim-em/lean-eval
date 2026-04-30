@@ -15,7 +15,7 @@ body:
         and tries every match it finds. That means all of these work:
 
         - a repo that is a single generated workspace
-        - a fork of `kim-em/lean-eval` with changes under `generated/`
+        - a fork of `leanprover/lean-eval` with changes under `generated/`
         - a repo that contains several workspaces side by side
         - a gist that contains a `lakefile.toml` and a `Submission.lean`
 
