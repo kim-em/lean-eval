@@ -1,0 +1,12 @@
+{
+  "id": "oppenheim_inequality",
+  "module": "LeanEval.LinearAlgebra.Oppenheim",
+  "holes": [
+    {
+      "name": "LeanEval.LinearAlgebra.oppenheim_inequality",
+      "basename": "oppenheim_inequality",
+      "kind": "theorem",
+      "body": "theorem oppenheim_inequality\n    {n : Type*} [Fintype n] [DecidableEq n]\n    {A B : Matrix n n \u211d} (hA : A.PosSemidef) (hB : B.PosSemidef) :\n    A.det * \u220f i, B i i \u2264 (A \u2299 B).det := by\n  sorry"
+    }
+  ]
+}

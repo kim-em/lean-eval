@@ -1,0 +1,12 @@
+{
+  "id": "ci_regenerate_main_check",
+  "module": "LeanEval.EasyProblems",
+  "holes": [
+    {
+      "name": "LeanEval.ci_regenerate_main_check",
+      "basename": "ci_regenerate_main_check",
+      "kind": "theorem",
+      "body": "theorem ci_regenerate_main_check : True := by trivial"
+    }
+  ]
+}

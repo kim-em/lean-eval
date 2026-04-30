@@ -1,0 +1,18 @@
+{
+  "id": "instance_hole_example",
+  "module": "LeanEval.Sandbox.InstanceHoleExample",
+  "holes": [
+    {
+      "name": "WidgetCarrier",
+      "basename": "WidgetCarrier",
+      "kind": "def",
+      "body": "def WidgetCarrier : Type := sorry"
+    },
+    {
+      "name": "instInhabitedWidget",
+      "basename": "instInhabitedWidget",
+      "kind": "def",
+      "body": "instance instInhabitedWidget : Inhabited WidgetCarrier := sorry"
+    }
+  ]
+}

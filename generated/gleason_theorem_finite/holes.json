@@ -1,0 +1,12 @@
+{
+  "id": "gleason_theorem_finite",
+  "module": "LeanEval.Analysis.Gleason",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.gleason_theorem_finite",
+      "basename": "gleason_theorem_finite",
+      "kind": "theorem",
+      "body": "/-- **Gleason's theorem**, finite-dimensional version. For `dim H \u2265 3`, every frame\nfunction on the projection lattice of `H` is given by `P \u21a6 re Tr(\u03c1 P)` for the unique\ndensity operator `\u03c1` (positive, `re Tr \u03c1 = 1`). -/\ntheorem gleason_theorem_finite\n    {H : Type*} [NormedAddCommGroup H] [InnerProductSpace \u2102 H]\n      [CompleteSpace H] [FiniteDimensional \u2102 H]\n    (hdim : 3 \u2264 Module.finrank \u2102 H)\n    (f : FrameFunction H) :\n    \u2203! \u03c1 : H \u2192L[\u2102] H,\n      ContinuousLinearMap.IsPositive \u03c1 \u2227\n      reTr \u03c1 = 1 \u2227\n      \u2200 P : H \u2192L[\u2102] H, IsOrthProj P \u2192 f.\u03bc P = reTr (\u03c1 * P) := by\n  sorry"
+    }
+  ]
+}

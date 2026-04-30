@@ -1,0 +1,12 @@
+{
+  "id": "e8_irrep_tensor_square_decomp",
+  "module": "LeanEval.RepresentationTheory.ExceptionalLieTensorSquare",
+  "holes": [
+    {
+      "name": "LeanEval.RepresentationTheory.e8_irrep_tensor_square_decomp",
+      "basename": "e8_irrep_tensor_square_decomp",
+      "kind": "theorem",
+      "body": "theorem e8_irrep_tensor_square_decomp :\n    \u2203 (V : Type) (_ : AddCommGroup V) (_ : Module \u2102 V)\n      (_ : LieRingModule (LieAlgebra.e\u2088 \u2102) V) (_ : LieModule \u2102 (LieAlgebra.e\u2088 \u2102) V),\n      Module.finrank \u2102 V = 779247 \u2227\n      LieModule.IsIrreducible \u2102 (LieAlgebra.e\u2088 \u2102) V \u2227\n      (isotypicComponents (UniversalEnvelopingAlgebra \u2102 (LieAlgebra.e\u2088 \u2102))\n        (V \u2297[\u2102] V)).ncard = 40 := by\n  sorry"
+    }
+  ]
+}

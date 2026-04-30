@@ -1,0 +1,60 @@
+{
+  "id": "jacobian_challenge_alggeo",
+  "module": "LeanEval.AlgebraicGeometry.JacobianChallenge",
+  "holes": [
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.genus",
+      "basename": "genus",
+      "kind": "def",
+      "body": "/-- The genus of a smooth proper curve. -/\ndef genus (C : Over (Spec (.of k))) [IsProper C.hom] [SmoothOfRelativeDimension 1 C.hom]\n    [GeometricallyIrreducible C.hom] : \u2115 :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian",
+      "basename": "Jacobian",
+      "kind": "def",
+      "body": "/-- The Jacobian of a smooth, proper curve over a field `k`. -/\ndef Jacobian (C : Over (Spec (.of k))) [IsProper C.hom] [SmoothOfRelativeDimension 1 C.hom]\n    [GeometricallyIrreducible C.hom] : Over (Spec (.of k)) :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.instGrpObj",
+      "basename": "instGrpObj",
+      "kind": "def",
+      "body": "/-- The group scheme structure on the Jacobian of the curve `C`. -/\ninstance instGrpObj : GrpObj (Jacobian C) :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.smoothOfRelativeDimension_genus",
+      "basename": "smoothOfRelativeDimension_genus",
+      "kind": "theorem",
+      "body": "/-- The Jacobian of `C` is smooth of relative dimension `g` over `k`, where `g` is the\ngenus of `C`. -/\ninstance smoothOfRelativeDimension_genus :\n    SmoothOfRelativeDimension (genus C) (Jacobian C).hom :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.instIsProper",
+      "basename": "instIsProper",
+      "kind": "theorem",
+      "body": "/-- The Jacobian of `C` is proper over `k`. -/\ninstance instIsProper : IsProper (Jacobian C).hom :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.instGeometricallyIrreducible",
+      "basename": "instGeometricallyIrreducible",
+      "kind": "theorem",
+      "body": "/-- The Jacobian of `C` is geometrically irreducible over `k`. -/\ninstance instGeometricallyIrreducible : GeometricallyIrreducible (Jacobian C).hom :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.ofCurve",
+      "basename": "ofCurve",
+      "kind": "def",
+      "body": "/-- The Abel-Jacobi map from a smooth, proper curve to its Jacobian associated\nto a `k`-rational point of `C`. -/\ndef ofCurve (P : \ud835\udfd9_ (Over (Spec (.of k))) \u27f6 C) : C \u27f6 Jacobian C :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.comp_ofCurve",
+      "basename": "comp_ofCurve",
+      "kind": "theorem",
+      "body": "/-- The Abel-Jacobi map sends the `k`-rational point `P` to `0`, where `0` (denoted by `\u03b7` below) is\nthe neutral element of the group scheme `Jacobian C`. -/\ntheorem comp_ofCurve (C : Over (Spec (.of k))) [IsProper C.hom]\n    [SmoothOfRelativeDimension 1 C.hom] [GeometricallyIrreducible C.hom]\n    (P : \ud835\udfd9_ (Over (Spec (.of k))) \u27f6 C) :\n    P \u226b ofCurve P = \u03b7[Jacobian C] :=\n  sorry"
+    },
+    {
+      "name": "AlgebraicGeometry.JacobianChallenge.Jacobian.exists_unique_ofCurve_comp",
+      "basename": "exists_unique_ofCurve_comp",
+      "kind": "theorem",
+      "body": "/--\nThe universal property of the Jacobian variety: For any abelian variety `A`,\nany morphism `f : C \u27f6 A` such that `f(P) = 0` factors uniquely through the\nJacobian of `C`.\nIn other words, `Jacobian C` is the Albanese variety of `C`.\n-/\ntheorem exists_unique_ofCurve_comp (C : Over (Spec (.of k))) [IsProper C.hom]\n    [SmoothOfRelativeDimension 1 C.hom] [GeometricallyIrreducible C.hom]\n    (P : \ud835\udfd9_ (Over (Spec (.of k))) \u27f6 C)\n    {A : Over (Spec (.of k))} [Smooth A.hom] [IsProper A.hom] [GrpObj A]\n    [GeometricallyIrreducible A.hom] (f : C \u27f6 A) (hf : P \u226b f = \u03b7[A]) :\n    \u2203! (g : Jacobian C \u27f6 A), f = ofCurve P \u226b g :=\n  sorry"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "mulCayley_connected_iff_closure_eq_top",
+  "module": "LeanEval.Combinatorics.CayleyConnected",
+  "holes": [
+    {
+      "name": "LeanEval.Combinatorics.mulCayley_connected_iff_closure_eq_top",
+      "basename": "mulCayley_connected_iff_closure_eq_top",
+      "kind": "theorem",
+      "body": "theorem mulCayley_connected_iff_closure_eq_top\n    {G : Type*} [Group G]\n    (S : Set G) :\n    (SimpleGraph.mulCayley S).Connected \u2194 Subgroup.closure S = \u22a4 := by\n  sorry"
+    }
+  ]
+}

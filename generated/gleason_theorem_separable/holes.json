@@ -1,0 +1,12 @@
+{
+  "id": "gleason_theorem_separable",
+  "module": "LeanEval.Analysis.Gleason",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.gleason_theorem_separable",
+      "basename": "gleason_theorem_separable",
+      "kind": "theorem",
+      "body": "/-- **Gleason's theorem**, separable Hilbert space version (Gleason's original 1957\nformulation). For a separable complex Hilbert space `H` of dimension at least `3`, every\nframe function on the unit sphere of `H` is given by `x \u21a6 re \u27e8x, \u03c1 x\u27e9` for some positive\nbounded operator `\u03c1`. (The Lean conclusion does not separately assert trace-class /\n`Tr \u03c1 = 1`; see the file docstring.) -/\ntheorem gleason_theorem_separable\n    {H : Type*} [NormedAddCommGroup H] [InnerProductSpace \u2102 H]\n      [CompleteSpace H] [TopologicalSpace.SeparableSpace H]\n    (hdim : 3 \u2264 Module.rank \u2102 H)\n    (f : SphereFrameFunction H) :\n    \u2203 \u03c1 : H \u2192L[\u2102] H,\n      ContinuousLinearMap.IsPositive \u03c1 \u2227\n      \u2200 x : Metric.sphere (0 : H) 1,\n        f.f x = (inner \u2102 (x : H) (\u03c1 (x : H))).re := by\n  sorry"
+    }
+  ]
+}

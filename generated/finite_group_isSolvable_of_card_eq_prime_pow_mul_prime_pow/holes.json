@@ -1,0 +1,12 @@
+{
+  "id": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
+  "module": "LeanEval.GroupTheory.Burnside",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
+      "basename": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
+      "kind": "theorem",
+      "body": "theorem finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow\n    {G : Type*} [Group G] [Fintype G]\n    {p q a b : \u2115}\n    (hp : Nat.Prime p)\n    (hq : Nat.Prime q)\n    (hpq : p \u2260 q)\n    (hcard : Fintype.card G = p ^ a * q ^ b) :\n    IsSolvable G := by\n  sorry"
+    }
+  ]
+}

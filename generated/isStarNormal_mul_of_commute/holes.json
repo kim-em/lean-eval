@@ -1,0 +1,12 @@
+{
+  "id": "isStarNormal_mul_of_commute",
+  "module": "LeanEval.Algebra.NormalProduct",
+  "holes": [
+    {
+      "name": "LeanEval.Algebra.isStarNormal_mul_of_commute",
+      "basename": "isStarNormal_mul_of_commute",
+      "kind": "theorem",
+      "body": "theorem isStarNormal_mul_of_commute\n    {A : Type*} [NonUnitalCStarAlgebra A]\n    {a b : A} (ha : IsStarNormal a) (hb : IsStarNormal b)\n    (hab : Commute a b) :\n    IsStarNormal (a * b) := by\n  sorry"
+    }
+  ]
+}

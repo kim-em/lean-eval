@@ -1,0 +1,12 @@
+{
+  "id": "pi_succ_sphere_n_mulEquiv_zmod_two",
+  "module": "LeanEval.Topology.HomotopyGroups",
+  "holes": [
+    {
+      "name": "LeanEval.Topology.pi_succ_sphere_n_mulEquiv_zmod_two",
+      "basename": "pi_succ_sphere_n_mulEquiv_zmod_two",
+      "kind": "theorem",
+      "body": "/-- A concrete stable-family statement: for `n \u2265 3`, `\u03c0_(n+1)(S^n) \u2243 \u2124/2`. -/\ntheorem pi_succ_sphere_n_mulEquiv_zmod_two\n    (n : \u2115) (hn : 3 \u2264 n)\n    (x : Metric.sphere (0 : EuclideanSpace \u211d (Fin (n + 1))) 1) :\n    Nonempty\n      (HomotopyGroup.Pi (n + 1) (Metric.sphere (0 : EuclideanSpace \u211d (Fin (n + 1))) 1) x \u2243*\n        Multiplicative (ZMod 2)) := by\n  sorry"
+    }
+  ]
+}

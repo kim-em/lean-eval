@@ -1,0 +1,12 @@
+{
+  "id": "rouche_logCounting_zero_eq",
+  "module": "LeanEval.ComplexAnalysis.Rouche",
+  "holes": [
+    {
+      "name": "LeanEval.ComplexAnalysis.rouche_logCounting_zero_eq",
+      "basename": "rouche_logCounting_zero_eq",
+      "kind": "theorem",
+      "body": "theorem rouche_logCounting_zero_eq\n    {f g : \u2102 \u2192 \u2102} {R : \u211d}\n    (hR : 1 \u2264 R)\n    (hf : Meromorphic f)\n    (hg : AnalyticOn \u2102 g Set.univ)\n    (hbound : \u2200 z : \u2102, \u2016z\u2016 = R \u2192 \u2016g z\u2016 < \u2016f z\u2016) :\n    logCounting (f + g) 0 R = logCounting f 0 R := by\n  sorry"
+    }
+  ]
+}

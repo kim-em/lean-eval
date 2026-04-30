@@ -1,0 +1,150 @@
+{
+  "id": "jacobian_challenge_diffgeo",
+  "module": "LeanEval.Geometry.JacobianChallenge",
+  "holes": [
+    {
+      "name": "JacobianChallenge.genus",
+      "basename": "genus",
+      "kind": "def",
+      "body": "def genus (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]\n    [Nonempty X] [ChartedSpace \u2102 X] [IsManifold (modelWithCornersSelf \u2102 \u2102) \u03c9 X] : \u2115 := sorry"
+    },
+    {
+      "name": "JacobianChallenge.genus_eq_zero_iff_homeo",
+      "basename": "genus_eq_zero_iff_homeo",
+      "kind": "theorem",
+      "body": "theorem genus_eq_zero_iff_homeo :\n    genus X = 0 \u2194 Nonempty (X \u2243\u209c (Metric.sphere (0 : EuclideanSpace \u211d (Fin 3)) 1)) :=\n  sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian",
+      "basename": "Jacobian",
+      "kind": "def",
+      "body": "def Jacobian (X : Type u) [TopologicalSpace X] [T2Space X] [CompactSpace X] [ConnectedSpace X]\n    [Nonempty X] [ChartedSpace \u2102 X] [IsManifold (modelWithCornersSelf \u2102 \u2102) \u03c9 X] : Type u := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instAddCommGroup",
+      "basename": "instAddCommGroup",
+      "kind": "def",
+      "body": "instance instAddCommGroup : AddCommGroup (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instTopologicalSpace",
+      "basename": "instTopologicalSpace",
+      "kind": "def",
+      "body": "instance instTopologicalSpace : TopologicalSpace (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instT2Space",
+      "basename": "instT2Space",
+      "kind": "theorem",
+      "body": "instance instT2Space : T2Space (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instCompactSpace",
+      "basename": "instCompactSpace",
+      "kind": "theorem",
+      "body": "instance instCompactSpace : CompactSpace (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instChartedSpace",
+      "basename": "instChartedSpace",
+      "kind": "def",
+      "body": "instance instChartedSpace : ChartedSpace (Fin (genus X) \u2192 \u2102) (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instIsManifold",
+      "basename": "instIsManifold",
+      "kind": "theorem",
+      "body": "instance instIsManifold :\n    IsManifold (modelWithCornersSelf \u2102 (Fin (genus X) \u2192 \u2102)) \u03c9 (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.instLieAddGroup",
+      "basename": "instLieAddGroup",
+      "kind": "theorem",
+      "body": "instance instLieAddGroup :\n    LieAddGroup (modelWithCornersSelf \u2102 (Fin (genus X) \u2192 \u2102)) \u03c9 (Jacobian X) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.ofCurve",
+      "basename": "ofCurve",
+      "kind": "def",
+      "body": "def ofCurve (P : X) : X \u2192 Jacobian X := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.ofCurve_contMDiff",
+      "basename": "ofCurve_contMDiff",
+      "kind": "theorem",
+      "body": "theorem ofCurve_contMDiff (P : X) :\n    ContMDiff (modelWithCornersSelf \u2102 \u2102)\n      (modelWithCornersSelf \u2102 (Fin (genus X) \u2192 \u2102)) \u03c9 (ofCurve P) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.ofCurve_self",
+      "basename": "ofCurve_self",
+      "kind": "theorem",
+      "body": "theorem ofCurve_self (P : X) : ofCurve P P = 0 := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.ofCurve_inj",
+      "basename": "ofCurve_inj",
+      "kind": "theorem",
+      "body": "theorem ofCurve_inj (P : X) (h : 0 < genus X) : Function.Injective (ofCurve P) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pushforward",
+      "basename": "pushforward",
+      "kind": "def",
+      "body": "def pushforward (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f) :\n    Jacobian X \u2192\u209c+ Jacobian Y := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pushforward_contMDiff",
+      "basename": "pushforward_contMDiff",
+      "kind": "theorem",
+      "body": "theorem pushforward_contMDiff (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f) :\n    ContMDiff (modelWithCornersSelf \u2102 (Fin (genus X) \u2192 \u2102))\n      (modelWithCornersSelf \u2102 (Fin (genus Y) \u2192 \u2102)) \u03c9 (pushforward f hf) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pushforward_id_apply",
+      "basename": "pushforward_id_apply",
+      "kind": "theorem",
+      "body": "theorem pushforward_id_apply (P : Jacobian X) :\n    pushforward id contMDiff_id P = P := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pushforward_comp_apply",
+      "basename": "pushforward_comp_apply",
+      "kind": "theorem",
+      "body": "theorem pushforward_comp_apply (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f)\n    (g : Y \u2192 Z) (hg : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 g)\n    (P : Jacobian X) :\n    pushforward (g \u2218 f) (hg.comp hf) P = pushforward g hg (pushforward f hf P) :=\n  sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pullback",
+      "basename": "pullback",
+      "kind": "def",
+      "body": "def pullback (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f) :\n    Jacobian Y \u2192\u209c+ Jacobian X := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pullback_contMDiff",
+      "basename": "pullback_contMDiff",
+      "kind": "theorem",
+      "body": "theorem pullback_contMDiff (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f) :\n    ContMDiff (modelWithCornersSelf \u2102 (Fin (genus Y) \u2192 \u2102))\n      (modelWithCornersSelf \u2102 (Fin (genus X) \u2192 \u2102)) \u03c9 (pullback f hf) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pullback_id_apply",
+      "basename": "pullback_id_apply",
+      "kind": "theorem",
+      "body": "theorem pullback_id_apply (P : Jacobian X) :\n    pullback id contMDiff_id P = P := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pullback_comp_apply",
+      "basename": "pullback_comp_apply",
+      "kind": "theorem",
+      "body": "theorem pullback_comp_apply (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f)\n    (g : Y \u2192 Z) (hg : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 g)\n    (P : Jacobian Z) :\n    pullback (g.comp f) (hg.comp hf) P = pullback f hf (pullback g hg P) := sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.degree",
+      "basename": "degree",
+      "kind": "def",
+      "body": "def degree (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f) : \u2115 :=\n  sorry"
+    },
+    {
+      "name": "JacobianChallenge.Jacobian.pushforward_pullback",
+      "basename": "pushforward_pullback",
+      "kind": "theorem",
+      "body": "theorem pushforward_pullback (f : X \u2192 Y)\n    (hf : ContMDiff (modelWithCornersSelf \u2102 \u2102) (modelWithCornersSelf \u2102 \u2102) \u03c9 f)\n    (P : Jacobian Y) :\n    pushforward f hf (pullback f hf P) = (degree f hf) \u2022 P := sorry"
+    }
+  ]
+}

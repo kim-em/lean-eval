@@ -1,0 +1,12 @@
+{
+  "id": "vonNeumann_doubleCommutant_tfae",
+  "module": "LeanEval.Analysis.VonNeumannDoubleCommutant",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.vonNeumann_doubleCommutant_tfae",
+      "basename": "vonNeumann_doubleCommutant_tfae",
+      "kind": "theorem",
+      "body": "theorem vonNeumann_doubleCommutant_tfae\n    {H : Type*} [NormedAddCommGroup H] [InnerProductSpace \u2102 H] [CompleteSpace H]\n    (S : StarSubalgebra \u2102 (H \u2192L[\u2102] H)) :\n    List.TFAE\n      [ Set.centralizer (Set.centralizer (S : Set (H \u2192L[\u2102] H))) = S\n      , IsClosed\n          (ContinuousLinearMap.toWOT (RingHom.id \u2102) H H '' (S : Set (H \u2192L[\u2102] H)))\n      , IsClosed\n          (ContinuousLinearMap.toPointwiseConvergenceCLM \u2102 (RingHom.id \u2102) H H ''\n            (S : Set (H \u2192L[\u2102] H))) ] := by\n  sorry"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "cyclotomic_integer_house_between_two_and_76_33",
+  "module": "LeanEval.NumberTheory.SmallHouse",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.cyclotomic_integer_house_between_two_and_76_33",
+      "basename": "cyclotomic_integer_house_between_two_and_76_33",
+      "kind": "theorem",
+      "body": "theorem cyclotomic_integer_house_between_two_and_76_33\n    {K : Type*} [Field K] [NumberField K] [Algebra \u211a K]\n    (n : \u2115) [NeZero n] [IsCyclotomicExtension {n} \u211a K] {\u03b2 : K}\n    (h\u03b2_int : IsIntegral \u2124 \u03b2)\n    (h\u03b2_real : \u03b2 \u2208 NumberField.maximalRealSubfield K) :\n    (2 < house \u03b2 \u2227 house \u03b2 < (76 : \u211d) / 33) \u2192\n      house \u03b2 = (7 + Real.sqrt 3) / 2 \u2228\n      house \u03b2 = Real.sqrt 5 \u2228\n      house \u03b2 = 1 + 2 * Real.cos (2 * Real.pi / 7) \u2228\n      house \u03b2 = (1 + Real.sqrt 5) / Real.sqrt 2 \u2228\n      house \u03b2 = (1 + Real.sqrt 13) / 2 := by\n  sorry"
+    }
+  ]
+}

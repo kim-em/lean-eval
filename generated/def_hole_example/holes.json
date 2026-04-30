@@ -1,0 +1,18 @@
+{
+  "id": "def_hole_example",
+  "module": "LeanEval.Sandbox.DefHoleExample",
+  "holes": [
+    {
+      "name": "foo",
+      "basename": "foo",
+      "kind": "def",
+      "body": "def foo : Nat := sorry"
+    },
+    {
+      "name": "foo_def",
+      "basename": "foo_def",
+      "kind": "theorem",
+      "body": "theorem foo_def : foo = 37 := sorry"
+    }
+  ]
+}

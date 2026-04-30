@@ -1,0 +1,12 @@
+{
+  "id": "cerf_gamma_four",
+  "module": "LeanEval.Topology.CerfGammaFour",
+  "holes": [
+    {
+      "name": "LeanEval.Topology.cerf_gamma_four",
+      "basename": "cerf_gamma_four",
+      "kind": "theorem",
+      "body": "/-- **Cerf's theorem \u0393\u2084 = 0.** Every self-diffeomorphism of S\u00b3 is smoothly isotopic to\nthe restriction of a linear isometry of \u211d\u2074. -/\ntheorem cerf_gamma_four\n    (f : sphere (0 : EuclideanSpace \u211d (Fin 4)) 1 \u2243\u2098\u27ee\ud835\udce1 3, \ud835\udce1 3\u27ef\n         sphere (0 : EuclideanSpace \u211d (Fin 4)) 1) :\n    \u2203 (A : Matrix.orthogonalGroup (Fin 4) \u211d)\n      (F F' : unitInterval \u00d7 sphere (0 : EuclideanSpace \u211d (Fin 4)) 1 \u2192\n              sphere (0 : EuclideanSpace \u211d (Fin 4)) 1),\n      ContMDiff ((\ud835\udce1\u2202 1).prod (\ud835\udce1 3)) (\ud835\udce1 3) \u221e F \u2227\n      ContMDiff ((\ud835\udce1\u2202 1).prod (\ud835\udce1 3)) (\ud835\udce1 3) \u221e F' \u2227\n      (\u2200 t p, F  (t, F' (t, p)) = p) \u2227\n      (\u2200 t p, F' (t, F  (t, p)) = p) \u2227\n      (\u2200 p, F (0, p) = f p) \u2227\n      (\u2200 p, (F (1, p) : EuclideanSpace \u211d (Fin 4)) =\n            Matrix.UnitaryGroup.toLinearEquiv A\n              (p : EuclideanSpace \u211d (Fin 4))) := by\n  sorry"
+    }
+  ]
+}
