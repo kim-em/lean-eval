@@ -46,8 +46,10 @@ Current source modules live in topic folders such as:
 
 ### 3. Add the manifest entry
 
-Each tagged theorem must have exactly one matching entry in
-[`manifests/problems.toml`](/home/kim/lean-evals/manifests/problems.toml).
+Each tagged declaration must be listed by exactly one entry in
+[`manifests/problems.toml`](manifests/problems.toml). The `holes` array
+names every `@[eval_problem]`-tagged declaration in the module that the
+problem owns; for the common single-theorem case it has one element.
 
 ```toml
 [[problem]]
@@ -55,7 +57,7 @@ id = "my_new_problem"
 title = "My new problem"
 test = false
 module = "LeanEval.SomeModule"
-theorem = "my_new_problem"
+holes = ["my_new_problem"]
 submitter = "Your Name"
 notes = "Optional notes."
 source = "Optional citation or URL."
@@ -68,8 +70,28 @@ The required fields are:
 - `title`
 - `test`
 - `module`
-- `theorem`
+- `holes`
 - `submitter`
+
+#### Multi-hole problems
+
+A problem may bundle several `def`s, `instance`s and `theorem`s — list
+them all in `holes`. Comparator then asks the participant to fill every
+listed declaration in their `Submission.lean`. Two conventions:
+
+- **Name every instance.** The generator addresses holes by their
+  declaration name, and Lean's auto-generated names for anonymous
+  `instance`s (e.g. `instTopologicalSpaceJacobian`) are not stable. Use
+  `instance instAddCommGroup : ... := sorry` rather than `instance : ...
+  := sorry`.
+- **Use `holes` even for one declaration.** There is no `theorem = "..."`
+  shorthand; a singleton hole is just `holes = ["my_thm"]`.
+
+See [`LeanEval/Sandbox/DefHoleExample.lean`](LeanEval/Sandbox/DefHoleExample.lean)
+and [`LeanEval/Sandbox/InstanceHoleExample.lean`](LeanEval/Sandbox/InstanceHoleExample.lean)
+for the smallest working examples, or
+[`LeanEval/Geometry/JacobianChallenge.lean`](LeanEval/Geometry/JacobianChallenge.lean)
+for a realistic multi-hole problem.
 
 ### 4. Validate the authored source of truth (optional)
 
@@ -239,7 +261,7 @@ lake exe lean-eval check-generated-builds
 lake exe lean-eval run-eval
 ```
 
-There is also an end-to-end workflow smoke test:
+There is also an end-to-end workflow self-check:
 
 ```bash
 lake exe lean-eval check-eval-workflow

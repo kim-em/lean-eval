@@ -13,6 +13,25 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import generate_projects as gp  # noqa: E402
 
 
+def _spec(
+    *,
+    id: str = "two_plus_two",
+    title: str = "T",
+    test: bool = False,
+    module: str = "M",
+    holes: tuple[str, ...] = ("t",),
+    submitter: str = "Kim",
+) -> gp.ProblemSpec:
+    return gp.ProblemSpec(
+        id=id,
+        title=title,
+        test=test,
+        module=module,
+        holes=holes,
+        submitter=submitter,
+    )
+
+
 class GenerateProjectsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -44,88 +63,60 @@ submitter = "Kim"
 
     def test_duplicate_problem_id_rejected(self) -> None:
         problems = [
-            gp.ProblemSpec(
-                id="two_plus_two",
-                title="A",
-                test=False,
-                module="M",
-                theorem="t1",
-                submitter="Kim",
-            ),
-            gp.ProblemSpec(
-                id="two_plus_two",
-                title="B",
-                test=False,
-                module="M",
-                theorem="t2",
-                submitter="Kim",
-            ),
+            _spec(id="two_plus_two", holes=("t1",)),
+            _spec(id="two_plus_two", title="B", holes=("t2",)),
         ]
         with self.assertRaisesRegex(gp.GenerationError, "Duplicate problem id"):
             gp.validate_problems(problems)
 
-    def test_duplicate_theorem_reference_rejected(self) -> None:
+    def test_duplicate_hole_reference_rejected(self) -> None:
         problems = [
-            gp.ProblemSpec(
-                id="a",
-                title="A",
-                test=False,
-                module="M",
-                theorem="t",
-                submitter="Kim",
-            ),
-            gp.ProblemSpec(
-                id="b",
-                title="B",
-                test=False,
-                module="M",
-                theorem="t",
-                submitter="Kim",
-            ),
+            _spec(id="a", holes=("t",)),
+            _spec(id="b", title="B", holes=("t",)),
         ]
-        with self.assertRaisesRegex(gp.GenerationError, "Duplicate theorem reference"):
+        with self.assertRaisesRegex(gp.GenerationError, "Duplicate hole reference"):
             gp.validate_problems(problems)
 
     def test_unique_modules_preserves_order(self) -> None:
         problems = [
-            gp.ProblemSpec(id="a", title="A", test=False, module="M1", theorem="t1", submitter="Kim"),
-            gp.ProblemSpec(id="b", title="B", test=False, module="M2", theorem="t2", submitter="Kim"),
-            gp.ProblemSpec(id="c", title="C", test=False, module="M1", theorem="t3", submitter="Kim"),
+            _spec(id="a", module="M1", holes=("t1",)),
+            _spec(id="b", title="B", module="M2", holes=("t2",)),
+            _spec(id="c", title="C", module="M1", holes=("t3",)),
         ]
         self.assertEqual(gp.unique_modules(problems), ["M1", "M2"])
 
     def test_extract_statement_text_slices_source_range(self) -> None:
-        problem = gp.ProblemSpec(
+        problem = _spec(
             id="two_plus_two",
             title="2 + 2 = 4",
             test=True,
             module="LeanEval.EasyProblems",
-            theorem="two_plus_two_eq_four",
-            submitter="Kim",
+            holes=("two_plus_two_eq_four",),
         )
         extracted = gp.ExtractedTheorem(
             declaration_name="LeanEval.two_plus_two_eq_four",
             module=problem.module,
             source_range=(13, 0, 15, 7),
             same_module_dependencies=(),
+            kind="theorem",
         )
         statement = gp.extract_statement_text(problem, extracted)
         self.assertEqual(statement, ": (2 : Nat) + 2 = 4")
 
     def test_render_workspace_uses_local_theorem_name(self) -> None:
-        problem = gp.ProblemSpec(
+        problem = _spec(
             id="two_plus_two",
             title="2 + 2 = 4",
             test=True,
             module="LeanEval.EasyProblems",
-            theorem="two_plus_two_eq_four",
-            submitter="Kim",
+            holes=("two_plus_two_eq_four",),
         )
         extracted = gp.ExtractedTheorem(
             declaration_name="LeanEval.two_plus_two_eq_four",
             module=problem.module,
             source_range=(13, 0, 15, 7),
             same_module_dependencies=(),
+            kind="theorem",
         )
         dependency = gp.DependencySpec(
             name="mathlib",
@@ -134,7 +125,7 @@ submitter = "Kim"
         )
         files = gp.render_workspace(
             problem,
-            extracted,
+            [extracted],
             "leanprover/lean4:v4.30.0-rc1\n",
             dependency,
         )
@@ -161,45 +152,43 @@ submitter = "Kim"
             mismatches = gp.check_workspace(problem_dir, expected)
             self.assertEqual(mismatches, [f"stale {problem_dir / 'README.md'}"])
 
-    def test_extract_theorem_accepts_full_name(self) -> None:
-        extracted = gp.extract_theorem(
-            gp.ProblemSpec(
-                id="two_plus_two",
-                title="2 + 2 = 4",
-                test=True,
-                module="LeanEval.EasyProblems",
-                theorem="LeanEval.two_plus_two_eq_four",
-                submitter="Kim",
-            )
+    def test_extract_one_accepts_full_name(self) -> None:
+        problem = _spec(
+            id="two_plus_two",
+            title="2 + 2 = 4",
+            test=True,
+            module="LeanEval.EasyProblems",
+            holes=("LeanEval.two_plus_two_eq_four",),
         )
+        extracted = gp.extract_one(problem, problem.holes[0])
         self.assertEqual(extracted.declaration_name, "LeanEval.two_plus_two_eq_four")
         self.assertEqual(len(extracted.source_range), 4)
+        self.assertEqual(extracted.kind, "theorem")
 
-    def test_extract_theorem_rejects_unknown_declaration(self) -> None:
+    def test_extract_one_rejects_unknown_declaration(self) -> None:
+        problem = _spec(
+            id="missing",
+            title="Missing",
+            module="LeanEval.EasyProblems",
+            holes=("does_not_exist",),
+        )
         with self.assertRaisesRegex(gp.GenerationError, "not found"):
-            gp.extract_theorem(
-                gp.ProblemSpec(
-                    id="missing",
-                    title="Missing",
-                    test=False,
-                    module="LeanEval.EasyProblems",
-                    theorem="does_not_exist",
-                    submitter="Kim",
-                )
-            )
+            gp.extract_one(problem, problem.holes[0])
 
-    def test_extract_theorem_rejects_non_theorem(self) -> None:
-        with self.assertRaisesRegex(gp.GenerationError, "not a theorem"):
-            gp.extract_theorem(
-                gp.ProblemSpec(
-                    id="starter_number",
-                    title="starterNumber",
-                    test=False,
-                    module="LeanEval.EasyProblems",
-                    theorem="starterNumber",
-                    submitter="Kim",
-                )
-            )
+    def test_extract_one_rejects_unsupported_kind(self) -> None:
+        # `starterNumber` exists in the source as plain `def`. With
+        # def-hole support added, a `def` is now an accepted kind, so
+        # extraction should succeed with kind="def" rather than failing.
+        # If this changes (e.g. starterNumber is removed or changed), the
+        # test should be updated to point at a genuinely unsupported decl.
+        problem = _spec(
+            id="starter_number",
+            title="starterNumber",
+            module="LeanEval.EasyProblems",
+            holes=("starterNumber",),
+        )
+        extracted = gp.extract_one(problem, problem.holes[0])
+        self.assertEqual(extracted.kind, "def")
 
     def test_manifest_rejects_non_boolean_test_field(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -222,6 +211,28 @@ submitter = "Kim"
             with self.assertRaisesRegex(gp.GenerationError, "non-boolean field 'test'"):
                 gp.load_manifest(manifest_path)
 
+    def test_manifest_accepts_holes_array(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = pathlib.Path(tmpdir) / "problems.toml"
+            manifest_path.write_text(
+                """
+version = 1
+
+[[problem]]
+id = "multi"
+title = "Multi"
+test = true
+module = "LeanEval.Sandbox"
+holes = ["foo", "foo_def"]
+submitter = "Kim"
+""".strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            problems = gp.load_manifest(manifest_path)
+            self.assertEqual(len(problems), 1)
+            self.assertEqual(problems[0].holes, ("foo", "foo_def"))
+
     def test_load_root_mathlib_dependency(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             lakefile_path = pathlib.Path(tmpdir) / "lakefile.toml"
@@ -243,6 +254,7 @@ rev = "v4.test"
                 dependency.git, "https://github.com/leanprover-community/mathlib4.git"
             )
             self.assertEqual(dependency.rev, "v4.test")
+
 
 if __name__ == "__main__":
     unittest.main()

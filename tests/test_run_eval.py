@@ -29,7 +29,7 @@ class RunEvalTests(unittest.TestCase):
             title="Demo",
             test=True,
             module="Demo.Module",
-            theorem="demo_theorem",
+            holes=("demo_theorem",),
             submitter="Kim",
         )
         extracted = gp.ExtractedTheorem(
@@ -37,6 +37,7 @@ class RunEvalTests(unittest.TestCase):
             module=problem.module,
             source_range=(1, 0, 2, 9),
             same_module_dependencies=(),
+            kind="theorem",
         )
         toolchain = "leanprover/lean4:v4.30.0-rc1\n"
 
@@ -74,7 +75,7 @@ rev = "{dependency.rev}"
 ''',
                     encoding="utf-8",
                 )
-                files = gp.render_workspace(problem, extracted, toolchain, dependency)
+                files = gp.render_workspace(problem, [extracted], toolchain, dependency)
                 for relative_path, content in files.items():
                     destination = problem_dir / relative_path
                     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -82,7 +83,7 @@ rev = "{dependency.rev}"
                 (repo_root / "lean-toolchain").write_text(toolchain, encoding="utf-8")
                 mismatches = reval.problem_attempt_mismatches(
                     problem,
-                    extractor=lambda _problem: extracted,
+                    extractor=lambda _problem, _hole: extracted,
                     workspaces_root=repo_root / "workspaces",
                 )
             finally:
@@ -99,7 +100,7 @@ rev = "{dependency.rev}"
                 title="Attempted pass",
                 test=True,
                 module="M",
-                theorem="t1",
+                holes=("t1",),
                 submitter="Kim",
             ),
             gp.ProblemSpec(
@@ -107,7 +108,7 @@ rev = "{dependency.rev}"
                 title="Attempted fail",
                 test=False,
                 module="M",
-                theorem="t2",
+                holes=("t2",),
                 submitter="Kim",
             ),
             gp.ProblemSpec(
@@ -115,7 +116,7 @@ rev = "{dependency.rev}"
                 title="Untouched",
                 test=False,
                 module="M",
-                theorem="t3",
+                holes=("t3",),
                 submitter="Kim",
             ),
         ]
@@ -248,7 +249,7 @@ rev = "{dependency.rev}"
             title="Demo",
             test=True,
             module="Demo.Module",
-            theorem="demo_theorem",
+            holes=("demo_theorem",),
             submitter="Kim",
         )
         extracted = gp.ExtractedTheorem(
@@ -256,6 +257,7 @@ rev = "{dependency.rev}"
             module=problem.module,
             source_range=(1, 0, 2, 9),
             same_module_dependencies=(),
+            kind="theorem",
         )
         toolchain = "leanprover/lean4:v4.30.0-rc1\n"
         dependency = gp.DependencySpec(
@@ -295,7 +297,7 @@ rev = "{dependency.rev}"
 ''',
                     encoding="utf-8",
                 )
-                files = gp.render_workspace(problem, extracted, toolchain, dependency)
+                files = gp.render_workspace(problem, [extracted], toolchain, dependency)
                 for base_dir in [generated_problem_dir, workspace_problem_dir]:
                     for relative_path, content in files.items():
                         destination = base_dir / relative_path
@@ -309,7 +311,7 @@ rev = "{dependency.rev}"
                 (repo_root / "lean-toolchain").write_text(toolchain, encoding="utf-8")
                 mismatches = reval.problem_attempt_mismatches(
                     problem,
-                    extractor=lambda _problem: extracted,
+                    extractor=lambda _problem, _hole: extracted,
                     workspaces_root=workspaces_root,
                 )
             finally:

@@ -37,6 +37,45 @@ EXPECTED_FILES = {
 IGNORED_PATH_NAMES = {".lake", "build", ".cache", "lake-manifest.json"}
 
 
+_WORKSPACE_TEST_LEAN = (
+    "import Lean\n\n"
+    "open Lean\n\n"
+    "def comparatorExists (comparatorBin : String) : IO Bool := do\n"
+    "  if comparatorBin.contains '/' then\n"
+    "    return (← System.FilePath.pathExists comparatorBin)\n"
+    "  try\n"
+    "    let child ← IO.Process.spawn {\n"
+    '      cmd := "sh"\n'
+    '      args := #["-c", "command -v \\\"$1\\\" >/dev/null 2>&1", "sh", comparatorBin]\n'
+    "    }\n"
+    "    let exitCode ← child.wait\n"
+    "    return exitCode == 0\n"
+    "  catch _ =>\n"
+    "    return false\n\n"
+    "def main : IO UInt32 := do\n"
+    '  let comparatorBin := (← IO.getEnv "COMPARATOR_BIN").getD "comparator"\n'
+    "  if !(← comparatorExists comparatorBin) then\n"
+    '    IO.eprintln s!"Failed to run comparator via `{comparatorBin}`."\n'
+    '    IO.eprintln "Make sure `comparator` is installed and on your `PATH`, or set `COMPARATOR_BIN=/path/to/comparator`."\n'
+    '    IO.eprintln "See the root repository README for comparator setup details, including landrun and lean4export."\n'
+    "    pure 1\n"
+    "  else\n"
+    "    try\n"
+    "      let child ← IO.Process.spawn {\n"
+    '        cmd := "lake"\n'
+    '        args := #["env", comparatorBin, "config.json"]\n'
+    "      }\n"
+    "      let exitCode ← child.wait\n"
+    "      pure exitCode\n"
+    "    catch err =>\n"
+    '      IO.eprintln s!"Failed to run comparator via `{comparatorBin}`."\n'
+    '      IO.eprintln "Make sure `comparator` is installed and on your `PATH`, or set `COMPARATOR_BIN=/path/to/comparator`."\n'
+    '      IO.eprintln "See the root repository README for comparator setup details, including landrun and lean4export."\n'
+    '      IO.eprintln s!"Original error: {err}"\n'
+    "      pure 1\n"
+)
+
+
 def _theorem_by_pattern(theorem_name: str) -> re.Pattern[str]:
     return re.compile(
         rf"(?:^|\s)theorem\s+{re.escape(theorem_name)}\b(?P<body>.*?)(?:\s*:=\s*by\b)",
@@ -54,11 +93,15 @@ class ProblemSpec:
     title: str
     test: bool
     module: str
-    theorem: str
+    holes: tuple[str, ...]
     submitter: str
     notes: str | None = None
     source: str | None = None
     informal_solution: str | None = None
+
+    @property
+    def is_multi_hole(self) -> bool:
+        return len(self.holes) != 1
 
 
 @dataclass(frozen=True)
@@ -67,6 +110,7 @@ class ExtractedTheorem:
     module: str
     source_range: tuple[int, int, int, int]
     same_module_dependencies: tuple[str, ...]
+    kind: str  # "theorem", "def", or "instance"
 
 
 @dataclass(frozen=True)
@@ -76,11 +120,19 @@ class DependencySpec:
     rev: str
 
 
+def _theorem_pattern(theorem_name: str) -> re.Pattern[str]:
+    return re.compile(
+        rf"(?:^|\s)(?:theorem|opaque|def|instance)\s+{re.escape(theorem_name)}\b",
+        re.DOTALL,
+    )
+
+
 @dataclass(frozen=True)
 class InventoryEntry:
     module: str
     declaration_name: str
     basename: str
+    kind: str  # "theorem", "def", or "instance"
 
 
 def load_root_mathlib_dependency(path: pathlib.Path | None = None) -> DependencySpec:
@@ -126,7 +178,7 @@ def load_manifest(path: pathlib.Path) -> list[ProblemSpec]:
 
 
 def parse_problem(raw_problem: dict, index: int) -> ProblemSpec:
-    required_fields = ["id", "title", "module", "theorem", "submitter"]
+    required_fields = ["id", "title", "module", "submitter"]
     optional_fields = ["notes", "source", "informal_solution"]
 
     values: dict[str, str | None] = {}
@@ -161,12 +213,30 @@ def parse_problem(raw_problem: dict, index: int) -> ProblemSpec:
             f"Problem '{problem_id}' has non-boolean field 'test'"
         )
 
+    holes_value = raw_problem.get("holes")
+    if not isinstance(holes_value, list) or not holes_value:
+        raise GenerationError(
+            f"Problem '{problem_id}' must give 'holes' as a non-empty array of strings."
+        )
+    holes_list: list[str] = []
+    for entry in holes_value:
+        if not isinstance(entry, str) or not entry.strip():
+            raise GenerationError(
+                f"Problem '{problem_id}' has an empty or non-string entry in 'holes'."
+            )
+        holes_list.append(entry.strip())
+    if len(set(holes_list)) != len(holes_list):
+        raise GenerationError(
+            f"Problem '{problem_id}' has duplicate entries in 'holes'."
+        )
+    holes = tuple(holes_list)
+
     return ProblemSpec(
         id=values["id"],
         title=values["title"],
         test=test_value,
         module=values["module"],
-        theorem=values["theorem"],
+        holes=holes,
         submitter=values["submitter"],
         notes=values["notes"],
         source=values["source"],
@@ -176,18 +246,19 @@ def parse_problem(raw_problem: dict, index: int) -> ProblemSpec:
 
 def validate_problems(problems: list[ProblemSpec]) -> None:
     seen_ids: set[str] = set()
-    seen_theorems: set[tuple[str, str]] = set()
+    seen_holes: set[tuple[str, str]] = set()
     for problem in problems:
         if problem.id in seen_ids:
             raise GenerationError(f"Duplicate problem id '{problem.id}'")
         seen_ids.add(problem.id)
 
-        theorem_key = (problem.module, problem.theorem)
-        if theorem_key in seen_theorems:
-            raise GenerationError(
-                f"Duplicate theorem reference '{problem.module}:{problem.theorem}'"
-            )
-        seen_theorems.add(theorem_key)
+        for hole in problem.holes:
+            hole_key = (problem.module, hole)
+            if hole_key in seen_holes:
+                raise GenerationError(
+                    f"Duplicate hole reference '{problem.module}:{hole}'"
+                )
+            seen_holes.add(hole_key)
 
 
 def run(
@@ -240,19 +311,19 @@ def build_extractor(problems: list[ProblemSpec]) -> None:
     )
 
 
-def extract_theorem(problem: ProblemSpec) -> ExtractedTheorem:
+def extract_one(problem: ProblemSpec, hole: str) -> ExtractedTheorem:
     binary_path = REPO_ROOT / ".lake" / "build" / "bin" / "extract_theorem"
     completed = run(
-        ["lake", "env", str(binary_path), problem.module, problem.theorem],
+        ["lake", "env", str(binary_path), problem.module, hole],
         cwd=REPO_ROOT,
         capture_output=True,
-        error_prefix=f"Lean extraction failed for '{problem.id}'",
+        error_prefix=f"Lean extraction failed for '{problem.id}' hole '{hole}'",
     )
     try:
         payload = json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
         raise GenerationError(
-            f"Lean extractor returned invalid JSON for '{problem.id}': {exc}"
+            f"Lean extractor returned invalid JSON for '{problem.id}' hole '{hole}': {exc}"
         ) from exc
 
     try:
@@ -268,10 +339,11 @@ def extract_theorem(problem: ProblemSpec) -> ExtractedTheorem:
             same_module_dependencies=tuple(
                 str(name) for name in payload.get("sameModuleDependencies", [])
             ),
+            kind=str(payload["kind"]),
         )
     except KeyError as exc:
         raise GenerationError(
-            f"Lean extractor response for '{problem.id}' is missing field {exc}"
+            f"Lean extractor response for '{problem.id}' hole '{hole}' is missing field {exc}"
         ) from exc
 
 
@@ -295,6 +367,7 @@ def inventory_entries(problems: list[ProblemSpec]) -> list[InventoryEntry]:
                 module=str(raw_entry["module"]),
                 declaration_name=str(raw_entry["declarationName"]),
                 basename=str(raw_entry["basename"]),
+                kind=str(raw_entry["kind"]),
             )
         )
     return entries
@@ -309,22 +382,23 @@ def validate_manifest_against_inventory(problems: list[ProblemSpec]) -> None:
 
     matched_declarations: set[str] = set()
     for problem in problems:
-        candidates = [
-            entry
-            for entry in by_module.get(problem.module, [])
-            if problem.theorem in {entry.basename, entry.declaration_name}
-        ]
-        if not candidates:
-            raise GenerationError(
-                f"Manifest entry '{problem.id}' does not match any @[eval_problem] theorem in "
-                f"module '{problem.module}'."
-            )
-        if len(candidates) > 1:
-            raise GenerationError(
-                f"Manifest entry '{problem.id}' is ambiguous in module '{problem.module}'. "
-                f"Use a fully qualified theorem name."
-            )
-        matched_declarations.add(candidates[0].declaration_name)
+        for hole in problem.holes:
+            candidates = [
+                entry
+                for entry in by_module.get(problem.module, [])
+                if hole in {entry.basename, entry.declaration_name}
+            ]
+            if not candidates:
+                raise GenerationError(
+                    f"Manifest entry '{problem.id}' references hole '{hole}' which has no "
+                    f"@[eval_problem] declaration in module '{problem.module}'."
+                )
+            if len(candidates) > 1:
+                raise GenerationError(
+                    f"Manifest entry '{problem.id}' hole '{hole}' is ambiguous in module "
+                    f"'{problem.module}'. Use a fully qualified name."
+                )
+            matched_declarations.add(candidates[0].declaration_name)
 
     untracked = sorted(
         entry.declaration_name
@@ -334,12 +408,17 @@ def validate_manifest_against_inventory(problems: list[ProblemSpec]) -> None:
     if untracked:
         joined = ", ".join(untracked)
         raise GenerationError(
-            "Tagged @[eval_problem] theorem(s) are missing from manifests/problems.toml: "
+            "Tagged @[eval_problem] declaration(s) are missing from manifests/problems.toml: "
             f"{joined}"
         )
 
 
-def validate_theorem_proof_shape(problems: list[ProblemSpec]) -> None:
+def validate_hole_shape(problems: list[ProblemSpec]) -> None:
+    """Sanity-check that each manifest hole is declared as a top-level
+    theorem/def/instance in its source module. Type-correctness is enforced
+    by `validate_manifest_against_inventory` (which builds the source);
+    this check is just for early failure with a clear message when a
+    manifest entry has a typo'd name."""
     for problem in problems:
         source_path = module_source_path(problem.module)
         if not source_path.is_file():
@@ -347,14 +426,13 @@ def validate_theorem_proof_shape(problems: list[ProblemSpec]) -> None:
                 f"Source file for module '{problem.module}' not found: {source_path}"
             )
         source_text = source_path.read_text(encoding="utf-8")
-        theorem_name = problem.theorem.rsplit(".", maxsplit=1)[-1]
-        if not _theorem_by_pattern(theorem_name).search(source_text):
-            raise GenerationError(
-                f"Problem '{problem.id}' points at `theorem {theorem_name}` in "
-                f"{source_path.relative_to(REPO_ROOT)}, but the declaration does not match "
-                "the required `theorem <name> ... := by` shape used by the source slicer. "
-                "Rewrite the proof as `:= by <tactics-or-sorry>`."
-            )
+        for hole in problem.holes:
+            basename = hole.rsplit(".", maxsplit=1)[-1]
+            if not _theorem_pattern(basename).search(source_text):
+                raise GenerationError(
+                    f"Problem '{problem.id}' lists hole '{basename}' which is not declared "
+                    f"as a top-level theorem/def/instance in {source_path.relative_to(REPO_ROOT)}."
+                )
 
 
 def local_theorem_name(extracted: ExtractedTheorem) -> str:
@@ -619,10 +697,29 @@ def explicit_binder_application_args(theorem_statement: str) -> list[str]:
 
 def render_workspace(
     problem: ProblemSpec,
-    extracted: ExtractedTheorem,
+    extracteds: list[ExtractedTheorem],
     toolchain: str,
     mathlib_dependency: DependencySpec,
 ) -> dict[str, str]:
+    """Generate the comparator workspace files for one problem.
+
+    Two code paths:
+    - Legacy single-theorem path (one hole, kind="theorem"): preserves the
+      historical layout with `ChallengeDeps.lean` (for same-module dependencies)
+      and a sliced `theorem ...` statement in `Challenge.lean`. All existing
+      single-theorem problems take this path, so byte-identical regeneration
+      is preserved.
+    - Multi-hole path (defs / instances / multiple holes): copies the entire
+      source module verbatim into `Challenge.lean` with `@[eval_problem]`
+      attributes stripped, and emits a thin `Solution.lean` whose holes
+      delegate to `Submission`. No `ChallengeDeps.lean`.
+    """
+    use_multi_hole = problem.is_multi_hole or extracteds[0].kind != "theorem"
+    if use_multi_hole:
+        return _render_workspace_multi_hole(
+            problem, extracteds, toolchain, mathlib_dependency
+        )
+    [extracted] = extracteds
     theorem_name = local_theorem_name(extracted)
     theorem_statement = extract_statement_text(problem, extracted)
     solution_args = explicit_binder_application_args(theorem_statement)
@@ -742,47 +839,361 @@ def render_workspace(
             "namespace Submission.Helpers\n\n"
             "end Submission.Helpers\n"
         ),
-        "WorkspaceTest.lean": (
-            "import Lean\n\n"
-            "open Lean\n\n"
-            "def comparatorExists (comparatorBin : String) : IO Bool := do\n"
-            "  if comparatorBin.contains '/' then\n"
-            "    return (← System.FilePath.pathExists comparatorBin)\n"
-            "  try\n"
-            "    let child ← IO.Process.spawn {\n"
-            '      cmd := "sh"\n'
-            '      args := #["-c", "command -v \\\"$1\\\" >/dev/null 2>&1", "sh", comparatorBin]\n'
-            "    }\n"
-            "    let exitCode ← child.wait\n"
-            "    return exitCode == 0\n"
-            "  catch _ =>\n"
-            "    return false\n\n"
-            "def main : IO UInt32 := do\n"
-            '  let comparatorBin := (← IO.getEnv "COMPARATOR_BIN").getD "comparator"\n'
-            "  if !(← comparatorExists comparatorBin) then\n"
-            '    IO.eprintln s!"Failed to run comparator via `{comparatorBin}`."\n'
-            '    IO.eprintln "Make sure `comparator` is installed and on your `PATH`, or set `COMPARATOR_BIN=/path/to/comparator`."\n'
-            '    IO.eprintln "See the root repository README for comparator setup details, including landrun and lean4export."\n'
-            "    pure 1\n"
-            "  else\n"
-            "    try\n"
-            "      let child ← IO.Process.spawn {\n"
-            '        cmd := "lake"\n'
-            '        args := #["env", comparatorBin, "config.json"]\n'
-            "      }\n"
-            "      let exitCode ← child.wait\n"
-            "      pure exitCode\n"
-            "    catch err =>\n"
-            '      IO.eprintln s!"Failed to run comparator via `{comparatorBin}`."\n'
-            '      IO.eprintln "Make sure `comparator` is installed and on your `PATH`, or set `COMPARATOR_BIN=/path/to/comparator`."\n'
-            '      IO.eprintln "See the root repository README for comparator setup details, including landrun and lean4export."\n'
-            '      IO.eprintln s!"Original error: {err}"\n'
-            "      pure 1\n"
-        ),
+        "WorkspaceTest.lean": _WORKSPACE_TEST_LEAN,
         "config.json": json.dumps(config, indent=2) + "\n",
     }
     if challenge_deps is not None:
         files["ChallengeDeps.lean"] = challenge_deps
+    return files
+
+
+# Lines that appear in source modules to mark eval-problem holes; these get
+# stripped from the generated `Challenge.lean` so that submitters do not see
+# (or accidentally rely on) the `@[eval_problem]` attribute machinery.
+_EVAL_PROBLEM_ATTR_RE = re.compile(r"^\s*@\[eval_problem\]\s*\n", re.MULTILINE)
+_EVAL_TOOLS_IMPORT_RE = re.compile(r"^\s*import\s+EvalTools\.Markers\s*\n", re.MULTILINE)
+
+
+def _strip_problem_markers(source_text: str) -> str:
+    """Remove `@[eval_problem]` attributes and the `EvalTools.Markers` import
+    from source text destined for the generated `Challenge.lean`. The marker
+    machinery exists only on the trusted side and must not leak into a problem
+    workspace (which has no `EvalTools` dependency)."""
+    text = _EVAL_PROBLEM_ATTR_RE.sub("", source_text)
+    text = _EVAL_TOOLS_IMPORT_RE.sub("", text)
+    return text
+
+
+def _scan_header(lines: list[str]) -> tuple[int, int]:
+    """Walk top-of-file lines and classify each as part of the file header
+    (imports, blank lines, line comments `--`, block comments `/- ... -/`)
+    versus the body. Returns `(insert_after_imports, body_start)` line indices.
+
+    `insert_after_imports` is the index where a new `import` line should be
+    inserted (i.e. just after the last existing import; falls back to 0 if
+    there are no imports). `body_start` is the index of the first body line."""
+    in_block_comment = False
+    last_import_idx = -1
+    body_start = len(lines)
+    for idx, raw in enumerate(lines):
+        stripped = raw.strip()
+        if in_block_comment:
+            if "-/" in stripped:
+                in_block_comment = False
+            continue
+        if stripped == "":
+            continue
+        if stripped.startswith("--"):
+            continue
+        if stripped.startswith("/-"):
+            if "-/" not in stripped[2:]:
+                in_block_comment = True
+            continue
+        if stripped.startswith("import "):
+            last_import_idx = idx
+            continue
+        body_start = idx
+        break
+    insert_after_imports = last_import_idx + 1 if last_import_idx >= 0 else 0
+    return insert_after_imports, body_start
+
+
+def _inject_after_imports(source_text: str, line: str) -> str:
+    """Insert `line` (must end in a newline) just after the trailing `import`
+    line at the top of `source_text`. If there are no imports we prepend
+    `import Mathlib` followed by `line`."""
+    lines = source_text.splitlines(keepends=True)
+    insert_at, _ = _scan_header(lines)
+    if insert_at == 0 and not any(l.lstrip().startswith("import ") for l in lines):
+        return "import Mathlib\n" + line + source_text
+    return "".join(lines[:insert_at]) + line + "".join(lines[insert_at:])
+
+
+_TOP_LEVEL_NAMESPACE_RE = re.compile(r"^namespace\s+([A-Za-z_][\w.]*)")
+_END_NAMESPACE_RE = re.compile(r"^end\s+([A-Za-z_][\w.]*)")
+
+
+def _top_level_namespaces(body: str, user_namespace: str) -> list[str]:
+    """Return the names of top-level (depth-0) `namespace X` declarations in
+    `body` to `open` after `namespace Submission`, preserving source order
+    and removing duplicates. We exclude the user-declared namespace
+    (`user_namespace`, typically the source module's last path component)
+    because it is freshly created by the source — `open`ing it before the
+    `namespace user_namespace` line would fail with "unknown namespace".
+    Top-level namespaces that the source merely re-enters (e.g. Mathlib's
+    `AlgebraicGeometry`) DO need to be `open`ed, otherwise unqualified
+    references inside (e.g. `Spec`) won't resolve once we wrap the body in
+    `namespace Submission`."""
+    by_order: list[str] = []
+    seen: set[str] = set()
+    depth = 0
+    for raw in body.splitlines():
+        if raw.lstrip().startswith("--"):
+            continue
+        m = _TOP_LEVEL_NAMESPACE_RE.match(raw)
+        if m:
+            name = m.group(1)
+            if depth == 0 and name != user_namespace and name not in seen:
+                by_order.append(name)
+                seen.add(name)
+            depth += 1
+            continue
+        if _END_NAMESPACE_RE.match(raw):
+            depth -= 1
+    return by_order
+
+
+def _wrap_body_in_submission_namespace(source_text: str, user_namespace: str) -> str:
+    """Wrap everything after the source's import block in
+    `namespace Submission ... end Submission`. The Submission namespace lives
+    OUTSIDE any namespaces declared in the source, so a hole declared in
+    `namespace JacobianChallenge` becomes `Submission.JacobianChallenge.X`.
+
+    We also `open` every top-level namespace declared in the source so that
+    references inside (e.g. `Spec` inside `namespace AlgebraicGeometry`) keep
+    resolving — without the `open`, the body's `namespace AlgebraicGeometry`
+    would land in `Submission.AlgebraicGeometry`, which doesn't have `Spec`."""
+    lines = source_text.splitlines(keepends=True)
+    _, body_start = _scan_header(lines)
+    if body_start >= len(lines):
+        return source_text
+    head = "".join(lines[:body_start])
+    body = "".join(lines[body_start:])
+    if not body.endswith("\n"):
+        body += "\n"
+    opens = "".join(f"open {ns}\n" for ns in _top_level_namespaces(body, user_namespace))
+    return head + "\nnamespace Submission\n\n" + opens + body + "\nend Submission\n"
+
+
+def _hole_decl_signature(decl_text: str, basename: str) -> str:
+    """Strip the body off a sliced hole declaration so callers can append
+    their own body. `decl_text` is the source slice of the form
+
+        @[some_attr] def basename (args) : Type := <body>
+
+    or any other top-level form ending in `:= ...`. Returns the prefix up to
+    and including `:=`.
+    """
+    # Drop attributes (already stripped for Challenge but not necessarily
+    # for our hole-by-hole slicing).
+    text = _EVAL_PROBLEM_ATTR_RE.sub("", decl_text).strip()
+    # Find the LAST `:=` at top level. The declaration body is everything after.
+    # We trust that hole signatures don't contain `:=` (no `let ... :=` in a
+    # type, no anonymous constructors with `:=`). Holes' bodies are `sorry`
+    # so this is safe for the source files we generate from.
+    marker = ":="
+    idx = text.rfind(marker)
+    if idx < 0:
+        raise GenerationError(
+            f"Hole '{basename}' declaration has no `:=` to split: {text!r}"
+        )
+    prefix = text[:idx].rstrip()
+    return prefix + " := "
+
+
+def _render_workspace_multi_hole(
+    problem: ProblemSpec,
+    extracteds: list[ExtractedTheorem],
+    toolchain: str,
+    mathlib_dependency: DependencySpec,
+) -> dict[str, str]:
+    """Multi-hole rendering keeps the source's `variable`/`open`/`namespace`
+    structure intact so each hole's signature still type-checks. Three files
+    are produced from the same source, with body rewrites:
+
+    - `Challenge.lean`: source verbatim minus `@[eval_problem]` markers; all
+      hole bodies stay as `sorry`.
+    - `Solution.lean`: source verbatim with each hole's body rewritten to
+      `Submission.<full-namespaced-name>`. Comparator compares Challenge and
+      Solution by qualified hole name; both files preserve the source's
+      namespace structure so the names match.
+    - `Submission.lean`: source verbatim wrapped in `namespace Submission`,
+      with hole bodies left as `sorry` for the participant to fill in.
+      Submission's holes therefore live at `Submission.<full-namespaced-name>`.
+    """
+    source_path = module_source_path(problem.module)
+    if not source_path.is_file():
+        raise GenerationError(
+            f"Source file for module '{problem.module}' not found: {source_path}"
+        )
+    source_text = source_path.read_text(encoding="utf-8")
+
+    # Sort holes by start position so we can splice into the source text in a
+    # single forward pass (then iterate in reverse when applying replacements
+    # so earlier offsets stay valid).
+    holes_with_ranges = []
+    for extracted in extracteds:
+        full_name = extracted.declaration_name
+        start, end = offset_range_for_source_range(source_text, extracted.source_range)
+        holes_with_ranges.append((start, end, full_name, extracted.kind))
+    holes_with_ranges.sort()
+
+    # Split hole names into theorem_names vs definition_names per comparator's
+    # config schema. Both `def` and `instance` go in `definition_names`.
+    theorem_names: list[str] = []
+    definition_names: list[str] = []
+    for _start, _end, full_name, kind in holes_with_ranges:
+        if kind == "theorem":
+            theorem_names.append(full_name)
+        else:
+            definition_names.append(full_name)
+
+    challenge_body = _strip_problem_markers(source_text)
+    if not challenge_body.lstrip().startswith("import "):
+        challenge_body = "import Mathlib\n\n" + challenge_body
+
+    # Solution.lean: same as source, but each hole's body is replaced by
+    # `Submission.<full_name> <explicit-args>`. We splice replacements into
+    # the source from back to front so earlier offsets remain valid.
+    # Explicit args from the decl's leading binders are applied so the
+    # delegating call has the right type at the body position; implicit
+    # and instance args are inferred by Lean.
+    solution_text = source_text
+    for start, end, full_name, kind in reversed(holes_with_ranges):
+        decl_text = source_text[start:end]
+        basename = full_name.rsplit(".", maxsplit=1)[-1]
+        signature = _hole_decl_signature(decl_text, basename)
+        # Make Solution-side `def`/`instance` holes reducible so later decls in
+        # the same Solution.lean (e.g. a theorem hole that mentions a def hole
+        # in its statement) can defeq-unify their references with the
+        # corresponding `Submission.X` term that the theorem hole's body
+        # delegates to. Inject `@[reducible]` immediately before the
+        # declaration keyword so it sits AFTER the doc comment (Lean rejects
+        # `@[attr] /-- doc -/ def`).
+        if kind != "theorem":
+            keyword_pos = re.search(
+                rf"\b(?:def|instance|abbrev)\s+{re.escape(basename)}\b",
+                signature,
+            )
+            if keyword_pos is None:
+                raise GenerationError(
+                    f"Could not anchor `@[reducible]` injection in signature for hole '{full_name}'."
+                )
+            signature = (
+                signature[: keyword_pos.start()]
+                + "@[reducible] "
+                + signature[keyword_pos.start() :]
+            )
+        # Find the part of the decl text BETWEEN the basename and `:=`, which
+        # is the binder/return-type slice; pass it to the existing argument
+        # extractor.
+        # Anchor to the actual declaration keyword (`def`/`instance`/`theorem`)
+        # followed by the basename — otherwise an earlier `/-- doc comment that
+        # mentions {basename} -/` would steal the match.
+        keyword_match = re.search(
+            rf"\b(?:def|instance|theorem|opaque|lemma|abbrev|class|example)\s+{re.escape(basename)}\b",
+            decl_text,
+        )
+        if keyword_match is None:
+            raise GenerationError(
+                f"Could not locate basename '{basename}' in source decl for hole '{full_name}'."
+            )
+        between = decl_text[keyword_match.end():]
+        last_eq = between.rfind(":=")
+        if last_eq < 0:
+            raise GenerationError(
+                f"Source decl for hole '{full_name}' has no `:=` body marker."
+            )
+        statement = between[:last_eq]
+        explicit_args = explicit_binder_application_args(statement)
+        applied = f"Submission.{full_name}"
+        if explicit_args:
+            applied += " " + " ".join(explicit_args)
+        new_decl = signature + applied
+        solution_text = solution_text[:start] + new_decl + solution_text[end:]
+    solution_body = _strip_problem_markers(solution_text)
+    # Solution must `import Submission` (after the source's other imports) so
+    # that references to `Submission.X` resolve.
+    solution_body = _inject_after_imports(solution_body, "import Submission\n")
+
+    # Submission.lean: source verbatim wrapped in `namespace Submission`. The
+    # source's own imports stay at the top (above the namespace); we add
+    # `import Submission.Helpers` for participant convenience.
+    submission_text = _strip_problem_markers(source_text)
+    submission_text = _inject_after_imports(submission_text, "import Submission.Helpers\n")
+    submission_body = _wrap_body_in_submission_namespace(
+        submission_text, problem.module.rsplit(".", maxsplit=1)[-1]
+    )
+
+    readme_lines = [
+        f"# `{problem.id}`",
+        "",
+        problem.title,
+        "",
+        f"- Problem ID: `{problem.id}`",
+        f"- Test Problem: {'yes' if problem.test else 'no'}",
+        f"- Submitter: {problem.submitter}",
+        f"- Holes ({len(extracteds)}): "
+        + ", ".join(f"`{e.declaration_name}` ({e.kind})" for e in extracteds),
+    ]
+    if problem.notes:
+        readme_lines.append(f"- Notes: {problem.notes}")
+    if problem.source:
+        readme_lines.append(f"- Source: {problem.source}")
+    if problem.informal_solution:
+        readme_lines.append(f"- Informal solution: {problem.informal_solution}")
+    readme_lines.extend(
+        [
+            "",
+            "Do not modify `Challenge.lean` or `Solution.lean`. Those files are part of the",
+            "trusted benchmark and fixed by the repository.",
+            "",
+            "This is a multi-hole problem: the challenge declares multiple `def`s,",
+            "`instance`s, and/or `theorem`s as `sorry`. Fill all of them in",
+            "`Submission.lean` (under `namespace Submission`) for comparator to accept",
+            "your solution.",
+            "",
+            "Participants may use Mathlib freely. Any helper code not already available in",
+            "Mathlib must be inlined into the submission workspace.",
+            "",
+            "`lake test` runs comparator for this problem. The command expects a comparator",
+            "binary in `PATH`, or in the `COMPARATOR_BIN` environment variable.",
+        ]
+    )
+
+    config: dict[str, object] = {
+        "challenge_module": "Challenge",
+        "solution_module": "Solution",
+        "theorem_names": theorem_names,
+        "permitted_axioms": FIXED_AXIOMS,
+        "enable_nanoda": False,
+    }
+    if definition_names:
+        config["definition_names"] = definition_names
+
+    files = {
+        "README.md": "\n".join(readme_lines) + "\n",
+        "lean-toolchain": toolchain if toolchain.endswith("\n") else toolchain + "\n",
+        "lakefile.toml": (
+            f'name = "{problem.id}"\n'
+            + 'testDriver = "workspace_test"\n'
+            + 'defaultTargets = ["Challenge", "Solution", "Submission"]\n\n'
+            + "[leanOptions]\n"
+            + 'autoImplicit = false\n\n'
+            + "[[require]]\n"
+            + f'name = "{mathlib_dependency.name}"\n'
+            + f'git = "{mathlib_dependency.git}"\n'
+            + f'rev = "{mathlib_dependency.rev}"\n\n'
+            + "[[lean_lib]]\n"
+            + 'name = "Challenge"\n\n'
+            + "[[lean_lib]]\n"
+            + 'name = "Solution"\n\n'
+            + "[[lean_lib]]\n"
+            + 'name = "Submission"\n\n'
+            + "[[lean_exe]]\n"
+            + 'name = "workspace_test"\n'
+            + 'root = "WorkspaceTest"\n'
+        ),
+        "Challenge.lean": challenge_body if challenge_body.endswith("\n") else challenge_body + "\n",
+        "Solution.lean": solution_body,
+        "Submission.lean": submission_body,
+        "Submission/Helpers.lean": (
+            "namespace Submission.Helpers\n\n"
+            "end Submission.Helpers\n"
+        ),
+        "WorkspaceTest.lean": _WORKSPACE_TEST_LEAN,
+        "config.json": json.dumps(config, indent=2) + "\n",
+    }
     return files
 
 
@@ -883,7 +1294,7 @@ def generate(
     manifest_path: pathlib.Path,
     selected_problem_id: str | None,
     check: bool,
-    extractor: Callable[[ProblemSpec], ExtractedTheorem] = extract_theorem,
+    extractor: Callable[[ProblemSpec, str], ExtractedTheorem] = extract_one,
 ) -> None:
     problems = load_manifest(manifest_path)
     validate_problems(problems)
@@ -901,34 +1312,32 @@ def generate(
         if sync_mismatches:
             raise GenerationError("\n".join(sync_mismatches))
 
-    validate_theorem_proof_shape(problems)
+    validate_hole_shape(problems)
 
     toolchain = (REPO_ROOT / "lean-toolchain").read_text(encoding="utf-8")
     mathlib_dependency = load_root_mathlib_dependency()
 
     build_extractor(problems)
 
-    index_entries: list[dict[str, str]] = []
+    index_entries: list[dict[str, object]] = []
     mismatches: list[str] = []
     for problem in problems:
-        extracted = extractor(problem)
-        files = render_workspace(problem, extracted, toolchain, mathlib_dependency)
+        extracteds = [extractor(problem, hole) for hole in problem.holes]
+        files = render_workspace(problem, extracteds, toolchain, mathlib_dependency)
         problem_dir = GENERATED_ROOT / problem.id
         if check:
             mismatches.extend(check_workspace(problem_dir, files))
         else:
             write_workspace(problem_dir, files)
-        index_entries.append(
-            {
-                "id": problem.id,
-                "title": problem.title,
-                "test": problem.test,
-                "submitter": problem.submitter,
-                "module": problem.module,
-                "theorem": problem.theorem,
-                "generated_path": f"generated/{problem.id}",
-            }
-        )
+        index_entries.append({
+            "id": problem.id,
+            "title": problem.title,
+            "test": problem.test,
+            "submitter": problem.submitter,
+            "module": problem.module,
+            "holes": list(problem.holes),
+            "generated_path": f"generated/{problem.id}",
+        })
 
     if selected_problem_id is None:
         mismatches.extend(write_or_check_index(index_entries, check))

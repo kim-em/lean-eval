@@ -199,7 +199,7 @@ def validateSubmissionCmd : Cmd := `[Cli|
 
 def checkEvalWorkflowCmd : Cmd := `[Cli|
   "check-eval-workflow" VIA runCheckEvalWorkflowCmd;
-  "Run the end-to-end local workflow smoke test."
+  "Run the end-to-end local workflow self-check."
 ]
 
 def leanEvalCmd : Cmd := `[Cli|

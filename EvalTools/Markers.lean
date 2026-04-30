@@ -17,7 +17,11 @@ structure EvalProblemMetadata where
   title : String
   test : Bool
   moduleName : String
-  theoremName : String
+  /-- The names of the `@[eval_problem]`-tagged declarations in `moduleName` that
+  comprise this problem; comparator's `theorem_names` and `definition_names`
+  are derived from this list (split by declaration kind). At least one entry
+  is required. -/
+  holes : Array String
   submitter : String
   notes : Option String := none
   source : Option String := none
@@ -48,7 +52,14 @@ instance : DecodeToml EvalProblemMetadata where
     let id ← requireNonempty "id" (← t.decode `id)
     let title ← requireNonempty "title" (← t.decode `title)
     let moduleName ← requireNonempty "module" (← t.decode `module)
-    let theoremName ← requireNonempty "theorem" (← t.decode `theorem)
+    let holes : Array String ← t.decode `holes
+    if holes.isEmpty then
+      throwDecodeErrorAt Syntax.missing
+        s!"Manifest entry `{id}` has empty `holes` array; list at least one declaration."
+    for h in holes do
+      if h.isEmpty then
+        throwDecodeErrorAt Syntax.missing
+          s!"Manifest entry `{id}` has an empty string in `holes`."
     let submitter ← requireNonempty "submitter" (← t.decode `submitter)
     let notes? : Option String ← t.decode? `notes
     let source? : Option String ← t.decode? `source
@@ -58,7 +69,7 @@ instance : DecodeToml EvalProblemMetadata where
       title := title
       test := ← t.decode `test
       moduleName := moduleName
-      theoremName := theoremName
+      holes := holes
       submitter := submitter
       notes := notes?.bind fun s => if s.isEmpty then none else some s
       source := source?.bind fun s => if s.isEmpty then none else some s
@@ -94,11 +105,12 @@ def parseManifestMetadata (contents : String) (fileName : String := manifestRela
     if seenIds.contains metadata.id then
       return Except.error s!"Duplicate problem id `{metadata.id}` in `manifests/problems.toml`."
     seenIds := seenIds.insert metadata.id
-    let theoremKey := (metadata.moduleName, metadata.theoremName)
-    if seenRefs.contains theoremKey then
-      return Except.error
-        s!"Duplicate theorem reference `{metadata.moduleName}:{metadata.theoremName}` in `manifests/problems.toml`."
-    seenRefs := seenRefs.insert theoremKey
+    for hole in metadata.holes do
+      let key := (metadata.moduleName, hole)
+      if seenRefs.contains key then
+        return Except.error
+          s!"Duplicate hole reference `{metadata.moduleName}:{hole}` in `manifests/problems.toml`."
+      seenRefs := seenRefs.insert key
     entries := entries.push metadata
   return Except.ok entries
 
@@ -107,20 +119,20 @@ def moduleNameForDecl (env : Environment) (declName : Name) : String :=
   | some idx => toString <| env.header.moduleNames[idx.toNat]!
   | none => toString env.mainModule
 
-def theoremMatches (declName : Name) (theoremField : String) : Bool :=
-  theoremField == declName.toString || theoremField == declName.getString!
+def holeMatches (declName : Name) (holeField : String) : Bool :=
+  holeField == declName.toString || holeField == declName.getString!
 
 def validateMatchingManifestEntry
     (declName : Name) (entries : Array EvalProblemMetadata) (moduleName : String) :
     Except String EvalProblemMetadata := do
   let matchingEntries := entries.filter fun entry =>
-    entry.moduleName == moduleName && theoremMatches declName entry.theoremName
+    entry.moduleName == moduleName && entry.holes.any (holeMatches declName ·)
   if matchingEntries.isEmpty then
     throw
-      s!"The theorem `{declName}` is marked with @[eval_problem], but `manifests/problems.toml` has no matching `theorem = ...` entry.\nAdd a corresponding problem entry to the manifest."
+      s!"The declaration `{declName}` is marked with @[eval_problem], but no entry in `manifests/problems.toml` lists it in `holes`.\nAdd a corresponding problem entry to the manifest."
   if matchingEntries.size > 1 then
     throw
-      s!"The theorem `{declName}` is marked with @[eval_problem], but `manifests/problems.toml` has multiple matching entries in module `{moduleName}`."
+      s!"The declaration `{declName}` is marked with @[eval_problem], but `manifests/problems.toml` has multiple matching entries in module `{moduleName}`."
   match matchingEntries[0]? with
   | some metadata => return metadata
   | none => throw "internal error: missing manifest entry after nonempty match set"
@@ -134,7 +146,7 @@ def formatManifestHover (metadata : EvalProblemMetadata) : String :=
       s!"- title: {metadata.title}",
       s!"- test: `{metadata.test}`",
       s!"- module: `{metadata.moduleName}`",
-      s!"- theorem: `{metadata.theoremName}`",
+      s!"- holes: {", ".intercalate (metadata.holes.toList.map (s!"`{·}`"))}",
       s!"- submitter: {metadata.submitter}"
     ]
     if let some notes := metadata.notes then
@@ -253,9 +265,14 @@ def ensureEvalProblemManifestEntry (declName : Name) : AttrM EvalProblemMetadata
       validateEvalProblemBinders declName info.type
   | some (.opaqueInfo info) =>
       validateEvalProblemBinders declName info.type
+  | some (.defnInfo _) =>
+      -- Definition / instance holes: comparator only checks name, type, universe
+      -- levels, and safety of the hole, so the binder-shape restriction we
+      -- impose on theorems (so they can be applied positionally) does not apply.
+      pure ()
   | _ =>
       throwError
-        "The attribute @[eval_problem] may only be applied to theorem or opaque theorem declarations, but `{declName}` is not one."
+        "The attribute @[eval_problem] may only be applied to theorem, opaque, def, or instance declarations, but `{declName}` is not one."
   let cwd ← IO.currentDir
   let some manifestPath ← findManifestPath? cwd
     | throwError
