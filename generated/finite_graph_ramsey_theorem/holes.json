@@ -1,0 +1,12 @@
+{
+  "id": "finite_graph_ramsey_theorem",
+  "module": "LeanEval.Combinatorics.Ramsey",
+  "holes": [
+    {
+      "name": "LeanEval.Combinatorics.finite_graph_ramsey_theorem",
+      "basename": "finite_graph_ramsey_theorem",
+      "kind": "theorem",
+      "body": "theorem finite_graph_ramsey_theorem :\n    \u2200 r s : \u2115, 2 \u2264 r \u2192 2 \u2264 s \u2192 \u2203 n : \u2115, \u2200 G : SimpleGraph (Fin n), \u00ac G.CliqueFree r \u2228 \u00ac G\u1d9c.CliqueFree s := by\n  sorry"
+    }
+  ]
+}

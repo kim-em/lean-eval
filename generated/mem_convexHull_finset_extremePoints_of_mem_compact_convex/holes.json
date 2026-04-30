@@ -1,0 +1,12 @@
+{
+  "id": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
+  "module": "LeanEval.ConvexGeometry.MinkowskiCaratheodory",
+  "holes": [
+    {
+      "name": "LeanEval.ConvexGeometry.mem_convexHull_finset_extremePoints_of_mem_compact_convex",
+      "basename": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
+      "kind": "theorem",
+      "body": "theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex\n    {E : Type*} [NormedAddCommGroup E] [NormedSpace \u211d E] [FiniteDimensional \u211d E]\n    {s : Set E} {x : E}\n    (hscomp : IsCompact s)\n    (hsconv : Convex \u211d s)\n    (hx : x \u2208 s) :\n    \u2203 t : Finset E,\n      (\u2191t : Set E) \u2286 s.extremePoints \u211d \u2227\n      t.card \u2264 Module.finrank \u211d E + 1 \u2227\n      x \u2208 convexHull \u211d (\u2191t : Set E) := by\n  sorry"
+    }
+  ]
+}

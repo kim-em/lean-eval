@@ -1,0 +1,12 @@
+{
+  "id": "chudnovsky_formula_for_pi_inv",
+  "module": "LeanEval.Analysis.Chudnovsky",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.chudnovsky_formula_for_pi_inv",
+      "basename": "chudnovsky_formula_for_pi_inv",
+      "kind": "theorem",
+      "body": "theorem chudnovsky_formula_for_pi_inv :\n    chudnovskySum = \u03c0\u207b\u00b9 := by\n  sorry"
+    }
+  ]
+}

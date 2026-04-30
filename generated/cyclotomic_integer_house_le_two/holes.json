@@ -1,0 +1,12 @@
+{
+  "id": "cyclotomic_integer_house_le_two",
+  "module": "LeanEval.NumberTheory.SmallHouse",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.cyclotomic_integer_house_le_two",
+      "basename": "cyclotomic_integer_house_le_two",
+      "kind": "theorem",
+      "body": "theorem cyclotomic_integer_house_le_two\n    {K : Type*} [Field K] [NumberField K] [Algebra \u211a K]\n    (n : \u2115) [NeZero n] [IsCyclotomicExtension {n} \u211a K] {\u03b2 : K}\n    (h\u03b2_int : IsIntegral \u2124 \u03b2)\n    (h\u03b2_real : \u03b2 \u2208 NumberField.maximalRealSubfield K) :\n    house \u03b2 \u2264 2 \u2192\n      house \u03b2 = 2 \u2228 \u2203 m : \u2115, 0 < m \u2227 house \u03b2 = 2 * Real.cos (Real.pi / m) := by\n  sorry"
+    }
+  ]
+}

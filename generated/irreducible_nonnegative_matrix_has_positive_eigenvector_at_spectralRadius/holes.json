@@ -1,0 +1,12 @@
+{
+  "id": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
+  "module": "LeanEval.LinearAlgebra.PerronFrobenius",
+  "holes": [
+    {
+      "name": "LeanEval.LinearAlgebra.irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
+      "basename": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
+      "kind": "theorem",
+      "body": "theorem irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius\n    {n : Type*} [Fintype n] [DecidableEq n]\n    (A : Matrix n n \u211d)\n    (hA : A.IsIrreducible) :\n    \u2203 v : n \u2192 \u211d,\n      Module.End.HasEigenvector (Matrix.toLin' A) (spectralRadius \u211d A).toReal v \u2227\n      (\u2200 i, 0 < v i) := by\n  sorry"
+    }
+  ]
+}

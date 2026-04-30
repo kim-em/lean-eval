@@ -1,0 +1,12 @@
+{
+  "id": "pi1_circle_mulEquiv_int",
+  "module": "LeanEval.Topology.HomotopyGroups",
+  "holes": [
+    {
+      "name": "LeanEval.Topology.pi1_circle_mulEquiv_int",
+      "basename": "pi1_circle_mulEquiv_int",
+      "kind": "theorem",
+      "body": "/-- The fundamental group of the complex unit circle is infinite cyclic. -/\ntheorem pi1_circle_mulEquiv_int :\n    Nonempty (HomotopyGroup.Pi 1 Circle (1 : Circle) \u2243* Multiplicative \u2124) := by\n  sorry"
+    }
+  ]
+}

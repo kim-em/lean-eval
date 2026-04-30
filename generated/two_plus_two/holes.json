@@ -1,0 +1,12 @@
+{
+  "id": "two_plus_two",
+  "module": "LeanEval.EasyProblems",
+  "holes": [
+    {
+      "name": "LeanEval.two_plus_two_eq_four",
+      "basename": "two_plus_two_eq_four",
+      "kind": "theorem",
+      "body": "theorem two_plus_two_eq_four : (2 : Nat) + 2 = 4 := by\n  sorry"
+    }
+  ]
+}

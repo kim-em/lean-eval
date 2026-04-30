@@ -1,0 +1,12 @@
+{
+  "id": "dvd_card_connectedComponent_markoffGraph",
+  "module": "LeanEval.Combinatorics.MarkoffGraph",
+  "holes": [
+    {
+      "name": "LeanEval.Combinatorics.dvd_card_connectedComponent_markoffGraph",
+      "basename": "dvd_card_connectedComponent_markoffGraph",
+      "kind": "theorem",
+      "body": "/-- For prime `p > 3`, every connected component of the nonzero Markoff graph over `ZMod p`\nhas cardinality divisible by `p`. -/\ntheorem dvd_card_connectedComponent_markoffGraph\n    {p : \u2115} (hp : Nat.Prime p) (hgt : 3 < p) :\n    \u2200 c : (markoffGraph p).ConnectedComponent, p \u2223 Nat.card c := by\n  sorry"
+    }
+  ]
+}

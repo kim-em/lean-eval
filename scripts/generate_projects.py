@@ -33,6 +33,7 @@ EXPECTED_FILES = {
     "Submission/Helpers.lean",
     "WorkspaceTest.lean",
     "config.json",
+    "holes.json",
 }
 IGNORED_PATH_NAMES = {".lake", "build", ".cache", "lake-manifest.json"}
 
@@ -695,6 +696,43 @@ def explicit_binder_application_args(theorem_statement: str) -> list[str]:
     return args
 
 
+def build_holes_metadata(
+    problem: ProblemSpec,
+    extracteds: list[ExtractedTheorem],
+) -> str:
+    """Build the JSON content for `generated/<id>/holes.json`.
+
+    Captures, per `@[eval_problem]` hole, the fully-qualified declaration name,
+    its short basename, its kind (`theorem` / `def` / `instance` / `opaque`),
+    and the trimmed source body (with the `@[eval_problem]` attribute stripped,
+    matching what ends up in `Challenge.lean`). Order matches the manifest's
+    `holes = [...]`. Downstream consumers (e.g. the leaderboard site) read this
+    instead of re-parsing source.
+    """
+    source_path = module_source_path(problem.module)
+    if not source_path.is_file():
+        raise GenerationError(
+            f"Source file for module '{problem.module}' not found: {source_path}"
+        )
+    source_text = source_path.read_text(encoding="utf-8")
+    holes_payload: list[dict[str, str]] = []
+    for extracted in extracteds:
+        body = extract_source_text_for_range(source_text, extracted.source_range)
+        body = _strip_problem_markers(body).strip()
+        holes_payload.append({
+            "name": extracted.declaration_name,
+            "basename": local_theorem_name(extracted),
+            "kind": extracted.kind,
+            "body": body,
+        })
+    payload = {
+        "id": problem.id,
+        "module": problem.module,
+        "holes": holes_payload,
+    }
+    return json.dumps(payload, indent=2) + "\n"
+
+
 def render_workspace(
     problem: ProblemSpec,
     extracteds: list[ExtractedTheorem],
@@ -716,9 +754,11 @@ def render_workspace(
     """
     use_multi_hole = problem.is_multi_hole or extracteds[0].kind != "theorem"
     if use_multi_hole:
-        return _render_workspace_multi_hole(
+        files = _render_workspace_multi_hole(
             problem, extracteds, toolchain, mathlib_dependency
         )
+        files["holes.json"] = build_holes_metadata(problem, extracteds)
+        return files
     [extracted] = extracteds
     theorem_name = local_theorem_name(extracted)
     theorem_statement = extract_statement_text(problem, extracted)
@@ -844,6 +884,7 @@ def render_workspace(
     }
     if challenge_deps is not None:
         files["ChallengeDeps.lean"] = challenge_deps
+    files["holes.json"] = build_holes_metadata(problem, extracteds)
     return files
 
 

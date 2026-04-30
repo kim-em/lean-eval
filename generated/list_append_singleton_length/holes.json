@@ -1,0 +1,12 @@
+{
+  "id": "list_append_singleton_length",
+  "module": "LeanEval.EasyProblems",
+  "holes": [
+    {
+      "name": "LeanEval.list_append_singleton_length",
+      "basename": "list_append_singleton_length",
+      "kind": "theorem",
+      "body": "theorem list_append_singleton_length :\n    (([1, 2] : List Nat).append [3]).length = 3 := by\n  sorry"
+    }
+  ]
+}

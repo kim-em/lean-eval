@@ -1,0 +1,12 @@
+{
+  "id": "riemann_hypothesis_iff_lagarias_elementary_criterion",
+  "module": "LeanEval.NumberTheory.Lagarias",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.riemann_hypothesis_iff_lagarias_elementary_criterion",
+      "basename": "riemann_hypothesis_iff_lagarias_elementary_criterion",
+      "kind": "theorem",
+      "body": "theorem riemann_hypothesis_iff_lagarias_elementary_criterion :\n    RiemannHypothesis \u2194 LagariasElementaryCriterion := by\n  sorry"
+    }
+  ]
+}

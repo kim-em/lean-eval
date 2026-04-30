@@ -1,0 +1,12 @@
+{
+  "id": "substInv_X_sub_X_sq_eq_catalan",
+  "module": "LeanEval.Combinatorics.CatalanSubstInv",
+  "holes": [
+    {
+      "name": "LeanEval.Combinatorics.substInv_X_sub_X_sq_eq_catalan",
+      "basename": "substInv_X_sub_X_sq_eq_catalan",
+      "kind": "theorem",
+      "body": "theorem substInv_X_sub_X_sq_eq_catalan (n : \u2115) :\n    haveI : Invertible (coeff 1 ((X : \u211a\u27e6X\u27e7) - X ^ 2)) := by\n      simp [coeff_X, coeff_X_pow]; exact invertibleOne\n    coeff (n + 1) (substInv ((X : \u211a\u27e6X\u27e7) - X ^ 2)) =\n      (Nat.choose (2 * n) n : \u211a) / (\u2191n + 1) := by\n  sorry"
+    }
+  ]
+}
