@@ -192,9 +192,9 @@ Comparator setup also requires the upstream external tools, including `landrun` 
 (`go install github.com/zouuup/landrun/cmd/landrun@main`); the latest tagged
 release (v0.1.15) is missing fixes that comparator's sandbox relies on.
 
-Until Mathlib bumps past `v4.30.0-rc1`, CI pins `lean4export` to tag
-`v4.30.0-rc1` and `comparator` to commit `0ff36dde148dfea82dbdcf3baf91d6e1a8195554`
-so the toolchain matches the workspaces.
+CI pins `lean4export` to tag `v4.30.0-rc2` and `comparator` to commit
+`71b52ec29e06d4b7d882726553b1ceb99a2499e0` (which adds support for
+`def`-shaped holes).
 
 ### 6. Check your local score
 
