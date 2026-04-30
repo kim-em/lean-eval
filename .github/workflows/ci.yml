@@ -135,29 +135,40 @@ jobs:
       - name: Run Eval Workflow Check
         run: python scripts/check_eval_workflow.py
 
-      - name: Verify Generated Output
-        run: python scripts/generate_projects.py --check
-
-      # Detect whether generated/ files changed to skip the expensive
-      # workspace build step on PRs that only touch problem sources or
-      # manifests.
-      - name: Detect generated workspace changes
+      # Decide whether to run workspace generation/build. Source-only PRs
+      # regenerate generated/ in the runner's working tree (the regenerate-main
+      # workflow is the only thing that commits generated/ to main); solver PRs
+      # build the committed tree as-is.
+      - name: Detect changes
         id: changes
         run: |
           BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
           if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            echo "generated_changed=true" >> "$GITHUB_OUTPUT"
-          elif git diff --name-only "$BASE"..HEAD | grep -q '^generated/'; then
+            echo "source_changed=true" >> "$GITHUB_OUTPUT"
             echo "generated_changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "generated_changed=false" >> "$GITHUB_OUTPUT"
+            CHANGED=$(git diff --name-only "$BASE"..HEAD)
+            if echo "$CHANGED" | grep -Eq '^(LeanEval/|EvalTools/|manifests/problems\.toml$|scripts/generate_projects\.py$|lakefile\.toml$|lean-toolchain$)'; then
+              echo "source_changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "source_changed=false" >> "$GITHUB_OUTPUT"
+            fi
+            if echo "$CHANGED" | grep -q '^generated/'; then
+              echo "generated_changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "generated_changed=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
+
+      - name: Regenerate workspaces from source
+        if: steps.changes.outputs.source_changed == 'true'
+        run: python scripts/generate_projects.py
 
       # Download Mathlib cache once in the first workspace, then hard-link
       # its .lake/packages tree into every other workspace so that each
       # subsequent `lake build` skips the ~2 GB download + decompression.
       - name: Prepare shared Mathlib cache for workspaces
-        if: steps.changes.outputs.generated_changed == 'true'
+        if: steps.changes.outputs.source_changed == 'true' || steps.changes.outputs.generated_changed == 'true'
         run: |
           set -euo pipefail
           FIRST=$(find generated -maxdepth 1 -mindepth 1 -type d -exec test -f '{}/lakefile.toml' \; -print | sort | head -1)
@@ -178,5 +189,5 @@ jobs:
           done
 
       - name: Build Generated Workspaces
-        if: steps.changes.outputs.generated_changed == 'true'
+        if: steps.changes.outputs.source_changed == 'true' || steps.changes.outputs.generated_changed == 'true'
         run: python scripts/check_generated_builds.py

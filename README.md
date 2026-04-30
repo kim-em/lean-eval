@@ -71,7 +71,7 @@ The required fields are:
 - `theorem`
 - `submitter`
 
-### 4. Validate the authored source of truth
+### 4. Validate the authored source of truth (optional)
 
 ```bash
 lake exe lean-eval validate-manifest
@@ -80,40 +80,22 @@ lake exe lean-eval check-problem-build
 
 `validate-manifest` checks that `@[eval_problem]` declarations and manifest entries
 match. `check-problem-build` builds the problem modules so warning-producing Lean changes
-do not slip through.
+do not slip through. Both are cheap and catch the most common mistakes before a CI
+roundtrip.
 
-### 5. Regenerate comparator workspaces
+### 5. Open a PR
 
-Generate everything:
+That's it — push your branch and open a PR. CI regenerates the comparator workspaces
+under `generated/` and verifies they build, so you do not need to commit anything
+under `generated/` yourself. Once the PR merges, a separate workflow regenerates
+`generated/` on `main` and pushes the result.
 
-```bash
-lake exe lean-eval generate
-```
-
-Generate one problem only:
+If CI fails with a generation or build error, you'll need to fix the source. The
+fastest local equivalent is:
 
 ```bash
 lake exe lean-eval generate --problem my_new_problem
-```
-
-Check whether committed generated output is stale:
-
-```bash
-lake exe lean-eval generate --check
-```
-
-### 6. Build the generated workspaces
-
-For one workspace:
-
-```bash
 lake exe lean-eval check-generated-builds --problem my_new_problem
-```
-
-For all generated workspaces:
-
-```bash
-lake exe lean-eval check-generated-builds
 ```
 
 ## Quick Start For Solvers
