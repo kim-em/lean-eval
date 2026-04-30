@@ -71,7 +71,7 @@ def _write_manifest(path: pathlib.Path, problem_ids: list[str]) -> None:
                 title = "{pid}"
                 test = false
                 module = "Fake.{pid}"
-                theorem = "{pid}"
+                holes = ["{pid}"]
                 submitter = "tester"
                 """
             )

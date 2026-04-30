@@ -5,7 +5,7 @@ id = "two_plus_two"
 title = "2 + 2 = 4"
 test = true
 module = "LeanEval.EasyProblems"
-theorem = "two_plus_two_eq_four"
+holes = ["two_plus_two_eq_four"]
 submitter = "Kim Morrison"
 notes = "An easy problem to get you on the leaderboard."
 source = "Internal starter problem."
@@ -16,7 +16,7 @@ id = "ci_regenerate_main_check"
 title = "CI regenerate-main check"
 test = true
 module = "LeanEval.EasyProblems"
-theorem = "ci_regenerate_main_check"
+holes = ["ci_regenerate_main_check"]
 submitter = "Kim Morrison"
 notes = "Internal trivial problem used to exercise the regenerate-main workflow end-to-end."
 source = "Internal CI check."
@@ -27,7 +27,7 @@ id = "list_append_singleton_length"
 title = "Appending a singleton increases the list length"
 test = true
 module = "LeanEval.EasyProblems"
-theorem = "list_append_singleton_length"
+holes = ["list_append_singleton_length"]
 submitter = "Kim Morrison"
 notes = "A simple list problem that exercises notation in generated files."
 source = "Internal starter problem."
@@ -38,7 +38,7 @@ id = "chudnovsky_formula_for_pi_inv"
 title = "Chudnovsky formula for pi inverse"
 test = false
 module = "LeanEval.Analysis.Chudnovsky"
-theorem = "chudnovsky_formula_for_pi_inv"
+holes = ["chudnovsky_formula_for_pi_inv"]
 submitter = "Kim Morrison"
 notes = "Uses the existing Mathlib definition of the Chudnovsky series and asks for the missing identity with pi inverse."
 source = "https://link.springer.com/article/10.1007/s40316-018-0102-6"
@@ -49,7 +49,7 @@ id = "pi1_circle_mulEquiv_int"
 title = "pi_1 of the circle is Z"
 test = false
 module = "LeanEval.Topology.HomotopyGroups"
-theorem = "pi1_circle_mulEquiv_int"
+holes = ["pi1_circle_mulEquiv_int"]
 submitter = "Kim Morrison"
 notes = "Computes the fundamental group of the complex unit circle."
 source = "Classical theorem in algebraic topology."
@@ -60,7 +60,7 @@ id = "finite_graph_ramsey_theorem"
 title = "Finite Ramsey theorem for graphs"
 test = false
 module = "LeanEval.Combinatorics.Ramsey"
-theorem = "finite_graph_ramsey_theorem"
+holes = ["finite_graph_ramsey_theorem"]
 submitter = "Kim Morrison"
 notes = "States finite Ramsey existence for red/blue edge colourings of complete graphs, encoded by a graph and its complement."
 source = "Classical theorem in Ramsey theory."
@@ -71,7 +71,7 @@ id = "substInv_X_sub_X_sq_eq_catalan"
 title = "Catalan generating function via compositional inversion"
 test = false
 module = "LeanEval.Combinatorics.CatalanSubstInv"
-theorem = "substInv_X_sub_X_sq_eq_catalan"
+holes = ["substInv_X_sub_X_sq_eq_catalan"]
 submitter = "Kim Morrison"
 notes = "The compositional inverse of X - X² is the generating function for Catalan numbers. This is a classical application of Lagrange inversion in enumerative combinatorics, connecting formal power series inversion to Dyck paths, binary trees, and triangulations."
 source = "E. Catalan, Note sur une équation aux différences finies, 1838; J.-L. Lagrange, Nouvelle méthode pour résoudre les équations littérales, 1770."
@@ -82,7 +82,7 @@ id = "riemann_hypothesis_iff_lagarias_elementary_criterion"
 title = "Lagarias criterion is equivalent to RH"
 test = false
 module = "LeanEval.NumberTheory.Lagarias"
-theorem = "riemann_hypothesis_iff_lagarias_elementary_criterion"
+holes = ["riemann_hypothesis_iff_lagarias_elementary_criterion"]
 submitter = "Kim Morrison"
 notes = "Lagarias' elementary divisor-sum criterion stated using Mathlib's RiemannHypothesis, harmonic numbers, and sigma notation."
 source = "https://arxiv.org/abs/math/0008177"
@@ -93,7 +93,7 @@ id = "dvd_card_connectedComponent_markoffGraph"
 title = "Chen theorem for Markoff graphs"
 test = false
 module = "LeanEval.Combinatorics.MarkoffGraph"
-theorem = "dvd_card_connectedComponent_markoffGraph"
+holes = ["dvd_card_connectedComponent_markoffGraph"]
 submitter = "Kim Morrison"
 notes = "For prime p > 3, every connected component of the nonzero Markoff graph over ZMod p has cardinality divisible by p."
 source = "https://link.springer.com/article/10.1007/s00222-025-01346-9"
@@ -104,7 +104,7 @@ id = "mulCayley_connected_iff_closure_eq_top"
 title = "Cayley graph connected iff generators generate the group"
 test = false
 module = "LeanEval.Combinatorics.CayleyConnected"
-theorem = "mulCayley_connected_iff_closure_eq_top"
+holes = ["mulCayley_connected_iff_closure_eq_top"]
 submitter = "Kim Morrison"
 notes = "A foundational result in geometric group theory using the newly defined Cayley graph. Connectivity of the Cayley graph is equivalent to the generating set S generating G as a group."
 source = "A. Cayley, On the theory of groups, as depending on the symbolic equation θ^n = 1, 1878."
@@ -115,7 +115,7 @@ id = "pi3_sphere_two_mulEquiv_int"
 title = "pi_3 of the 2-sphere is Z"
 test = false
 module = "LeanEval.Topology.HomotopyGroups"
-theorem = "pi3_sphere_two_mulEquiv_int"
+holes = ["pi3_sphere_two_mulEquiv_int"]
 submitter = "Kim Morrison"
 notes = "The classical computation pi_3(S^2) = Z, with an explicit basepoint."
 source = "Classical theorem in algebraic topology."
@@ -126,7 +126,7 @@ id = "pin_sphere_n_mulEquiv_int"
 title = "pi_n of the n-sphere is Z"
 test = false
 module = "LeanEval.Topology.HomotopyGroups"
-theorem = "pin_sphere_n_mulEquiv_int"
+holes = ["pin_sphere_n_mulEquiv_int"]
 submitter = "Kim Morrison"
 notes = "The diagonal sphere homotopy-group computation pi_n(S^n) = Z for n at least 1."
 source = "Classical theorem in algebraic topology."
@@ -137,7 +137,7 @@ id = "pi_succ_sphere_n_mulEquiv_zmod_two"
 title = "pi_(n+1) of S^n is Z/2 for n at least 3"
 test = false
 module = "LeanEval.Topology.HomotopyGroups"
-theorem = "pi_succ_sphere_n_mulEquiv_zmod_two"
+holes = ["pi_succ_sphere_n_mulEquiv_zmod_two"]
 submitter = "Kim Morrison"
 notes = "A concrete stable-family homotopy-group computation."
 source = "Classical theorem in unstable homotopy theory."
@@ -148,7 +148,7 @@ id = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
 title = "Burnside p^a q^b theorem"
 test = false
 module = "LeanEval.GroupTheory.Burnside"
-theorem = "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
+holes = ["finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"]
 submitter = "Kim Morrison"
 notes = "Burnside's theorem that a finite group of order p^a q^b is solvable."
 source = "Classical theorem in finite group theory."
@@ -159,7 +159,7 @@ id = "rouche_logCounting_zero_eq"
 title = "Rouche theorem via zero counting"
 test = false
 module = "LeanEval.ComplexAnalysis.Rouche"
-theorem = "rouche_logCounting_zero_eq"
+holes = ["rouche_logCounting_zero_eq"]
 submitter = "Kim Morrison"
 notes = "Phrases Rouché's theorem as equality of zero-counting functions for f and f + g."
 source = "Classical theorem in complex analysis."
@@ -170,7 +170,7 @@ id = "mem_convexHull_finset_extremePoints_of_mem_compact_convex"
 title = "Minkowski-Caratheodory theorem"
 test = false
 module = "LeanEval.ConvexGeometry.MinkowskiCaratheodory"
-theorem = "mem_convexHull_finset_extremePoints_of_mem_compact_convex"
+holes = ["mem_convexHull_finset_extremePoints_of_mem_compact_convex"]
 submitter = "Kim Morrison"
 notes = "Finite-dimensional compact convex sets are generated by their extreme points, with a finrank + 1 bound."
 source = "Classical theorem in convex geometry."
@@ -181,7 +181,7 @@ id = "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
 title = "Perron-Frobenius for irreducible nonnegative matrices"
 test = false
 module = "LeanEval.LinearAlgebra.PerronFrobenius"
-theorem = "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
+holes = ["irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"]
 submitter = "Kim Morrison"
 notes = "A Perron-Frobenius style eigenvector existence statement at the spectral radius."
 source = "Classical theorem in linear algebra."
@@ -192,7 +192,7 @@ id = "exists_complementary_polynomial_on_unit_circle"
 title = "Complementary polynomial on the unit circle"
 test = false
 module = "LeanEval.ComplexAnalysis.ComplementaryPolynomials"
-theorem = "exists_complementary_polynomial_on_unit_circle"
+holes = ["exists_complementary_polynomial_on_unit_circle"]
 submitter = "Kim Morrison"
 notes = "If a complex polynomial has modulus at most 1 on the unit circle, then there is a same-degree complementary polynomial whose squared moduli add to 1 on the circle."
 source = "https://link.springer.com/article/10.1007/s00220-025-05302-9"
@@ -203,7 +203,7 @@ id = "isStarNormal_mul_of_commute"
 title = "Product of commuting normal elements is normal"
 test = false
 module = "LeanEval.Algebra.NormalProduct"
-theorem = "isStarNormal_mul_of_commute"
+holes = ["isStarNormal_mul_of_commute"]
 submitter = "Kim Morrison"
 notes = "Uses the Fuglede-Putnam-Rosenblum theorem to show all four of a, star a, b, star b pairwise commute, then verifies the normality condition by direct computation."
 source = "B. Fuglede, A commutativity theorem for normal operators, 1950."
@@ -214,7 +214,7 @@ id = "posSemidef_map_exp"
 title = "Entrywise exponential of a PSD matrix is PSD"
 test = false
 module = "LeanEval.LinearAlgebra.EntrywiseExpPSD"
-theorem = "posSemidef_map_exp"
+holes = ["posSemidef_map_exp"]
 submitter = "Kim Morrison"
 notes = "Part of the Schur-Polya-Loewner theory of entrywise functions preserving PSD. The proof uses the Schur product theorem iteratively: exp_⊙(A) = ∑ A^{⊙k}/k!, each Hadamard power is PSD, and the convergent series of PSD matrices is PSD."
 source = "I.J. Schoenberg, Positive definite functions on spheres, 1942."
@@ -225,7 +225,7 @@ id = "oppenheim_inequality"
 title = "Oppenheim's inequality for Hadamard products"
 test = false
 module = "LeanEval.LinearAlgebra.Oppenheim"
-theorem = "oppenheim_inequality"
+holes = ["oppenheim_inequality"]
 submitter = "Kim Morrison"
 notes = "Oppenheim's 1930 inequality: for PSD matrices A, B, det(A ⊙ B) ≥ det(A) · ∏ᵢ Bᵢᵢ. Uses the Schur product theorem (newly formalized) as a key ingredient."
 source = "I. Schur, Bemerkungen zur Theorie der beschränkten Bilinearformen, 1911; A. Oppenheim, Inequalities connected with definite Hermitian forms, 1930."
@@ -236,7 +236,7 @@ id = "vonNeumann_doubleCommutant_tfae"
 title = "von Neumann double commutant theorem"
 test = false
 module = "LeanEval.Analysis.VonNeumannDoubleCommutant"
-theorem = "vonNeumann_doubleCommutant_tfae"
+holes = ["vonNeumann_doubleCommutant_tfae"]
 submitter = "Kim Morrison"
 notes = "The classical double commutant theorem: for a unital *-subalgebra of bounded operators on a complex Hilbert space, equality with the double commutant is equivalent to closedness in the weak operator topology and to closedness in the strong operator topology. WOT and SOT live on Mathlib's irreducible type copies of H →L[ℂ] H (`ContinuousLinearMapWOT` and `PointwiseConvergenceCLM`), so each closure condition is phrased on the image of the carrier under the canonical inclusion."
 source = "J. von Neumann, Zur Algebra der Funktionaloperationen und Theorie der normalen Operatoren, Math. Ann. 102 (1930), 370-427."
@@ -247,7 +247,7 @@ id = "symAction_range_eq_centralizer_glAction"
 title = "Schur-Weyl duality: S_k image equals centralizer of GL(V) image"
 test = false
 module = "LeanEval.RepresentationTheory.SchurWeyl"
-theorem = "symAction_range_eq_centralizer_glAction"
+holes = ["symAction_range_eq_centralizer_glAction"]
 submitter = "Kim Morrison"
 notes = "One direction of Schur-Weyl duality: the subalgebra of End(V^⊗k) generated by the S_k action (permuting factors) equals the centralizer of the subalgebra generated by the diagonal GL(V) action. Hypothesis `Invertible (k! : R)` over a field is exactly the Maschke condition for R[S_k]."
 source = "H. Weyl, The Classical Groups, 1939; I. Schur, Über die rationalen Darstellungen der allgemeinen linearen Gruppe, 1927."
@@ -258,7 +258,7 @@ id = "glAction_range_eq_centralizer_symAction"
 title = "Schur-Weyl duality: GL(V) image equals centralizer of S_k image"
 test = false
 module = "LeanEval.RepresentationTheory.SchurWeyl"
-theorem = "glAction_range_eq_centralizer_symAction"
+holes = ["glAction_range_eq_centralizer_symAction"]
 submitter = "Kim Morrison"
 notes = "The other direction of Schur-Weyl duality: the subalgebra of End(V^⊗k) generated by the diagonal GL(V) action equals the centralizer of the subalgebra generated by the S_k action."
 source = "H. Weyl, The Classical Groups, 1939; I. Schur, Über die rationalen Darstellungen der allgemeinen linearen Gruppe, 1927."
@@ -269,7 +269,7 @@ id = "g2_irrep_tensor_square_decomp"
 title = "Existence of a 64-dim irreducible g₂-representation with 14 tensor-square isotypic components"
 test = false
 module = "LeanEval.RepresentationTheory.ExceptionalLieTensorSquare"
-theorem = "g2_irrep_tensor_square_decomp"
+holes = ["g2_irrep_tensor_square_decomp"]
 submitter = "Kim Morrison"
 notes = "g₂ is the smallest exceptional Lie algebra, defined here by the Serre construction (Mathlib's `LieAlgebra.g₂`). The formal statement is existential: it asks for some 64-dimensional irreducible representation whose tensor square has 14 isotypic components. In the intended solution, one constructs such a witness using the highest-weight representation with highest weight ω₁ + ω₂ (the sum of the two fundamental weights). The U(g)-module structure on V ⊗ V used in the statement comes from lifting the Lie action via the universal enveloping algebra."
 source = "Classical: representation theory of the exceptional Lie algebra g₂."
@@ -280,7 +280,7 @@ id = "e8_irrep_tensor_square_decomp"
 title = "Existence of a 779247-dim irreducible e₈-representation with 40 tensor-square isotypic components"
 test = false
 module = "LeanEval.RepresentationTheory.ExceptionalLieTensorSquare"
-theorem = "e8_irrep_tensor_square_decomp"
+holes = ["e8_irrep_tensor_square_decomp"]
 submitter = "Kim Morrison"
 notes = "e₈ is the largest exceptional Lie algebra (dim 248), defined here by the Serre construction (Mathlib's `LieAlgebra.e₈`). The formal statement is existential: it asks for some 779247-dimensional irreducible representation whose tensor square has 40 isotypic components. In the intended solution, one constructs such a witness using the highest-weight representation with highest weight ω₁ + ω₈ (the sum of the first and last fundamental weights, in Bourbaki labelling). The U(g)-module structure on V ⊗ V used in the statement comes from lifting the Lie action via the universal enveloping algebra."
 source = "Classical: representation theory of the exceptional Lie algebra e₈."
@@ -291,7 +291,7 @@ id = "cerf_gamma_four"
 title = "Cerf's theorem: every self-diffeomorphism of S3 is smoothly isotopic to a linear isometry"
 test = false
 module = "LeanEval.Topology.CerfGammaFour"
-theorem = "cerf_gamma_four"
+holes = ["cerf_gamma_four"]
 submitter = "Kim Morrison"
 notes = "Cerf's 1968 theorem, the X = point (unparameterized) case of the Smale conjecture. Stated as the existence of a smooth isotopy [0,1] x S3 -> S3 from f to a linear isometry, witnessed by a smooth slice-inverse to encode the diffeomorphism property of each slice without needing a topology on Diffeomorph."
 source = "J. Cerf, Sur les diffeomorphismes de la sphere de dimension trois, Lecture Notes in Mathematics 53, Springer (1968)."
@@ -302,7 +302,7 @@ id = "smale_conjecture"
 title = "Smale conjecture (Hatcher) in relative parameterized form"
 test = false
 module = "LeanEval.Topology.SmaleConjecture"
-theorem = "smale_conjecture"
+holes = ["smale_conjecture"]
 submitter = "Kim Morrison"
 notes = "Hatcher's 1983 theorem that Diff(S3) is homotopy equivalent to O(4), stated in the relative-parameterized-family form (families on a compact manifold-with-boundary X whose boundary already factors through O(4) deform rel boundary to a family fully factoring through O(4)). Mathlib does not yet carry the C-infinity topology on Diffeomorph, which would be needed for the direct homotopy-equivalence formulation."
 source = "A. Hatcher, A proof of the Smale conjecture, Diff(S3) = O(4), Ann. of Math. 117 (1983)."
@@ -313,7 +313,7 @@ id = "cyclotomic_integer_house_le_two"
 title = "Real cyclotomic integer with house at most 2"
 test = false
 module = "LeanEval.NumberTheory.SmallHouse"
-theorem = "cyclotomic_integer_house_le_two"
+holes = ["cyclotomic_integer_house_le_two"]
 submitter = "Kim Morrison"
 notes = "The <= 2 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
 source = "https://arxiv.org/pdf/1004.0665"
@@ -324,7 +324,7 @@ id = "cyclotomic_integer_house_between_two_and_76_33"
 title = "Real cyclotomic integer with house in (2, 76/33)"
 test = false
 module = "LeanEval.NumberTheory.SmallHouse"
-theorem = "cyclotomic_integer_house_between_two_and_76_33"
+holes = ["cyclotomic_integer_house_between_two_and_76_33"]
 submitter = "Kim Morrison"
 notes = "The 2 < house < 76/33 branch of Theorem 1.0.5 from Calegari--Morrison--Snyder, stated using Mathlib's NumberField.house."
 source = "https://arxiv.org/pdf/1004.0665"
@@ -335,7 +335,7 @@ id = "gleason_theorem_finite"
 title = "Gleason's theorem (finite-dimensional)"
 test = false
 module = "LeanEval.Analysis.Gleason"
-theorem = "gleason_theorem_finite"
+holes = ["gleason_theorem_finite"]
 submitter = "Kim Morrison"
 notes = "Gleason's theorem in finite dimensions: every frame function on the orthogonal projections of a complex Hilbert space of dimension at least 3 is given by P ↦ Tr(ρ P) for the unique density operator ρ. Stated using a bespoke `FrameFunction` structure (non-negative, additive on orthogonal projection pairs, normalized at the identity) and the standard Mathlib trace `LinearMap.trace`. Finite additivity on orthogonal pairs already implies countable additivity in finite dimensions, so the hypothesis matches Gleason's original σ-additive frame functions."
 source = "A. M. Gleason, Measures on the closed subspaces of a Hilbert space, J. Math. Mech. 6 (1957), 885-893."
@@ -346,8 +346,81 @@ id = "gleason_theorem_separable"
 title = "Gleason's theorem (separable Hilbert space)"
 test = false
 module = "LeanEval.Analysis.Gleason"
-theorem = "gleason_theorem_separable"
+holes = ["gleason_theorem_separable"]
 submitter = "Kim Morrison"
 notes = "Gleason's theorem for a separable complex Hilbert space H of dimension at least 3, in Gleason's original `frame function on the unit sphere' formulation: any non-negative function on the unit sphere whose values sum to 1 along every Hilbert basis is given by x ↦ re ⟨x, ρ x⟩ for some positive bounded operator ρ. The Lean conclusion does not assert that ρ is trace-class with Tr(ρ) = 1; stating that would require trace-class infrastructure not yet at this Mathlib pin. This side-steps the absence of Schatten 1 / trace-class infrastructure in Mathlib at the time of writing."
 source = "A. M. Gleason, Measures on the closed subspaces of a Hilbert space, J. Math. Mech. 6 (1957), 885-893."
 informal_solution = "Reduce to the real 3-dimensional case via restriction to real subspaces of H, where Gleason's continuity argument plus an analysis of regular frame functions on S^2 gives a positive quadratic form. Patch these forms together using rotation-invariance and the assumed basis-sum normalization to obtain a globally defined positive bounded operator ρ on H reproducing the frame function on every unit vector."
+[[problem]]
+id = "jacobian_challenge_diffgeo"
+title = "Jacobian of a compact Riemann surface (Buzzard challenge)"
+test = false
+module = "LeanEval.Geometry.JacobianChallenge"
+holes = [
+  "JacobianChallenge.genus",
+  "JacobianChallenge.genus_eq_zero_iff_homeo",
+  "JacobianChallenge.Jacobian",
+  "JacobianChallenge.Jacobian.instAddCommGroup",
+  "JacobianChallenge.Jacobian.instTopologicalSpace",
+  "JacobianChallenge.Jacobian.instT2Space",
+  "JacobianChallenge.Jacobian.instCompactSpace",
+  "JacobianChallenge.Jacobian.instChartedSpace",
+  "JacobianChallenge.Jacobian.instIsManifold",
+  "JacobianChallenge.Jacobian.instLieAddGroup",
+  "JacobianChallenge.Jacobian.ofCurve",
+  "JacobianChallenge.Jacobian.ofCurve_contMDiff",
+  "JacobianChallenge.Jacobian.ofCurve_self",
+  "JacobianChallenge.Jacobian.ofCurve_inj",
+  "JacobianChallenge.Jacobian.pushforward",
+  "JacobianChallenge.Jacobian.pushforward_contMDiff",
+  "JacobianChallenge.Jacobian.pushforward_id_apply",
+  "JacobianChallenge.Jacobian.pushforward_comp_apply",
+  "JacobianChallenge.Jacobian.pullback",
+  "JacobianChallenge.Jacobian.pullback_contMDiff",
+  "JacobianChallenge.Jacobian.pullback_id_apply",
+  "JacobianChallenge.Jacobian.pullback_comp_apply",
+  "JacobianChallenge.Jacobian.degree",
+  "JacobianChallenge.Jacobian.pushforward_pullback",
+]
+submitter = "Kevin Buzzard"
+source = "https://leanprover.zulipchat.com/#narrow/stream/583336-Autoformalization/topic/Jacobian%20challenge"
+informal_solution = "Construct J(X) as H^0(X, Omega^1)* / H_1(X, Z), the period lattice quotient; the Abel-Jacobi map sends a point to the linear functional 'integrate from a fixed basepoint to here'. Functoriality and the projection formula come from pushforward and pullback of differential forms."
+
+[[problem]]
+id = "jacobian_challenge_alggeo"
+title = "Jacobian of a smooth proper curve (Merten challenge)"
+test = false
+module = "LeanEval.AlgebraicGeometry.JacobianChallenge"
+holes = [
+  "AlgebraicGeometry.JacobianChallenge.genus",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.instGrpObj",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.smoothOfRelativeDimension_genus",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.instIsProper",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.instGeometricallyIrreducible",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.ofCurve",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.comp_ofCurve",
+  "AlgebraicGeometry.JacobianChallenge.Jacobian.exists_unique_ofCurve_comp",
+]
+submitter = "Christian Merten"
+source = "https://leanprover.zulipchat.com/#narrow/stream/583336-Autoformalization/topic/Jacobian%20challenge/near/587802685"
+informal_solution = "Build the Albanese variety of C as the universal abelian variety receiving a pointed map from C; Weil's construction of the Jacobian of a curve makes this concrete via Pic^0(C). The universal property is the no-cheating clamp."
+
+[[problem]]
+id = "def_hole_example"
+title = "def-hole minimal example"
+test = true
+module = "LeanEval.Sandbox.DefHoleExample"
+holes = ["foo", "foo_def"]
+submitter = "Kim Morrison"
+notes = "Minimal example exercising def + theorem holes through the comparator def-hole pipeline."
+
+[[problem]]
+id = "instance_hole_example"
+title = "instance-hole minimal example"
+test = true
+module = "LeanEval.Sandbox.InstanceHoleExample"
+holes = ["WidgetCarrier", "instInhabitedWidget"]
+submitter = "Kim Morrison"
+notes = "Minimal example exercising instance + theorem holes; instances must be named so the comparator can address them."
+

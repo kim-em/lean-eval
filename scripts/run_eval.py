@@ -35,12 +35,12 @@ class ProblemScore:
 def expected_workspace_files(
     problem: gp.ProblemSpec,
     *,
-    extractor: Callable[[gp.ProblemSpec], gp.ExtractedTheorem],
+    extractor: Callable[[gp.ProblemSpec, str], gp.ExtractedTheorem],
 ) -> dict[str, str]:
     toolchain = (gp.REPO_ROOT / "lean-toolchain").read_text(encoding="utf-8")
     mathlib_dependency = gp.load_root_mathlib_dependency()
-    extracted = extractor(problem)
-    return gp.render_workspace(problem, extracted, toolchain, mathlib_dependency)
+    extracteds = [extractor(problem, hole) for hole in problem.holes]
+    return gp.render_workspace(problem, extracteds, toolchain, mathlib_dependency)
 
 
 def workspace_path_for_problem(
@@ -57,7 +57,7 @@ def workspace_path_for_problem(
 def problem_attempt_mismatches(
     problem: gp.ProblemSpec,
     *,
-    extractor: Callable[[gp.ProblemSpec], gp.ExtractedTheorem],
+    extractor: Callable[[gp.ProblemSpec, str], gp.ExtractedTheorem],
     workspaces_root: pathlib.Path = DEFAULT_WORKSPACES_ROOT,
 ) -> list[str]:
     expected_files = expected_workspace_files(problem, extractor=extractor)
@@ -90,7 +90,7 @@ def run_problem_test(
 def score_problems(
     problems: list[gp.ProblemSpec],
     *,
-    extractor: Callable[[gp.ProblemSpec], gp.ExtractedTheorem] = gp.extract_theorem,
+    extractor: Callable[[gp.ProblemSpec, str], gp.ExtractedTheorem] = gp.extract_one,
     workspaces_root: pathlib.Path = DEFAULT_WORKSPACES_ROOT,
     mismatch_detector: Callable[[gp.ProblemSpec], list[str]] | None = None,
     test_runner: Callable[[str], int] = run_problem_test,

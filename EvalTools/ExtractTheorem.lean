@@ -19,6 +19,10 @@ structure ExtractedTheorem where
   uses introduced by typeclass synthesis (which the `.ilean` references metadata
   records as textual matches only). -/
   sameModuleDependencies : Array String
+  /-- One of `"theorem"` (covers `.thmInfo` and `.opaqueInfo`), `"def"`, or
+  `"instance"`. Drives whether the generator emits this hole in `theorem_names`
+  or `definition_names` in the comparator config. -/
+  kind : String
   deriving ToJson
 
 def parseName (text : String) : Name :=
@@ -92,17 +96,24 @@ def extractTheorem (moduleNameText declNameText : String) : IO ExtractedTheorem 
     endLine := declRanges.range.endPos.line
     endColumn := declRanges.range.endPos.column
   }
-  match constantInfo with
-  | .thmInfo _ | .opaqueInfo _ =>
+  let kind? : Option String := match constantInfo with
+    | .thmInfo _ | .opaqueInfo _ => some "theorem"
+    | .defnInfo _ =>
+        if Lean.Meta.isInstanceCore env resolvedDeclName then some "instance" else some "def"
+    | _ => none
+  match kind? with
+  | some kind =>
       let deps := collectSameModuleDependencies env moduleName resolvedDeclName
       return {
         declarationName := toString resolvedDeclName
         module := moduleNameText
         sourceRange := sourceRange
         sameModuleDependencies := deps.map toString
+        kind := kind
       }
-  | _ =>
-      throw <| IO.userError s!"Declaration '{resolvedDeclName}' is not a theorem or opaque theorem."
+  | none =>
+      throw <| IO.userError
+        s!"Declaration '{resolvedDeclName}' has unsupported kind for an eval-problem hole."
 
 def main (args : List String) : IO UInt32 := do
   let [moduleName, declName] := args

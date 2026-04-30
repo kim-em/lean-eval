@@ -1,0 +1,23 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.smoothOfRelativeDimension_genus",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.instIsProper",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.instGeometricallyIrreducible",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.comp_ofCurve",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.exists_unique_ofCurve_comp"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": false,
+  "definition_names": [
+    "AlgebraicGeometry.JacobianChallenge.genus",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.instGrpObj",
+    "AlgebraicGeometry.JacobianChallenge.Jacobian.ofCurve"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "JacobianChallenge.genus_eq_zero_iff_homeo",
+    "JacobianChallenge.Jacobian.instT2Space",
+    "JacobianChallenge.Jacobian.instCompactSpace",
+    "JacobianChallenge.Jacobian.instIsManifold",
+    "JacobianChallenge.Jacobian.instLieAddGroup",
+    "JacobianChallenge.Jacobian.ofCurve_contMDiff",
+    "JacobianChallenge.Jacobian.ofCurve_self",
+    "JacobianChallenge.Jacobian.ofCurve_inj",
+    "JacobianChallenge.Jacobian.pushforward_contMDiff",
+    "JacobianChallenge.Jacobian.pushforward_id_apply",
+    "JacobianChallenge.Jacobian.pushforward_comp_apply",
+    "JacobianChallenge.Jacobian.pullback_contMDiff",
+    "JacobianChallenge.Jacobian.pullback_id_apply",
+    "JacobianChallenge.Jacobian.pullback_comp_apply",
+    "JacobianChallenge.Jacobian.pushforward_pullback"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": false,
+  "definition_names": [
+    "JacobianChallenge.genus",
+    "JacobianChallenge.Jacobian",
+    "JacobianChallenge.Jacobian.instAddCommGroup",
+    "JacobianChallenge.Jacobian.instTopologicalSpace",
+    "JacobianChallenge.Jacobian.instChartedSpace",
+    "JacobianChallenge.Jacobian.ofCurve",
+    "JacobianChallenge.Jacobian.pushforward",
+    "JacobianChallenge.Jacobian.pullback",
+    "JacobianChallenge.Jacobian.degree"
+  ]
+}
