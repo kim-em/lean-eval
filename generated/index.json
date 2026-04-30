@@ -286,6 +286,72 @@
     "generated_path": "generated/e8_irrep_tensor_square_decomp"
   },
   {
+    "id": "cerf_gamma_four",
+    "title": "Cerf's theorem: every self-diffeomorphism of S3 is smoothly isotopic to a linear isometry",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Topology.CerfGammaFour",
+    "holes": [
+      "cerf_gamma_four"
+    ],
+    "generated_path": "generated/cerf_gamma_four"
+  },
+  {
+    "id": "smale_conjecture",
+    "title": "Smale conjecture (Hatcher) in relative parameterized form",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Topology.SmaleConjecture",
+    "holes": [
+      "smale_conjecture"
+    ],
+    "generated_path": "generated/smale_conjecture"
+  },
+  {
+    "id": "cyclotomic_integer_house_le_two",
+    "title": "Real cyclotomic integer with house at most 2",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.NumberTheory.SmallHouse",
+    "holes": [
+      "cyclotomic_integer_house_le_two"
+    ],
+    "generated_path": "generated/cyclotomic_integer_house_le_two"
+  },
+  {
+    "id": "cyclotomic_integer_house_between_two_and_76_33",
+    "title": "Real cyclotomic integer with house in (2, 76/33)",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.NumberTheory.SmallHouse",
+    "holes": [
+      "cyclotomic_integer_house_between_two_and_76_33"
+    ],
+    "generated_path": "generated/cyclotomic_integer_house_between_two_and_76_33"
+  },
+  {
+    "id": "gleason_theorem_finite",
+    "title": "Gleason's theorem (finite-dimensional)",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.Gleason",
+    "holes": [
+      "gleason_theorem_finite"
+    ],
+    "generated_path": "generated/gleason_theorem_finite"
+  },
+  {
+    "id": "gleason_theorem_separable",
+    "title": "Gleason's theorem (separable Hilbert space)",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.Gleason",
+    "holes": [
+      "gleason_theorem_separable"
+    ],
+    "generated_path": "generated/gleason_theorem_separable"
+  },
+  {
     "id": "jacobian_challenge_diffgeo",
     "title": "Jacobian of a compact Riemann surface (Buzzard challenge)",
     "test": false,
@@ -337,50 +403,6 @@
       "AlgebraicGeometry.JacobianChallenge.Jacobian.exists_unique_ofCurve_comp"
     ],
     "generated_path": "generated/jacobian_challenge_alggeo"
-  },
-  {
-    "id": "cerf_gamma_four",
-    "title": "Cerf's theorem: every self-diffeomorphism of S3 is smoothly isotopic to a linear isometry",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.Topology.CerfGammaFour",
-    "holes": [
-      "cerf_gamma_four"
-    ],
-    "generated_path": "generated/cerf_gamma_four"
-  },
-  {
-    "id": "smale_conjecture",
-    "title": "Smale conjecture (Hatcher) in relative parameterized form",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.Topology.SmaleConjecture",
-    "holes": [
-      "smale_conjecture"
-    ],
-    "generated_path": "generated/smale_conjecture"
-  },
-  {
-    "id": "cyclotomic_integer_house_le_two",
-    "title": "Real cyclotomic integer with house at most 2",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.NumberTheory.SmallHouse",
-    "holes": [
-      "cyclotomic_integer_house_le_two"
-    ],
-    "generated_path": "generated/cyclotomic_integer_house_le_two"
-  },
-  {
-    "id": "cyclotomic_integer_house_between_two_and_76_33",
-    "title": "Real cyclotomic integer with house in (2, 76/33)",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.NumberTheory.SmallHouse",
-    "holes": [
-      "cyclotomic_integer_house_between_two_and_76_33"
-    ],
-    "generated_path": "generated/cyclotomic_integer_house_between_two_and_76_33"
   },
   {
     "id": "def_hole_example",
