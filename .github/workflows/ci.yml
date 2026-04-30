@@ -41,7 +41,7 @@ jobs:
         run: |
           git clone https://github.com/leanprover/lean4export.git .ci/lean4export
           cd .ci/lean4export
-          git checkout v4.30.0-rc1
+          git checkout v4.30.0-rc2
           lake build lean4export
           echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
 
@@ -49,7 +49,7 @@ jobs:
         run: |
           git clone https://github.com/leanprover/comparator.git .ci/comparator
           cd .ci/comparator
-          git checkout 0ff36dde148dfea82dbdcf3baf91d6e1a8195554
+          git checkout 71b52ec29e06d4b7d882726553b1ceb99a2499e0
           lake build comparator
           echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
 
