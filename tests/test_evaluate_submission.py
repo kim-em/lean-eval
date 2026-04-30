@@ -172,6 +172,51 @@ class DetectMatchesTests(unittest.TestCase):
             with self.assertRaisesRegex(ev.EvaluateError, "escapes"):
                 list(ev._iter_lakefile_toml(src))
 
+    def test_pristine_equal_submission_lean_is_skipped(self) -> None:
+        # The fork-everything-solve-a-few case: submitter's Submission.lean is
+        # byte-identical to the pristine in generated/<id>/. detect_matches
+        # must mark these with a skip_reason so we don't waste prime/build
+        # cycles on workspaces the submitter never attempted.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            generated = tmp_path / "generated"
+            _write_pristine(generated, "two_plus_two")
+            src = tmp_path / "src"
+            _write_submitter_workspace(
+                src, ".", "two_plus_two",
+                submission_lean_contents="sorry\n",
+            )
+            matches = ev.detect_matches(
+                src, {"two_plus_two"}, generated_root=generated,
+            )
+        self.assertEqual(len(matches), 1)
+        self.assertIn("unchanged from pristine", matches[0].skip_reason or "")
+
+    def test_modified_submission_lean_is_not_skipped_as_pristine(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            generated = tmp_path / "generated"
+            _write_pristine(generated, "two_plus_two")
+            src = tmp_path / "src"
+            _write_submitter_workspace(src, ".", "two_plus_two")
+            matches = ev.detect_matches(
+                src, {"two_plus_two"}, generated_root=generated,
+            )
+        self.assertEqual(len(matches), 1)
+        self.assertIsNone(matches[0].skip_reason)
+
+    def test_pristine_check_off_when_no_generated_root(self) -> None:
+        # Backward compat: callers that don't pass generated_root must still
+        # see byte-identical Submission.lean as a real candidate, not a skip.
+        with tempfile.TemporaryDirectory() as tmp:
+            src = pathlib.Path(tmp) / "src"
+            _write_submitter_workspace(
+                src, ".", "two_plus_two", submission_lean_contents="sorry\n",
+            )
+            matches = ev.detect_matches(src, {"two_plus_two"})
+        self.assertEqual(len(matches), 1)
+        self.assertIsNone(matches[0].skip_reason)
+
 
 class OverlayMatchTests(unittest.TestCase):
     def test_overlay_copies_submission_lean_and_subdir(self) -> None:
@@ -352,6 +397,76 @@ class EvaluateSubmissionEndToEndTests(unittest.TestCase):
             )
         self.assertEqual(result["results"]["passed"], ["two_plus_two"])
 
+    def test_fork_everything_solve_a_few(self) -> None:
+        # Mirrors the real submission case from issue #20: a fork that
+        # carries every generated workspace but only solves a subset.
+        # Pristine workspaces must be detected and skipped; only the
+        # actually-attempted workspaces should reach the run-eval call.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            generated, manifest = self._setup_repo_like(tmp_path)
+            problem_ids = ["alpha", "beta", "gamma", "delta", "epsilon"]
+            for pid in problem_ids:
+                _write_pristine(generated, pid)
+            _write_manifest(manifest, problem_ids)
+            src = tmp_path / "src"
+            for pid in problem_ids:
+                # All five workspaces present in the fork.
+                _write_submitter_workspace(
+                    src, pid, pid,
+                    submission_lean_contents="sorry\n",
+                )
+            # Only beta and delta have real submissions.
+            (src / "beta" / "Submission.lean").write_text(
+                "by exact submitter.proof\n", encoding="utf-8"
+            )
+            (src / "delta" / "Submission.lean").write_text(
+                "by exact submitter.proof\n", encoding="utf-8"
+            )
+            output = tmp_path / "out"
+
+            seen_problem_ids: list[list[str]] = []
+
+            def runner(*, problem_ids: list[str], workspaces_root: pathlib.Path) -> dict:
+                seen_problem_ids.append(list(problem_ids))
+                return _fake_runner_factory(["beta"])(
+                    problem_ids=problem_ids, workspaces_root=workspaces_root
+                )
+
+            result = ev.evaluate_submission(
+                source_dir=src,
+                generated_root=generated,
+                manifest_path=manifest,
+                output_dir=output,
+                repo_root=tmp_path,
+                run_eval_runner=runner,
+            )
+        self.assertEqual(len(seen_problem_ids), 1)
+        self.assertEqual(sorted(seen_problem_ids[0]), ["beta", "delta"])
+        self.assertEqual(result["results"]["passed"], ["beta"])
+
+    def test_fork_with_no_real_submissions_explains_pristine_skip(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = pathlib.Path(tmp)
+            generated, manifest = self._setup_repo_like(tmp_path)
+            _write_pristine(generated, "two_plus_two")
+            _write_manifest(manifest, ["two_plus_two"])
+            src = tmp_path / "src"
+            _write_submitter_workspace(
+                src, ".", "two_plus_two",
+                submission_lean_contents="sorry\n",
+            )
+            output = tmp_path / "out"
+            with self.assertRaisesRegex(ev.EvaluateError, "unchanged from the pristine"):
+                ev.evaluate_submission(
+                    source_dir=src,
+                    generated_root=generated,
+                    manifest_path=manifest,
+                    output_dir=output,
+                    repo_root=tmp_path,
+                    run_eval_runner=_fake_runner_factory([]),
+                )
+
     def test_no_matches_is_hard_fail(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = pathlib.Path(tmp)
@@ -399,6 +514,51 @@ class RunEvalInvocationTests(unittest.TestCase):
         _, kwargs = popen.call_args
         self.assertIs(kwargs["stderr"], None)
         self.assertEqual(kwargs["stdout"], ev.subprocess.PIPE)
+
+    def test_run_eval_passes_problem_ids_as_single_comma_separated_flag(self) -> None:
+        # lean4-cli's `Array String` flag instance does NOT support
+        # `--problem foo --problem bar` (it raises `Duplicate flag`). It
+        # parses one occurrence as a comma-separated list. _run_run_eval
+        # must produce the comma-separated form so the Lean side accepts
+        # multi-problem evaluations.
+        class FakeProcess:
+            def __init__(self) -> None:
+                self.returncode = 0
+
+            def communicate(self) -> tuple[str, None]:
+                return ('{"problems": []}', None)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            with mock.patch.object(ev.subprocess, "Popen", return_value=FakeProcess()) as popen:
+                ev._run_run_eval(
+                    problem_ids=["foo", "bar", "baz"],
+                    workspaces_root=repo_root / "workspaces",
+                    repo_root=repo_root,
+                )
+        argv = popen.call_args[0][0]
+        problem_indices = [i for i, a in enumerate(argv) if a == "--problem"]
+        self.assertEqual(len(problem_indices), 1, f"--problem must appear exactly once, got argv={argv}")
+        self.assertEqual(argv[problem_indices[0] + 1], "foo,bar,baz")
+
+    def test_run_eval_omits_problem_flag_when_no_ids(self) -> None:
+        class FakeProcess:
+            def __init__(self) -> None:
+                self.returncode = 0
+
+            def communicate(self) -> tuple[str, None]:
+                return ('{"problems": []}', None)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            with mock.patch.object(ev.subprocess, "Popen", return_value=FakeProcess()) as popen:
+                ev._run_run_eval(
+                    problem_ids=[],
+                    workspaces_root=repo_root / "workspaces",
+                    repo_root=repo_root,
+                )
+        argv = popen.call_args[0][0]
+        self.assertNotIn("--problem", argv)
 
     def test_run_eval_nonzero_exit_includes_stdout(self) -> None:
         class FakeProcess:
