@@ -1,3 +1,5 @@
+# Auth (lean-eval-bot GitHub App + LEADERBOARD_WRITE_TOKEN PAT) is
+# documented in docs/ci-secrets.md.
 name: Submission
 
 on:

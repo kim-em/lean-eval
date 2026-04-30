@@ -1,15 +1,21 @@
+# Auth and bypass for this workflow are documented in docs/ci-secrets.md
+# (`lean-eval-regenerator` GitHub App + Repository Ruleset bypass list).
 name: Regenerate generated/ on main
 
-# DISABLED: GITHUB_TOKEN cannot push to main because of branch protection
-# (PRs required, "verify" status check required). A follow-up PR will switch
-# this workflow to mint an installation token from a dedicated GitHub App
-# whose principal is in the branch-protection bypass list, and re-enable the
-# push trigger.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'LeanEval/**'
+      - 'EvalTools/**'
+      - 'manifests/problems.toml'
+      - 'scripts/generate_projects.py'
+      - 'lakefile.toml'
+      - 'lean-toolchain'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: regenerate-main
@@ -19,14 +25,31 @@ jobs:
   regenerate:
     runs-on: ubuntu-latest
     steps:
+      - name: Mint lean-eval-regenerator installation token
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LEAN_EVAL_REGENERATOR_APP_ID }}
+          private-key: ${{ secrets.LEAN_EVAL_REGENERATOR_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app_token.outputs.token }}
 
       - uses: leanprover/lean-action@v1
         with:
           use-mathlib-cache: true
+
+      - name: Re-sync to latest origin/main
+        # Codex finding: regenerate against the freshest source, not whatever
+        # the runner cloned. A merge can land on main between the trigger and
+        # the checkout above; without this, we'd regenerate against stale
+        # source and then push a result that doesn't match HEAD.
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Regenerate
         run: python scripts/generate_projects.py
@@ -34,13 +57,18 @@ jobs:
       - name: Commit and push if changed
         run: |
           set -euo pipefail
-          if git diff --quiet generated/ && [ -z "$(git ls-files --others --exclude-standard generated/)" ]; then
+          if git diff --quiet generated/ \
+             && [ -z "$(git ls-files --others --exclude-standard generated/)" ]; then
             echo "No changes to generated/."
             exit 0
           fi
-          git config user.name  "lean-eval-bot"
-          git config user.email "lean-eval-bot@users.noreply.github.com"
+          git config user.name  "lean-eval-regenerator[bot]"
+          git config user.email "lean-eval-regenerator[bot]@users.noreply.github.com"
           git add generated/
           git commit -m "chore: regenerate generated/ workspaces"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          # Retry once if a human commit landed during this run.
+          if ! git push origin HEAD:main; then
+            echo "push rejected; rebasing onto latest main and retrying"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
