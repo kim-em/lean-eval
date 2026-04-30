@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Merge comparator results into a clone of leanprover/lean-eval-leaderboard.
+Merge comparator results into a clone of kim-em/lean-eval-leaderboard.
 
 Implements the sticky-no-op semantics documented at
-https://github.com/leanprover/lean-eval-leaderboard (README, schema v1).
+https://github.com/kim-em/lean-eval-leaderboard (README, schema v1).
 Does not run git; the caller is responsible for cloning the leaderboard
 repo, committing the modified file, and pushing.
 """
@@ -22,6 +22,7 @@ SCHEMA_VERSION = 1
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 REPO_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9._-]+$")
 LOGIN_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$")
+PRODUCTION_DESCRIPTION_MAX_LEN = 4000
 
 
 class UpdateError(Exception):
@@ -89,6 +90,7 @@ def update_leaderboard(
     model: str,
     issue_number: int,
     now: str,
+    production_description: str | None = None,
 ) -> dict:
     _require_login(user)
     _require_sha("benchmark-commit", benchmark_commit)
@@ -98,6 +100,16 @@ def update_leaderboard(
         raise UpdateError(f"issue-number must be positive, got {issue_number}")
     if not model.strip():
         raise UpdateError("model must be a non-empty string")
+    if production_description is not None:
+        if "\x00" in production_description:
+            raise UpdateError("production-description must not contain NUL bytes")
+        if len(production_description) > PRODUCTION_DESCRIPTION_MAX_LEN:
+            raise UpdateError(
+                f"production-description must be at most "
+                f"{PRODUCTION_DESCRIPTION_MAX_LEN} characters"
+            )
+        if not production_description.strip():
+            production_description = None
 
     target = leaderboard_target_path(leaderboard_dir, user)
     existing = _load_existing(target, user)
@@ -106,7 +118,7 @@ def update_leaderboard(
     for problem_id in list(dict.fromkeys(passed)):
         if problem_id in solved:
             continue
-        solved[problem_id] = {
+        record = {
             "solved_at": now,
             "benchmark_commit": benchmark_commit,
             "submission_repo": submission_repo,
@@ -115,6 +127,9 @@ def update_leaderboard(
             "model": model,
             "issue_number": issue_number,
         }
+        if production_description is not None:
+            record["production_description"] = production_description
+        solved[problem_id] = record
         added.append(problem_id)
 
     if added:
@@ -149,7 +164,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--leaderboard-dir",
         required=True,
         type=pathlib.Path,
-        help="Path to a local clone of leanprover/lean-eval-leaderboard.",
+        help="Path to a local clone of kim-em/lean-eval-leaderboard.",
     )
     parser.add_argument(
         "--results-json",
@@ -168,6 +183,11 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--model", required=True)
     parser.add_argument("--issue-number", required=True, type=int)
+    parser.add_argument(
+        "--production-description",
+        default=None,
+        help="Optional free-form description of how the solution was produced.",
+    )
     parser.add_argument(
         "--now",
         default=None,
@@ -191,6 +211,7 @@ def main(argv: list[str] | None = None) -> int:
             submission_public=args.submission_public,
             model=args.model,
             issue_number=args.issue_number,
+            production_description=args.production_description,
             now=now,
         )
     except UpdateError as exc:

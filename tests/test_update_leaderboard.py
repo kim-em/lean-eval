@@ -27,6 +27,7 @@ def default_call(
     model: str = "Claude Opus 4.6",
     issue_number: int = 42,
     benchmark_commit: str = BENCHMARK_COMMIT,
+    production_description: str | None = None,
 ) -> dict:
     return ul.update_leaderboard(
         user=user,
@@ -38,6 +39,7 @@ def default_call(
         submission_public=submission_public,
         model=model,
         issue_number=issue_number,
+        production_description=production_description,
         now=now,
     )
 
@@ -66,6 +68,7 @@ class UpdateLeaderboardTests(unittest.TestCase):
             self.assertTrue(record["submission_public"])
             self.assertEqual(record["model"], "Claude Opus 4.6")
             self.assertEqual(record["issue_number"], 42)
+            self.assertNotIn("production_description", record)
 
     def test_duplicate_is_noop_and_preserves_solved_at(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -145,6 +148,70 @@ class UpdateLeaderboardTests(unittest.TestCase):
             self.assertFalse(result["changed"])
             self.assertEqual(result["added"], [])
             self.assertFalse((lb / "results" / "alice.json").exists())
+
+    def test_production_description_recorded_when_supplied(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            default_call(
+                leaderboard_dir=lb,
+                passed=["x"],
+                production_description="Custom orchestrator + Claude Opus 4.7.",
+            )
+            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["x"]
+            self.assertEqual(
+                record["production_description"],
+                "Custom orchestrator + Claude Opus 4.7.",
+            )
+
+    def test_production_description_sticky_no_op(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            default_call(
+                leaderboard_dir=lb,
+                passed=["x"],
+                production_description="first description",
+            )
+            # Re-submitting the same problem with a different description must
+            # not overwrite the existing record (sticky-no-op semantics).
+            default_call(
+                leaderboard_dir=lb,
+                passed=["x"],
+                production_description="second description",
+            )
+            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["x"]
+            self.assertEqual(record["production_description"], "first description")
+
+    def test_production_description_oversize_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            oversize = "x" * (ul.PRODUCTION_DESCRIPTION_MAX_LEN + 1)
+            with self.assertRaisesRegex(ul.UpdateError, "at most"):
+                default_call(
+                    leaderboard_dir=lb,
+                    passed=["x"],
+                    production_description=oversize,
+                )
+
+    def test_production_description_nul_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            with self.assertRaisesRegex(ul.UpdateError, "NUL"):
+                default_call(
+                    leaderboard_dir=lb,
+                    passed=["x"],
+                    production_description="bad\x00string",
+                )
+
+    def test_production_description_blank_treated_as_absent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            default_call(
+                leaderboard_dir=lb,
+                passed=["x"],
+                production_description="   \n\t  ",
+            )
+            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["x"]
+            self.assertNotIn("production_description", record)
 
     def test_cli_end_to_end_writes_and_prints_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -48,29 +48,51 @@ class SourceDescriptor:
     ref: str | None
 
 
-def parse_issue_body(body_text: str) -> dict[str, str]:
-    """Extract source_url and model from a GitHub Issue Form's rendered body.
+PRODUCTION_DESCRIPTION_HEADING = "How this solution was produced (optional)"
+PRODUCTION_DESCRIPTION_MAX_LEN = 4000
+
+
+def _find_section(body_text: str, heading: str) -> str | None:
+    pattern = re.compile(
+        rf"^###\s+{re.escape(heading)}\s*\n+(?P<value>.+?)(?=\n+###\s|\Z)",
+        re.MULTILINE | re.DOTALL,
+    )
+    match = pattern.search(body_text)
+    if match is None:
+        return None
+    return match.group("value").strip()
+
+
+def parse_issue_body(body_text: str) -> dict[str, str | None]:
+    """Extract submission fields from a GitHub Issue Form's rendered body.
 
     Issue Forms render as markdown with section headers like
     `### Submission URL\\n\\n<value>\\n\\n### Model\\n\\n<value>`.
-    Missing fields raise FetchError.
+    `source_url` and `model` are required; missing or empty values raise
+    FetchError. `production_description` is optional and may be `None`.
     """
-    fields = {}
+    fields: dict[str, str | None] = {}
     for field_key, heading in (("source_url", "Submission URL"), ("model", "Model")):
-        pattern = re.compile(
-            rf"^###\s+{re.escape(heading)}\s*\n+(?P<value>.+?)(?=\n+###\s|\Z)",
-            re.MULTILINE | re.DOTALL,
-        )
-        match = pattern.search(body_text)
-        if match is None:
+        value = _find_section(body_text, heading)
+        if value is None:
             raise FetchError(
                 f"Could not find `{heading}` section in issue body. "
                 "Make sure you submitted via the `Submit benchmark solution` Issue Form."
             )
-        value = match.group("value").strip()
         if not value or value.startswith("_No response_"):
             raise FetchError(f"`{heading}` field is empty.")
         fields[field_key] = value
+
+    description = _find_section(body_text, PRODUCTION_DESCRIPTION_HEADING)
+    if description is None or not description or description.startswith("_No response_"):
+        fields["production_description"] = None
+    else:
+        if len(description) > PRODUCTION_DESCRIPTION_MAX_LEN:
+            raise FetchError(
+                f"`{PRODUCTION_DESCRIPTION_HEADING}` field is longer than "
+                f"{PRODUCTION_DESCRIPTION_MAX_LEN} characters."
+            )
+        fields["production_description"] = description
     return fields
 
 
@@ -384,6 +406,8 @@ def fetch_submission(
         "submitted_by": submitted_by,
         "issue_number": issue_number,
     }
+    if fields["production_description"] is not None:
+        metadata["production_description"] = fields["production_description"]
     metadata_path = output_dir / "metadata.json"
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     metadata_path.write_text(
