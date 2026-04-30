@@ -18,96 +18,6 @@
     "generated_path": "generated/list_append_singleton_length"
   },
   {
-    "id": "cyclotomic_integer_house_le_two",
-    "title": "Real cyclotomic integer with house at most 2",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.NumberTheory.SmallHouse",
-    "theorem": "cyclotomic_integer_house_le_two",
-    "generated_path": "generated/cyclotomic_integer_house_le_two"
-  },
-  {
-    "id": "cyclotomic_integer_house_between_two_and_76_33",
-    "title": "Real cyclotomic integer with house in (2, 76/33)",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.NumberTheory.SmallHouse",
-    "theorem": "cyclotomic_integer_house_between_two_and_76_33",
-    "generated_path": "generated/cyclotomic_integer_house_between_two_and_76_33"
-  },
-  {
-    "id": "riemann_hypothesis_iff_lagarias_elementary_criterion",
-    "title": "Lagarias criterion is equivalent to RH",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.NumberTheory.Lagarias",
-    "theorem": "riemann_hypothesis_iff_lagarias_elementary_criterion",
-    "generated_path": "generated/riemann_hypothesis_iff_lagarias_elementary_criterion"
-  },
-  {
-    "id": "finite_graph_ramsey_theorem",
-    "title": "Finite Ramsey theorem for graphs",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.Combinatorics.Ramsey",
-    "theorem": "finite_graph_ramsey_theorem",
-    "generated_path": "generated/finite_graph_ramsey_theorem"
-  },
-  {
-    "id": "dvd_card_connectedComponent_markoffGraph",
-    "title": "Chen theorem for Markoff graphs",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.Combinatorics.MarkoffGraph",
-    "theorem": "dvd_card_connectedComponent_markoffGraph",
-    "generated_path": "generated/dvd_card_connectedComponent_markoffGraph"
-  },
-  {
-    "id": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
-    "title": "Burnside p^a q^b theorem",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.GroupTheory.Burnside",
-    "theorem": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
-    "generated_path": "generated/finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
-  },
-  {
-    "id": "rouche_logCounting_zero_eq",
-    "title": "Rouche theorem via zero counting",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.ComplexAnalysis.Rouche",
-    "theorem": "rouche_logCounting_zero_eq",
-    "generated_path": "generated/rouche_logCounting_zero_eq"
-  },
-  {
-    "id": "exists_complementary_polynomial_on_unit_circle",
-    "title": "Complementary polynomial on the unit circle",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.ComplexAnalysis.ComplementaryPolynomials",
-    "theorem": "exists_complementary_polynomial_on_unit_circle",
-    "generated_path": "generated/exists_complementary_polynomial_on_unit_circle"
-  },
-  {
-    "id": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
-    "title": "Perron-Frobenius for irreducible nonnegative matrices",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.LinearAlgebra.PerronFrobenius",
-    "theorem": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
-    "generated_path": "generated/irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
-  },
-  {
-    "id": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
-    "title": "Minkowski-Caratheodory theorem",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.ConvexGeometry.MinkowskiCaratheodory",
-    "theorem": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
-    "generated_path": "generated/mem_convexHull_finset_extremePoints_of_mem_compact_convex"
-  },
-  {
     "id": "chudnovsky_formula_for_pi_inv",
     "title": "Chudnovsky formula for pi inverse",
     "test": false,
@@ -124,6 +34,51 @@
     "module": "LeanEval.Topology.HomotopyGroups",
     "theorem": "pi1_circle_mulEquiv_int",
     "generated_path": "generated/pi1_circle_mulEquiv_int"
+  },
+  {
+    "id": "finite_graph_ramsey_theorem",
+    "title": "Finite Ramsey theorem for graphs",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Combinatorics.Ramsey",
+    "theorem": "finite_graph_ramsey_theorem",
+    "generated_path": "generated/finite_graph_ramsey_theorem"
+  },
+  {
+    "id": "substInv_X_sub_X_sq_eq_catalan",
+    "title": "Catalan generating function via compositional inversion",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Combinatorics.CatalanSubstInv",
+    "theorem": "substInv_X_sub_X_sq_eq_catalan",
+    "generated_path": "generated/substInv_X_sub_X_sq_eq_catalan"
+  },
+  {
+    "id": "riemann_hypothesis_iff_lagarias_elementary_criterion",
+    "title": "Lagarias criterion is equivalent to RH",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.NumberTheory.Lagarias",
+    "theorem": "riemann_hypothesis_iff_lagarias_elementary_criterion",
+    "generated_path": "generated/riemann_hypothesis_iff_lagarias_elementary_criterion"
+  },
+  {
+    "id": "dvd_card_connectedComponent_markoffGraph",
+    "title": "Chen theorem for Markoff graphs",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Combinatorics.MarkoffGraph",
+    "theorem": "dvd_card_connectedComponent_markoffGraph",
+    "generated_path": "generated/dvd_card_connectedComponent_markoffGraph"
+  },
+  {
+    "id": "mulCayley_connected_iff_closure_eq_top",
+    "title": "Cayley graph connected iff generators generate the group",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Combinatorics.CayleyConnected",
+    "theorem": "mulCayley_connected_iff_closure_eq_top",
+    "generated_path": "generated/mulCayley_connected_iff_closure_eq_top"
   },
   {
     "id": "pi3_sphere_two_mulEquiv_int",
@@ -153,13 +108,49 @@
     "generated_path": "generated/pi_succ_sphere_n_mulEquiv_zmod_two"
   },
   {
-    "id": "substInv_X_sub_X_sq_eq_catalan",
-    "title": "Catalan generating function via compositional inversion",
+    "id": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
+    "title": "Burnside p^a q^b theorem",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "LeanEval.Combinatorics.CatalanSubstInv",
-    "theorem": "substInv_X_sub_X_sq_eq_catalan",
-    "generated_path": "generated/substInv_X_sub_X_sq_eq_catalan"
+    "module": "LeanEval.GroupTheory.Burnside",
+    "theorem": "finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow",
+    "generated_path": "generated/finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
+  },
+  {
+    "id": "rouche_logCounting_zero_eq",
+    "title": "Rouche theorem via zero counting",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.ComplexAnalysis.Rouche",
+    "theorem": "rouche_logCounting_zero_eq",
+    "generated_path": "generated/rouche_logCounting_zero_eq"
+  },
+  {
+    "id": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
+    "title": "Minkowski-Caratheodory theorem",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.ConvexGeometry.MinkowskiCaratheodory",
+    "theorem": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
+    "generated_path": "generated/mem_convexHull_finset_extremePoints_of_mem_compact_convex"
+  },
+  {
+    "id": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
+    "title": "Perron-Frobenius for irreducible nonnegative matrices",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.LinearAlgebra.PerronFrobenius",
+    "theorem": "irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius",
+    "generated_path": "generated/irreducible_nonnegative_matrix_has_positive_eigenvector_at_spectralRadius"
+  },
+  {
+    "id": "exists_complementary_polynomial_on_unit_circle",
+    "title": "Complementary polynomial on the unit circle",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.ComplexAnalysis.ComplementaryPolynomials",
+    "theorem": "exists_complementary_polynomial_on_unit_circle",
+    "generated_path": "generated/exists_complementary_polynomial_on_unit_circle"
   },
   {
     "id": "isStarNormal_mul_of_commute",
@@ -180,15 +171,6 @@
     "generated_path": "generated/posSemidef_map_exp"
   },
   {
-    "id": "mulCayley_connected_iff_closure_eq_top",
-    "title": "Cayley graph connected iff generators generate the group",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.Combinatorics.CayleyConnected",
-    "theorem": "mulCayley_connected_iff_closure_eq_top",
-    "generated_path": "generated/mulCayley_connected_iff_closure_eq_top"
-  },
-  {
     "id": "oppenheim_inequality",
     "title": "Oppenheim's inequality for Hadamard products",
     "test": false,
@@ -196,6 +178,15 @@
     "module": "LeanEval.LinearAlgebra.Oppenheim",
     "theorem": "oppenheim_inequality",
     "generated_path": "generated/oppenheim_inequality"
+  },
+  {
+    "id": "vonNeumann_doubleCommutant_tfae",
+    "title": "von Neumann double commutant theorem",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.VonNeumannDoubleCommutant",
+    "theorem": "vonNeumann_doubleCommutant_tfae",
+    "generated_path": "generated/vonNeumann_doubleCommutant_tfae"
   },
   {
     "id": "symAction_range_eq_centralizer_glAction",
@@ -252,12 +243,21 @@
     "generated_path": "generated/smale_conjecture"
   },
   {
-    "id": "vonNeumann_doubleCommutant_tfae",
-    "title": "von Neumann double commutant theorem",
+    "id": "cyclotomic_integer_house_le_two",
+    "title": "Real cyclotomic integer with house at most 2",
     "test": false,
     "submitter": "Kim Morrison",
-    "module": "LeanEval.Analysis.VonNeumannDoubleCommutant",
-    "theorem": "vonNeumann_doubleCommutant_tfae",
-    "generated_path": "generated/vonNeumann_doubleCommutant_tfae"
+    "module": "LeanEval.NumberTheory.SmallHouse",
+    "theorem": "cyclotomic_integer_house_le_two",
+    "generated_path": "generated/cyclotomic_integer_house_le_two"
+  },
+  {
+    "id": "cyclotomic_integer_house_between_two_and_76_33",
+    "title": "Real cyclotomic integer with house in (2, 76/33)",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.NumberTheory.SmallHouse",
+    "theorem": "cyclotomic_integer_house_between_two_and_76_33",
+    "generated_path": "generated/cyclotomic_integer_house_between_two_and_76_33"
   }
 ]
