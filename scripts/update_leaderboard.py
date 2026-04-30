@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Merge comparator results into a clone of kim-em/lean-eval-leaderboard.
+Merge comparator results into a clone of leanprover/lean-eval-leaderboard.
 
 Implements the sticky-no-op semantics documented at
-https://github.com/kim-em/lean-eval-leaderboard (README, schema v1).
+https://github.com/leanprover/lean-eval-leaderboard (README, schema v1).
 Does not run git; the caller is responsible for cloning the leaderboard
 repo, committing the modified file, and pushing.
 """
@@ -149,7 +149,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--leaderboard-dir",
         required=True,
         type=pathlib.Path,
-        help="Path to a local clone of kim-em/lean-eval-leaderboard.",
+        help="Path to a local clone of leanprover/lean-eval-leaderboard.",
     )
     parser.add_argument(
         "--results-json",

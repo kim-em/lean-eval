@@ -77,8 +77,8 @@ on and closed, and the leaderboard receives (an empty) update.
 
 ### Relevant repositories
 
-- `kim-em/lean-eval` — the benchmark. This repo.
-- `kim-em/lean-eval-leaderboard` — the public results store. Write-only from CI.
+- `leanprover/lean-eval` — the benchmark. This repo.
+- `leanprover/lean-eval-leaderboard` — the public results store. Write-only from CI.
 - `kim-em/lean-eval-dogfood` — throwaway private test submission (just a
   `lakefile.toml` + `Submission.lean` proving `two_plus_two_eq_four`).
 - `leanprover/comparator` — upstream comparator, which drives the
@@ -387,7 +387,7 @@ a submission can take: `lakefile.toml` with
 (`theorem two_plus_two_eq_four : (2 : Nat) + 2 = 4 := by decide`). The
 `lean-eval-bot` GitHub App is installed on it. Re-triggering the
 submission workflow against it is the fastest feedback loop — toggle
-the `submission` label on issue #1 of `kim-em/lean-eval`.
+the `submission` label on issue #1 of `leanprover/lean-eval`.
 
 ### Running the minimal reproducer outside CI
 
@@ -395,7 +395,7 @@ On a Linux machine with landrun installed (`go install
 github.com/zouuup/landrun/cmd/landrun@latest`) and lean4 via elan:
 
 ```bash
-git clone https://github.com/kim-em/lean-eval
+git clone https://github.com/leanprover/lean-eval
 cd lean-eval
 lake exe cache get    # seed repo-root Mathlib
 # build comparator and lean4export locally; add them to PATH

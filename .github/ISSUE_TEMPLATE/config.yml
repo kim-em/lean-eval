@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Benchmark source code and documentation
-    url: https://github.com/kim-em/lean-eval
+    url: https://github.com/leanprover/lean-eval
     about: Read the README for submission requirements before opening a submission issue.
   - name: Leaderboard (results store)
-    url: https://github.com/kim-em/lean-eval-leaderboard
+    url: https://github.com/leanprover/lean-eval-leaderboard
     about: Machine-written results per GitHub user. The schema lives in that repo's README.

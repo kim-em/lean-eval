@@ -220,7 +220,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          repository: kim-em/lean-eval-leaderboard
+          repository: leanprover/lean-eval-leaderboard
           token: ${{ secrets.LEADERBOARD_WRITE_TOKEN }}
           path: leaderboard
 
