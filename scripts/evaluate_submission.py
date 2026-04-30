@@ -101,15 +101,36 @@ def _read_lakefile_name(path: pathlib.Path) -> str | None:
     return name
 
 
+def _pristine_submission_bytes(
+    generated_root: pathlib.Path | None,
+    problem_id: str,
+) -> bytes | None:
+    if generated_root is None:
+        return None
+    pristine = generated_root / problem_id / "Submission.lean"
+    try:
+        return pristine.read_bytes()
+    except (FileNotFoundError, IsADirectoryError):
+        return None
+
+
 def detect_matches(
     source_dir: pathlib.Path,
     manifest_ids: set[str],
+    *,
+    generated_root: pathlib.Path | None = None,
 ) -> list[WorkspaceMatch]:
     """Walk source_dir for lakefile.toml files whose name matches a manifest problem id.
 
     A match is only valid if the containing directory also has a
     Submission.lean sibling. Duplicate problem ids across distinct
     directories are a hard failure.
+
+    If `generated_root` is provided, candidates whose Submission.lean is
+    byte-identical to `generated_root/<id>/Submission.lean` are marked with
+    a skip_reason. This avoids overlaying / priming / scoring problems that
+    the submitter never attempted (the common case for a fork that carries
+    every generated workspace but only solves a few).
     """
     candidates: list[WorkspaceMatch] = []
     for lakefile in _iter_lakefile_toml(source_dir):
@@ -129,6 +150,21 @@ def detect_matches(
                 )
             )
             continue
+        pristine_bytes = _pristine_submission_bytes(generated_root, name)
+        if pristine_bytes is not None and not submission_lean.is_symlink():
+            try:
+                submitted_bytes = submission_lean.read_bytes()
+            except OSError:
+                submitted_bytes = None
+            if submitted_bytes is not None and submitted_bytes == pristine_bytes:
+                candidates.append(
+                    WorkspaceMatch(
+                        problem_id=name,
+                        source_dir=containing,
+                        skip_reason="Submission.lean unchanged from pristine; nothing to score",
+                    )
+                )
+                continue
         candidates.append(WorkspaceMatch(problem_id=name, source_dir=containing))
 
     seen_by_id: dict[str, list[WorkspaceMatch]] = {}
@@ -309,6 +345,17 @@ def overlay_match(
       - overlaid_files: list[str]
       - shared_packages: bool | str (True if symlinked, else reason it was not)
     """
+    if match.skip_reason is not None:
+        # Bail before any tree copy or package-share work — this match is
+        # already known to be unactionable (e.g. submitter never modified
+        # Submission.lean from the pristine version).
+        return {
+            "problem_id": match.problem_id,
+            "overlaid": False,
+            "skip_reason": match.skip_reason,
+            "overlaid_files": [],
+            "shared_packages": False,
+        }
     target = workspaces_root / match.problem_id
     if target.exists():
         shutil.rmtree(target)
@@ -327,15 +374,6 @@ def overlay_match(
     if shared_packages is not None:
         reason = _share_packages(target, shared_packages)
         shared_state = True if reason is None else reason
-
-    if match.skip_reason is not None:
-        return {
-            "problem_id": match.problem_id,
-            "overlaid": False,
-            "skip_reason": match.skip_reason,
-            "overlaid_files": [],
-            "shared_packages": shared_state,
-        }
 
     # 1. Overlay Submission.lean
     source_submission_lean = match.source_dir / "Submission.lean"
@@ -411,8 +449,12 @@ def _run_run_eval(
         "--workspaces-root",
         str(workspaces_root),
     ]
-    for pid in problem_ids:
-        args.extend(["--problem", pid])
+    if problem_ids:
+        # lean4-cli's `Array String` flag wants one occurrence with
+        # comma-separated values; passing `--problem` repeatedly trips a
+        # `Duplicate flag` parse error. Problem ids are TOML identifiers,
+        # so commas never appear inside an id.
+        args.extend(["--problem", ",".join(problem_ids)])
     process = subprocess.Popen(
         args,
         cwd=repo_root,
@@ -506,7 +548,7 @@ def evaluate_submission(
     re-unpacking Mathlib for each.
     """
     manifest_ids = _load_manifest_ids(manifest_path)
-    matches = detect_matches(source_dir, manifest_ids)
+    matches = detect_matches(source_dir, manifest_ids, generated_root=generated_root)
 
     overlay_records: list[dict] = []
     # Create the tempdir as an immediate child of repo_root so that:
@@ -535,10 +577,22 @@ def evaluate_submission(
                 overlaid_ids.append(record["problem_id"])
 
         if not overlaid_ids:
+            pristine_skipped = sum(
+                1 for r in overlay_records
+                if r["skip_reason"] and "unchanged from pristine" in r["skip_reason"]
+            )
+            extra = ""
+            if pristine_skipped:
+                extra = (
+                    f" Found {pristine_skipped} workspace(s) whose Submission.lean "
+                    "was unchanged from the pristine version; edit Submission.lean "
+                    "(and any helpers under Submission/) with your proof."
+                )
             raise EvaluateError(
                 "No valid workspace matches found in the submission. "
                 "A candidate is a directory containing a `lakefile.toml` with a `name` "
                 "matching a benchmark problem id AND a non-empty `Submission.lean` sibling."
+                + extra
             )
 
         if run_eval_runner is None:

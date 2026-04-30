@@ -167,13 +167,21 @@ jobs:
           tar -xzf /tmp/submission-artifact/source.tar.gz -C /tmp/submission-src --strip-components=1
 
       - name: Run evaluate_submission.py
+        # Sharing the host repo's .lake/packages tree across every
+        # per-submission workspace lets each `lake update` reuse Mathlib
+        # (~3GB unpacked) instead of cloning + decompressing it per
+        # workspace. Required to handle submissions that overlay several
+        # generated workspaces on a single runner without "no space left
+        # on device". Assumes generated workspaces stay in lock-step with
+        # the benchmark repo on dependency revs (they do, by construction).
         run: |
           python scripts/evaluate_submission.py \
             --source-dir /tmp/submission-src \
             --generated-root generated \
             --manifest manifests/problems.toml \
             --output-dir /tmp/evaluate-out \
-            --repo-root "$PWD"
+            --repo-root "$PWD" \
+            --shared-packages "$PWD/.lake/packages"
 
       - name: Copy frozen metadata through to record
         if: always()
