@@ -12,6 +12,17 @@ source = "Internal starter problem."
 informal_solution = "By computation."
 
 [[problem]]
+id = "ci_smoke_2026_04_30"
+title = "CI smoke test"
+test = true
+module = "LeanEval.EasyProblems"
+theorem = "ci_smoke_2026_04_30"
+submitter = "Kim Morrison"
+notes = "Internal smoke test for the auto-regenerate CI; remove after verification."
+source = "Internal smoke test."
+informal_solution = "True is true."
+
+[[problem]]
 id = "list_append_singleton_length"
 title = "Appending a singleton increases the list length"
 test = true

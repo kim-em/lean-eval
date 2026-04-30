@@ -50,6 +50,9 @@ Add a corresponding problem entry to the manifest.
 theorem eval_problem_inferable_implicit_guard {n : Nat} (h : n = n) : n = n := by
   exact h
 
+@[eval_problem]
+theorem ci_smoke_2026_04_30 : True := True.intro
+
 def starterNumber : Nat := 4
 
 end LeanEval
