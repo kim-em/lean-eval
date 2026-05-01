@@ -1,0 +1,12 @@
+{
+  "id": "m23_irrep_tensor_square_decomp",
+  "module": "LeanEval.RepresentationTheory.M23TensorSquare",
+  "holes": [
+    {
+      "name": "LeanEval.RepresentationTheory.m23_irrep_tensor_square_decomp",
+      "basename": "m23_irrep_tensor_square_decomp",
+      "kind": "theorem",
+      "body": "theorem m23_irrep_tensor_square_decomp :\n    \u2203 (G : Type) (_ : Group G) (_ : Fintype G),\n      Fintype.card G = 10200960 \u2227\n      \u2203 (V : Type) (_ : AddCommGroup V) (_ : Module \u2102 V)\n        (_ : Module (MonoidAlgebra \u2102 G) V)\n        (_ : IsScalarTower \u2102 (MonoidAlgebra \u2102 G) V)\n        (_ : Module (MonoidAlgebra \u2102 G) (V \u2297[\u2102] V))\n        (_ : IsScalarTower \u2102 (MonoidAlgebra \u2102 G) (V \u2297[\u2102] V)),\n        Module.finrank \u2102 V = 22 \u2227\n        IsSimpleModule (MonoidAlgebra \u2102 G) V \u2227\n        (\u2200 (g : G) (v w : V),\n          (MonoidAlgebra.of \u2102 G g : MonoidAlgebra \u2102 G) \u2022 (v \u2297\u209c[\u2102] w) =\n            ((MonoidAlgebra.of \u2102 G g : MonoidAlgebra \u2102 G) \u2022 v) \u2297\u209c[\u2102]\n              ((MonoidAlgebra.of \u2102 G g : MonoidAlgebra \u2102 G) \u2022 w)) \u2227\n        (isotypicComponents (MonoidAlgebra \u2102 G) (V \u2297[\u2102] V)).ncard = 4 := by\n  sorry"
+    }
+  ]
+}

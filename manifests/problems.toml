@@ -414,6 +414,72 @@ submitter = "Kim Morrison"
 notes = "Minimal example exercising instance + theorem holes; instances must be named so the comparator can address them."
 
 [[problem]]
+id = "brauer_character_in_cyclotomic"
+title = "Character values of finite groups lie in cyclotomic fields"
+test = false
+module = "LeanEval.RepresentationTheory.BrauerSplittingField"
+holes = ["brauer_character_in_cyclotomic"]
+submitter = "Kim Morrison"
+notes = "For a finite group G of exponent n, every value of every complex character of G lies in (the image of) the cyclotomic field ℚ(ζₙ). Stated uniformly for the fixed group G: there is a ring embedding φ : CyclotomicField (Monoid.exponent G) ℚ →+* ℂ whose range contains tr(ρ(g)) for every finite-dimensional complex representation ρ of G and every g. This is a corollary of Brauer's induction theorem; the full splitting-field statement (every irreducible representation has a ℚ(ζₙ)-form) is strictly stronger and requires more scalar-extension scaffolding than mathlib currently exposes cleanly."
+source = "R. Brauer, On the representation of a group of order g in the field of g-th roots of unity, Amer. J. Math. 67 (1945)."
+informal_solution = "Choose an embedding φ : ℚ(ζₙ) ↪ ℂ once and for all for the fixed group G. Then apply Brauer's induction theorem uniformly: every complex character of G is a ℤ-combination of characters induced from elementary subgroups, and those induced character values lie in φ(ℚ(ζₙ)). Hence for every finite-dimensional complex representation ρ of G and every g ∈ G, tr(ρ(g)) lies in φ.range."
+
+[[problem]]
+id = "m23_irrep_tensor_square_decomp"
+title = "Existence of an order-10200960 group with a 22-dim irrep whose tensor square has 4 isotypic components"
+test = false
+module = "LeanEval.RepresentationTheory.M23TensorSquare"
+holes = ["m23_irrep_tensor_square_decomp"]
+submitter = "Kim Morrison"
+notes = "Existential: a finite group G of order 10200960 (= |M₂₃|) with a 22-dimensional irreducible complex representation V whose tensor square (with the diagonal G-action) has exactly 4 isotypic components. Both the MonoidAlgebra ℂ G action on V and on V ⊗[ℂ] V are bound explicitly, with IsScalarTower and an explicit diagonal-action equation g•(v⊗w) = (g•v)⊗(g•w) pinning the V⊗V action. The intended witness is M₂₃ acting on its 22-dim irreducible: V ⊗ V = 1 ⊕ V ⊕ W₂₃₀ ⊕ Λ²V. While the formal statement does not technically require constructing M₂₃ and studying its representation theory, we suspect that in practice it does."
+source = "É. Mathieu, Sur les fonctions cinq fois transitives de 24 quantités, J. Math. Pures Appl. (1873); ATLAS of Finite Groups, M₂₃ character table."
+informal_solution = "Realise M₂₃ as a subgroup of S₂₃ (e.g. via the Steiner system S(4,7,23) or as the automorphism group of a ternary Golay code construction). Take V to be the 22-dimensional deleted permutation representation. By 4-transitivity Sym²V is the permutation representation on the 23 choose 2 = 253 unordered pairs, decomposing as 1 + V + W₂₃₀ where W is the unique 230-dimensional irrep; Λ²V is irreducible of dimension 231, giving four pairwise non-isomorphic isotypic components in V⊗V."
+
+[[problem]]
+id = "frobenius_kernel_isNormal"
+title = "Frobenius's theorem: the Frobenius kernel is normal"
+test = false
+module = "LeanEval.GroupTheory.Frobenius"
+holes = ["frobenius_kernel_isNormal"]
+submitter = "Kim Morrison"
+notes = "For a Frobenius group G acting transitively and faithfully on X with |X| ≥ 2, non-trivial point stabilisers, and the Frobenius condition (no non-identity element fixes more than one point), the set {1} ∪ {g | g fixes no point} is a normal subgroup. The only known proof uses Frobenius's induction-of-characters argument; no purely group-theoretic proof has been found in over a century."
+source = "G. Frobenius, Über auflösbare Gruppen IV, Sitzungsber. Akad. Wiss. Berlin (1901)."
+informal_solution = "Let H = stabilizer(x₀). Construct a class function θ on H of the form (1_H minus restriction of certain induced characters), and apply Frobenius reciprocity to lift θ to a generalised character of G whose kernel is exactly the Frobenius kernel K. The fact that the lift remains a virtual character (i.e. integer-valued combination of irreducibles) is exactly the content; that K is then a subgroup follows from K being a kernel."
+
+[[problem]]
+id = "glauberman_zStar"
+title = "Glauberman's Z* theorem for isolated involutions"
+test = false
+module = "LeanEval.GroupTheory.GlaubermanZStar"
+holes = ["glauberman_zStar"]
+submitter = "Kim Morrison"
+notes = "For a finite group G with an isolated involution t (no distinct conjugate of t commutes with t), there is a normal subgroup N ⊴ G of odd order such that every commutator g·t·g⁻¹·t⁻¹ lies in N — i.e., t is central in G/N. The hypothesis is the global form of isolation, equivalent to (but more self-contained than) the standard Sylow-local form. Proof uses modular Brauer character theory."
+source = "G. Glauberman, Central elements in core-free groups, J. Algebra 4 (1966)."
+informal_solution = "Take N = O(G), the largest normal subgroup of odd order. By Glauberman's modular character argument, isolation of t in C_G(t) implies t commutes with every element of G modulo O(G). The core of the proof is the analysis of the principal 2-block of G via Brauer characters and the Z*-style fusion theorem."
+
+[[problem]]
+id = "schreier_conjecture"
+title = "Schreier's conjecture: outer automorphism group of a finite simple group is solvable"
+test = false
+module = "LeanEval.GroupTheory.SchreierConjecture"
+holes = ["schreier_conjecture"]
+submitter = "Kim Morrison"
+notes = "For every finite non-abelian simple group S, Out(S) := Aut(S)/Inn(S) is solvable. The statement requires the normality of Inn(S) ⊴ Aut(S), which is supplied by a local instance with a one-line proof (the conjugate of conj(s) by α equals conj(α(s))). Verified case-by-case via CFSG; no CFSG-free proof is known."
+source = "O. Schreier, Über die Erweiterung von Gruppen II, Abh. Math. Sem. Univ. Hamburg 4 (1926); CFSG, completed c. 2004."
+informal_solution = "Use the classification of finite simple groups. For each family — alternating Aₙ, classical Lie type, exceptional Lie type, sporadic — inspect the known Out(S) and verify it is solvable. For Aₙ (n ≥ 5, n ≠ 6), Out = ℤ/2; for A₆, Out = (ℤ/2)²; for groups of Lie type, Out is built from diagonal, field, and graph automorphisms (each step solvable); for sporadics, Out is trivial or ℤ/2."
+
+[[problem]]
+id = "five_transitive_card_classification"
+title = "Possible orders of 5-transitive finite permutation groups"
+test = false
+module = "LeanEval.GroupTheory.MultiplyTransitive"
+holes = ["five_transitive_card_classification"]
+submitter = "Kim Morrison"
+notes = "If a finite group acts faithfully and 5-transitively on a set X with |X| ≥ 5, then |G| is one of n!, n!/2 (only when n ≥ 7), 95040 (= |M₁₂|), or 244823040 (= |M₂₄|). The 5 ≤ |X| hypothesis prevents the 5-transitivity condition from being vacuously satisfied (otherwise small groups like C₃ on Fin 3 would qualify). Classification is folklore via CFSG; no CFSG-free proof is known."
+source = "Folklore via CFSG; classical work of Mathieu, Jordan; modern accounts in P. Cameron, Permutation Groups (1999)."
+informal_solution = "By CFSG, the only finite 2-transitive groups are explicitly classified. Restricting to 5-transitive: the symmetric group Sₙ is k-transitive for all k ≤ n; the alternating group Aₙ is k-transitive for k ≤ n − 2 (so 5-transitive for n ≥ 7); among the Mathieu groups, M₁₂ is sharply 5-transitive on 12 points and M₂₄ is 5-transitive on 24 points. M₁₁ and M₂₃ are only 4-transitive and so do not appear. No other finite simple group has a 5-transitive permutation representation."
+
+[[problem]]
 id = "cubic_decay_asymptotic"
 title = "Polynomial decay rate of y' = -y^3"
 test = false

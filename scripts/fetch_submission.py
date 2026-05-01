@@ -399,6 +399,7 @@ def fetch_submission(
 
     metadata = {
         "source_url": fields["source_url"],
+        "submission_kind": descriptor.kind,
         "submission_repo": submission_repo_identifier(descriptor),
         "submission_ref": sha,
         "submission_public": submission_public,

@@ -1,0 +1,12 @@
+{
+  "id": "frobenius_kernel_isNormal",
+  "module": "LeanEval.GroupTheory.Frobenius",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.frobenius_kernel_isNormal",
+      "basename": "frobenius_kernel_isNormal",
+      "kind": "theorem",
+      "body": "theorem frobenius_kernel_isNormal\n    (G X : Type) [Group G] [Fintype G] [Fintype X]\n    [MulAction G X] [FaithfulSMul G X]\n    (hcard : 2 \u2264 Fintype.card X)\n    (htrans : \u2200 x y : X, \u2203 g : G, g \u2022 x = y)\n    (hstab : \u2200 x : X, MulAction.stabilizer G x \u2260 \u22a5)\n    (hfrob : \u2200 g : G, g \u2260 1 \u2192 \u2200 x y : X, g \u2022 x = x \u2192 g \u2022 y = y \u2192 x = y) :\n    \u2203 N : Subgroup G, N.Normal \u2227\n      (N : Set G) = {1} \u222a {g : G | \u2200 x : X, g \u2022 x \u2260 x} := by\n  sorry"
+    }
+  ]
+}

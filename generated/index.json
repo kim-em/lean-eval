@@ -416,5 +416,71 @@
       "instInhabitedWidget"
     ],
     "generated_path": "generated/instance_hole_example"
+  },
+  {
+    "id": "brauer_character_in_cyclotomic",
+    "title": "Character values of finite groups lie in cyclotomic fields",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.RepresentationTheory.BrauerSplittingField",
+    "holes": [
+      "brauer_character_in_cyclotomic"
+    ],
+    "generated_path": "generated/brauer_character_in_cyclotomic"
+  },
+  {
+    "id": "m23_irrep_tensor_square_decomp",
+    "title": "Existence of an order-10200960 group with a 22-dim irrep whose tensor square has 4 isotypic components",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.RepresentationTheory.M23TensorSquare",
+    "holes": [
+      "m23_irrep_tensor_square_decomp"
+    ],
+    "generated_path": "generated/m23_irrep_tensor_square_decomp"
+  },
+  {
+    "id": "frobenius_kernel_isNormal",
+    "title": "Frobenius's theorem: the Frobenius kernel is normal",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.GroupTheory.Frobenius",
+    "holes": [
+      "frobenius_kernel_isNormal"
+    ],
+    "generated_path": "generated/frobenius_kernel_isNormal"
+  },
+  {
+    "id": "glauberman_zStar",
+    "title": "Glauberman's Z* theorem for isolated involutions",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.GroupTheory.GlaubermanZStar",
+    "holes": [
+      "glauberman_zStar"
+    ],
+    "generated_path": "generated/glauberman_zStar"
+  },
+  {
+    "id": "schreier_conjecture",
+    "title": "Schreier's conjecture: outer automorphism group of a finite simple group is solvable",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.GroupTheory.SchreierConjecture",
+    "holes": [
+      "schreier_conjecture"
+    ],
+    "generated_path": "generated/schreier_conjecture"
+  },
+  {
+    "id": "five_transitive_card_classification",
+    "title": "Possible orders of 5-transitive finite permutation groups",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.GroupTheory.MultiplyTransitive",
+    "holes": [
+      "five_transitive_card_classification"
+    ],
+    "generated_path": "generated/five_transitive_card_classification"
   }
 ]

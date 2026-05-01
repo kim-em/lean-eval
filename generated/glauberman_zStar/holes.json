@@ -1,0 +1,12 @@
+{
+  "id": "glauberman_zStar",
+  "module": "LeanEval.GroupTheory.GlaubermanZStar",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.glauberman_zStar",
+      "basename": "glauberman_zStar",
+      "kind": "theorem",
+      "body": "theorem glauberman_zStar\n    (G : Type) [Group G] [Fintype G]\n    (t : G) (ht1 : t \u2260 1) (ht2 : t * t = 1)\n    (hisolated : \u2200 g : G, (g * t * g\u207b\u00b9) * t = t * (g * t * g\u207b\u00b9) \u2192\n      g * t * g\u207b\u00b9 = t) :\n    \u2203 N : Subgroup G, N.Normal \u2227 Odd (Nat.card N) \u2227\n      \u2200 g : G, g * t * g\u207b\u00b9 * t\u207b\u00b9 \u2208 N := by\n  sorry"
+    }
+  ]
+}
