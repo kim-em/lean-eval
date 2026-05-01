@@ -7,7 +7,14 @@ on:
     types: [labeled]
 
 concurrency:
-  group: submission-${{ github.event.issue.user.login }}
+  # Per-issue concurrency: each submission issue gets its own group so
+  # parallel submissions from the same user do not cancel each other.
+  # GitHub keeps at most 1 running + 1 pending per group, and any newer
+  # pending run cancels the previously-pending one — which manifested as
+  # silent dropouts when several issues were filed in quick succession.
+  # Concurrent leaderboard pushes from sibling runs are already handled
+  # by the `record` job's push-retry loop below.
+  group: submission-issue-${{ github.event.issue.number }}
   cancel-in-progress: false
 
 jobs:
