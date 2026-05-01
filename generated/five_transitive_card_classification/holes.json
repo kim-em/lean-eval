@@ -1,0 +1,12 @@
+{
+  "id": "five_transitive_card_classification",
+  "module": "LeanEval.GroupTheory.MultiplyTransitive",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.five_transitive_card_classification",
+      "basename": "five_transitive_card_classification",
+      "kind": "theorem",
+      "body": "theorem five_transitive_card_classification\n    (G X : Type) [Group G] [Fintype G] [Fintype X]\n    [MulAction G X] [FaithfulSMul G X]\n    (hcard : 5 \u2264 Fintype.card X)\n    (h5 : \u2200 a b : Fin 5 \u2192 X, Function.Injective a \u2192 Function.Injective b \u2192\n      \u2203 g : G, \u2200 i, g \u2022 a i = b i) :\n    let n := Fintype.card X\n    Fintype.card G = n.factorial \u2228\n    (7 \u2264 n \u2227 Fintype.card G = n.factorial / 2) \u2228\n    (n = 12 \u2227 Fintype.card G = 95040) \u2228\n    (n = 24 \u2227 Fintype.card G = 244823040) := by\n  sorry"
+    }
+  ]
+}

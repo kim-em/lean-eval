@@ -317,6 +317,7 @@ class FetchSubmissionEndToEndTests(unittest.TestCase):
                     app_token=None,
                     skip_clone=True,
                 )
+            self.assertEqual(metadata["submission_kind"], "github_repo")
             self.assertEqual(metadata["submission_repo"], "alice/my-proofs")
             self.assertEqual(metadata["submission_ref"], sha)
             self.assertTrue(metadata["submission_public"])
@@ -355,6 +356,35 @@ class FetchSubmissionEndToEndTests(unittest.TestCase):
                 metadata["production_description"],
                 "Custom orchestrator + Claude Opus 4.7; ~30 min human review.",
             )
+
+    def test_dry_run_emits_gist_kind_for_gist_submission(self) -> None:
+        gist_body = SAMPLE_BODY.replace(
+            "https://github.com/alice/my-proofs/commit/8e1b9cf5e1d3c2b1a0f9e8d7c6b5a4938271605f",
+            "https://gist.github.com/alice/abc123def456abc123def456abc123de",
+        )
+        event = {
+            "issue": {
+                "number": 42,
+                "user": {"login": "alice"},
+                "body": gist_body,
+            }
+        }
+        sha = "8e1b9cf5e1d3c2b1a0f9e8d7c6b5a4938271605f"
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch("fetch_submission.resolve_repo_visibility", return_value=True):
+                with patch("fetch_submission.resolve_ref", return_value=sha):
+                    metadata = fs.fetch_submission(
+                        event_payload=event,
+                        output_dir=pathlib.Path(tmp),
+                        app_token=None,
+                        skip_clone=True,
+                    )
+            self.assertEqual(metadata["submission_kind"], "gist")
+            self.assertEqual(
+                metadata["submission_repo"],
+                "alice/abc123def456abc123def456abc123de",
+            )
+            self.assertEqual(metadata["submission_ref"], sha)
 
     def test_secret_gist_is_rejected(self) -> None:
         gist_body = SAMPLE_BODY.replace(

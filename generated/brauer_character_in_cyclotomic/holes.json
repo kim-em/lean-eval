@@ -1,0 +1,12 @@
+{
+  "id": "brauer_character_in_cyclotomic",
+  "module": "LeanEval.RepresentationTheory.BrauerSplittingField",
+  "holes": [
+    {
+      "name": "LeanEval.RepresentationTheory.brauer_character_in_cyclotomic",
+      "basename": "brauer_character_in_cyclotomic",
+      "kind": "theorem",
+      "body": "theorem brauer_character_in_cyclotomic\n    (G : Type) [Group G] [Fintype G] :\n    \u2203 \u03c6 : CyclotomicField (Monoid.exponent G) \u211a \u2192+* \u2102,\n      \u2200 (V : Type) (_ : AddCommGroup V) (_ : Module \u2102 V) (_ : FiniteDimensional \u2102 V)\n        (\u03c1 : Representation \u2102 G V) (g : G),\n        LinearMap.trace \u2102 V (\u03c1 g) \u2208 \u03c6.range := by\n  sorry"
+    }
+  ]
+}

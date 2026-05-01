@@ -257,6 +257,7 @@ jobs:
           # Read frozen metadata fields
           SUBMITTED_BY=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submitted_by'])" "$METADATA_PATH")
           MODEL=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['model'])" "$METADATA_PATH")
+          SUBMISSION_KIND=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_kind'])" "$METADATA_PATH")
           SUBMISSION_REPO=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_repo'])" "$METADATA_PATH")
           SUBMISSION_REF=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['submission_ref'])" "$METADATA_PATH")
           SUBMISSION_PUBLIC=$(python -c "import json,sys; print(str(json.load(open(sys.argv[1]))['submission_public']).lower())" "$METADATA_PATH")
@@ -281,6 +282,7 @@ jobs:
               --leaderboard-dir leaderboard \
               --results-json "$RESULTS_PATH" \
               --benchmark-commit "${{ github.sha }}" \
+              --submission-kind "$SUBMISSION_KIND" \
               --submission-repo "$SUBMISSION_REPO" \
               --submission-ref "$SUBMISSION_REF" \
               $PUBLIC_FLAG \

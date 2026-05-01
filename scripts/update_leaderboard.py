@@ -18,10 +18,11 @@ import re
 import sys
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 1
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-REPO_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9._-]+$")
+OWNER_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9._-]+$")
 LOGIN_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$")
+SUBMISSION_KINDS = ("github_repo", "gist")
 PRODUCTION_DESCRIPTION_MAX_LEN = 4000
 
 
@@ -34,9 +35,16 @@ def _require_sha(field: str, value: str) -> None:
         raise UpdateError(f"{field} must be a 40-char hex SHA, got {value!r}")
 
 
-def _require_repo(value: str) -> None:
-    if not REPO_RE.fullmatch(value):
-        raise UpdateError(f"submission-repo must look like owner/repo, got {value!r}")
+def _require_owner_name(value: str) -> None:
+    if not OWNER_NAME_RE.fullmatch(value):
+        raise UpdateError(f"submission-repo must look like owner/name, got {value!r}")
+
+
+def _require_submission_kind(value: str) -> None:
+    if value not in SUBMISSION_KINDS:
+        raise UpdateError(
+            f"submission-kind must be one of {SUBMISSION_KINDS}, got {value!r}"
+        )
 
 
 def _require_login(value: str) -> None:
@@ -92,6 +100,7 @@ def update_leaderboard(
     leaderboard_dir: pathlib.Path,
     passed: list[str],
     benchmark_commit: str,
+    submission_kind: str,
     submission_repo: str,
     submission_ref: str,
     submission_public: bool,
@@ -103,7 +112,8 @@ def update_leaderboard(
     _require_login(user)
     _require_sha("benchmark-commit", benchmark_commit)
     _require_sha("submission-ref", submission_ref)
-    _require_repo(submission_repo)
+    _require_submission_kind(submission_kind)
+    _require_owner_name(submission_repo)
     if issue_number <= 0:
         raise UpdateError(f"issue-number must be positive, got {issue_number}")
     if not model.strip():
@@ -130,6 +140,7 @@ def update_leaderboard(
         record = {
             "solved_at": now,
             "benchmark_commit": benchmark_commit,
+            "submission_kind": submission_kind,
             "submission_repo": submission_repo,
             "submission_ref": submission_ref,
             "submission_public": submission_public,
@@ -186,6 +197,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Path to a JSON file of the form {'passed': [problem_id, ...]}.",
     )
     parser.add_argument("--benchmark-commit", required=True)
+    parser.add_argument(
+        "--submission-kind",
+        required=True,
+        choices=SUBMISSION_KINDS,
+        help="Source kind: github_repo or gist. Determines how the leaderboard "
+        "renders the proof link.",
+    )
     parser.add_argument("--submission-repo", required=True)
     parser.add_argument("--submission-ref", required=True)
     parser.add_argument(
@@ -219,6 +237,7 @@ def main(argv: list[str] | None = None) -> int:
             leaderboard_dir=args.leaderboard_dir,
             passed=passed,
             benchmark_commit=args.benchmark_commit,
+            submission_kind=args.submission_kind,
             submission_repo=args.submission_repo,
             submission_ref=args.submission_ref,
             submission_public=args.submission_public,

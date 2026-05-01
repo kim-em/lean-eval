@@ -1,0 +1,12 @@
+{
+  "id": "schreier_conjecture",
+  "module": "LeanEval.GroupTheory.SchreierConjecture",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.schreier_conjecture",
+      "basename": "schreier_conjecture",
+      "kind": "theorem",
+      "body": "theorem schreier_conjecture\n    (S : Type) [Group S] [Fintype S] [IsSimpleGroup S]\n    (hS : \u2203 a b : S, \u00ac Commute a b) :\n    IsSolvable (MulAut S \u29f8 (MulAut.conj : S \u2192* MulAut S).range) := by\n  sorry"
+    }
+  ]
+}
