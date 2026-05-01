@@ -18,7 +18,7 @@ import re
 import sys
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 REPO_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9._-]+$")
 LOGIN_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$")
@@ -58,8 +58,16 @@ def _load_existing(target_path: pathlib.Path, user: str) -> dict:
         )
     if not isinstance(data.get("user"), str):
         raise UpdateError(f"{target_path} is missing a 'user' string")
-    if not isinstance(data.get("solved"), dict):
+    solved = data.get("solved")
+    if not isinstance(solved, dict):
         raise UpdateError(f"{target_path} is missing a 'solved' object")
+    for model_key, problems in solved.items():
+        if not isinstance(model_key, str) or not model_key.strip():
+            raise UpdateError(f"{target_path} 'solved' has a non-string or empty model key")
+        if not isinstance(problems, dict):
+            raise UpdateError(
+                f"{target_path} 'solved[{model_key!r}]' must be an object of problem records"
+            )
     return data
 
 
@@ -69,9 +77,9 @@ def _write_json(path: pathlib.Path, data: dict) -> None:
     path.write_text(contents, encoding="utf-8")
 
 
-def _commit_message(user: str, added: list[str], benchmark_commit: str) -> str:
+def _commit_message(user: str, added: list[str], model: str, benchmark_commit: str) -> str:
     short = benchmark_commit[:7]
-    return f"record: {user} solved {', '.join(added)} @ {short}"
+    return f"record: {user} solved {', '.join(added)} using {model} @ {short}"
 
 
 def leaderboard_target_path(leaderboard_dir: pathlib.Path, user: str) -> pathlib.Path:
@@ -114,9 +122,10 @@ def update_leaderboard(
     target = leaderboard_target_path(leaderboard_dir, user)
     existing = _load_existing(target, user)
     solved = existing["solved"]
+    model_bucket = solved.setdefault(model, {})
     added: list[str] = []
     for problem_id in list(dict.fromkeys(passed)):
-        if problem_id in solved:
+        if problem_id in model_bucket:
             continue
         record = {
             "solved_at": now,
@@ -124,13 +133,17 @@ def update_leaderboard(
             "submission_repo": submission_repo,
             "submission_ref": submission_ref,
             "submission_public": submission_public,
-            "model": model,
             "issue_number": issue_number,
         }
         if production_description is not None:
             record["production_description"] = production_description
-        solved[problem_id] = record
+        model_bucket[problem_id] = record
         added.append(problem_id)
+
+    if not model_bucket:
+        # Nothing was added and the bucket we just inserted is empty
+        # (model name had no new solves). Drop it to keep the file tidy.
+        del solved[model]
 
     if added:
         _write_json(target, existing)
@@ -138,7 +151,7 @@ def update_leaderboard(
     return {
         "changed": bool(added),
         "added": added,
-        "commit_message": _commit_message(user, added, benchmark_commit) if added else "",
+        "commit_message": _commit_message(user, added, model, benchmark_commit) if added else "",
     }
 
 

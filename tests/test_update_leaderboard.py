@@ -45,7 +45,7 @@ def default_call(
 
 
 class UpdateLeaderboardTests(unittest.TestCase):
-    def test_first_write_creates_file_with_schema_v1(self) -> None:
+    def test_first_write_creates_file_with_schema_v2(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             lb = pathlib.Path(tmp)
             result = default_call(leaderboard_dir=lb, passed=["two_plus_two"])
@@ -53,24 +53,25 @@ class UpdateLeaderboardTests(unittest.TestCase):
             self.assertEqual(result["added"], ["two_plus_two"])
             self.assertEqual(
                 result["commit_message"],
-                "record: alice solved two_plus_two @ 8e1b9cf",
+                "record: alice solved two_plus_two using Claude Opus 4.6 @ 8e1b9cf",
             )
             target = lb / "results" / "alice.json"
             self.assertTrue(target.is_file())
             data = json.loads(target.read_text())
-            self.assertEqual(data["schema_version"], 1)
+            self.assertEqual(data["schema_version"], 2)
             self.assertEqual(data["user"], "alice")
-            record = data["solved"]["two_plus_two"]
+            self.assertIn("Claude Opus 4.6", data["solved"])
+            record = data["solved"]["Claude Opus 4.6"]["two_plus_two"]
             self.assertEqual(record["solved_at"], "2026-04-11T10:45:00Z")
             self.assertEqual(record["benchmark_commit"], BENCHMARK_COMMIT)
             self.assertEqual(record["submission_repo"], "alice/proofs")
             self.assertEqual(record["submission_ref"], SUBMISSION_REF)
             self.assertTrue(record["submission_public"])
-            self.assertEqual(record["model"], "Claude Opus 4.6")
             self.assertEqual(record["issue_number"], 42)
+            self.assertNotIn("model", record)
             self.assertNotIn("production_description", record)
 
-    def test_duplicate_is_noop_and_preserves_solved_at(self) -> None:
+    def test_duplicate_same_model_is_noop_and_preserves_solved_at(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             lb = pathlib.Path(tmp)
             default_call(leaderboard_dir=lb, passed=["two_plus_two"], now="2026-04-11T10:45:00Z")
@@ -79,7 +80,33 @@ class UpdateLeaderboardTests(unittest.TestCase):
             self.assertEqual(result["added"], [])
             self.assertEqual(result["commit_message"], "")
             data = json.loads((lb / "results" / "alice.json").read_text())
-            self.assertEqual(data["solved"]["two_plus_two"]["solved_at"], "2026-04-11T10:45:00Z")
+            self.assertEqual(
+                data["solved"]["Claude Opus 4.6"]["two_plus_two"]["solved_at"],
+                "2026-04-11T10:45:00Z",
+            )
+
+    def test_same_problem_different_model_records_new_entry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            default_call(leaderboard_dir=lb, passed=["two_plus_two"], model="Claude Opus 4.6")
+            result = default_call(leaderboard_dir=lb, passed=["two_plus_two"], model="GPT-5.5", now="2026-05-01T01:00:00Z")
+            self.assertTrue(result["changed"])
+            self.assertEqual(result["added"], ["two_plus_two"])
+            self.assertEqual(
+                result["commit_message"],
+                "record: alice solved two_plus_two using GPT-5.5 @ 8e1b9cf",
+            )
+            data = json.loads((lb / "results" / "alice.json").read_text())
+            self.assertIn("Claude Opus 4.6", data["solved"])
+            self.assertIn("GPT-5.5", data["solved"])
+            self.assertEqual(
+                data["solved"]["Claude Opus 4.6"]["two_plus_two"]["solved_at"],
+                "2026-04-11T10:45:00Z",
+            )
+            self.assertEqual(
+                data["solved"]["GPT-5.5"]["two_plus_two"]["solved_at"],
+                "2026-05-01T01:00:00Z",
+            )
 
     def test_partial_add_only_records_new_problems(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -89,7 +116,7 @@ class UpdateLeaderboardTests(unittest.TestCase):
             self.assertEqual(result["added"], ["list_append_singleton_length"])
             self.assertEqual(
                 result["commit_message"],
-                "record: alice solved list_append_singleton_length @ 8e1b9cf",
+                "record: alice solved list_append_singleton_length using Claude Opus 4.6 @ 8e1b9cf",
             )
 
     def test_multi_problem_commit_message(self) -> None:
@@ -97,13 +124,17 @@ class UpdateLeaderboardTests(unittest.TestCase):
             lb = pathlib.Path(tmp)
             result = default_call(leaderboard_dir=lb, passed=["a", "b", "c"])
             self.assertEqual(result["added"], ["a", "b", "c"])
-            self.assertEqual(result["commit_message"], "record: alice solved a, b, c @ 8e1b9cf")
+            self.assertEqual(
+                result["commit_message"],
+                "record: alice solved a, b, c using Claude Opus 4.6 @ 8e1b9cf",
+            )
 
     def test_private_submission_records_false_flag(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             lb = pathlib.Path(tmp)
             default_call(leaderboard_dir=lb, passed=["secret"], submission_public=False)
-            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["secret"]
+            data = json.loads((lb / "results" / "alice.json").read_text())
+            record = data["solved"]["Claude Opus 4.6"]["secret"]
             self.assertFalse(record["submission_public"])
 
     def test_duplicates_in_passed_list_are_deduped(self) -> None:
@@ -126,6 +157,21 @@ class UpdateLeaderboardTests(unittest.TestCase):
             target = lb / "results" / "alice.json"
             target.parent.mkdir(parents=True)
             target.write_text(json.dumps({"schema_version": 999, "user": "alice", "solved": {}}))
+            with self.assertRaisesRegex(ul.UpdateError, "schema_version"):
+                default_call(leaderboard_dir=lb, passed=["x"])
+
+    def test_v1_file_rejected(self) -> None:
+        # Ensure a v1-shaped file is rejected so callers must run the
+        # leaderboard repo's migration script before retrying.
+        with tempfile.TemporaryDirectory() as tmp:
+            lb = pathlib.Path(tmp)
+            target = lb / "results" / "alice.json"
+            target.parent.mkdir(parents=True)
+            target.write_text(json.dumps({
+                "schema_version": 1,
+                "user": "alice",
+                "solved": {"two_plus_two": {"model": "old", "solved_at": "x"}},
+            }))
             with self.assertRaisesRegex(ul.UpdateError, "schema_version"):
                 default_call(leaderboard_dir=lb, passed=["x"])
 
@@ -157,7 +203,8 @@ class UpdateLeaderboardTests(unittest.TestCase):
                 passed=["x"],
                 production_description="Custom orchestrator + Claude Opus 4.7.",
             )
-            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["x"]
+            data = json.loads((lb / "results" / "alice.json").read_text())
+            record = data["solved"]["Claude Opus 4.6"]["x"]
             self.assertEqual(
                 record["production_description"],
                 "Custom orchestrator + Claude Opus 4.7.",
@@ -171,14 +218,15 @@ class UpdateLeaderboardTests(unittest.TestCase):
                 passed=["x"],
                 production_description="first description",
             )
-            # Re-submitting the same problem with a different description must
-            # not overwrite the existing record (sticky-no-op semantics).
+            # Re-submitting the same (model, problem) with a different
+            # description must not overwrite the existing record.
             default_call(
                 leaderboard_dir=lb,
                 passed=["x"],
                 production_description="second description",
             )
-            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["x"]
+            data = json.loads((lb / "results" / "alice.json").read_text())
+            record = data["solved"]["Claude Opus 4.6"]["x"]
             self.assertEqual(record["production_description"], "first description")
 
     def test_production_description_oversize_rejected(self) -> None:
@@ -210,7 +258,8 @@ class UpdateLeaderboardTests(unittest.TestCase):
                 passed=["x"],
                 production_description="   \n\t  ",
             )
-            record = json.loads((lb / "results" / "alice.json").read_text())["solved"]["x"]
+            data = json.loads((lb / "results" / "alice.json").read_text())
+            record = data["solved"]["Claude Opus 4.6"]["x"]
             self.assertNotIn("production_description", record)
 
     def test_cli_end_to_end_writes_and_prints_json(self) -> None:
