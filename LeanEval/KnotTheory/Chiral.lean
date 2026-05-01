@@ -13,21 +13,23 @@ chirality requires an invariant *that is not preserved under reflection*,
 and choosing the right such invariant is part of the problem.
 -/
 
-/-- **Existence of a chiral smooth knot.**
+/-- **Existence of a chiral oriented smooth knot.**
 
-There exists a smooth knot in `ℝ³` whose image is not ambient-isotopic to
-its mirror image (the reflection of the image through the `xy`-plane).
+There exists an oriented smooth knot in `ℝ³` that is not ambient-isotopic
+to its mirror image (the reflection of the image through the `xy`-plane).
 
 *Suggestion.* The right-handed trefoil is chiral. Parametrize it for
 instance as
 
   `t ↦ (sin t + 2 sin (2 t), cos t − 2 cos (2 t), −sin (3 t))`.
 
-Proving chirality requires an ambient-isotopy invariant that takes
-*different* values on a knot and its mirror image. The figure-eight knot
-*is* isotopic to its mirror, so the invariant must be sensitive to chirality
-— in particular, the knot determinant and the Alexander polynomial alone do
-*not* suffice (both are mirror-symmetric).
+Here chirality is understood in the orientation-sensitive sense induced by
+the benchmark's notion of isotopy. Proving chirality therefore requires an
+ambient-isotopy invariant that takes *different* values on a knot and its
+mirror image. The figure-eight knot *is* isotopic to its mirror in the usual
+unoriented sense, so the invariant must be sensitive to chirality — in
+particular, the knot determinant and the Alexander polynomial alone do *not*
+suffice (both are mirror-symmetric).
 
 Standard chirality-detecting invariants:
 

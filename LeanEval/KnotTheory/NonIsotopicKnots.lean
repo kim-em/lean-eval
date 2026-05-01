@@ -13,9 +13,9 @@ ambient-isotopy invariant of single-component knots and compute it on two
 explicit parametrizations.
 -/
 
-/-- **Existence of a non-isotopic pair of smooth knots.**
+/-- **Existence of a non-isotopic pair of oriented smooth knots.**
 
-There exist two smooth knots in `ℝ³` that are not ambient-isotopic.
+There exist two oriented smooth knots in `ℝ³` that are not ambient-isotopic.
 
 *Suggestion.* Take `K₁` to be the **unknot**, parametrized as the round
 unit circle in the `xy`-plane, and `K₂` to be the **right-handed trefoil**,

@@ -13,10 +13,10 @@ ambient-isotopy invariant defined by an explicit double integral over the
 two parametrizations — no diagrammatic machinery needed.
 -/
 
-/-- **Existence of a non-isotopic pair of two-component links.**
+/-- **Existence of a non-isotopic pair of oriented two-component links.**
 
-There exist two smooth two-component links in `ℝ³` that are not ambient-
-isotopic.
+There exist two oriented smooth two-component links in `ℝ³` that are not
+ambient-isotopic.
 
 *Suggestion.* Take `L₁` to be the **unlink** — for instance, the two unit
 circles in the planes `z = 0` and `z = 2`, both centered on the `z`-axis —
@@ -29,10 +29,10 @@ To distinguish them, use the **Gauss linking integral**
               `⟨K(s) − L(t), K′(s) × L′(t)⟩ / ‖K(s) − L(t)‖³ ds dt`,
 
 which is well-defined when the components have disjoint images, takes the
-value `0` on the unlink and `±1` on the Hopf link, and is invariant under
-ambient isotopy of the link. (Invariance follows from a Stokes-style
-computation: the integrand is the pullback of a closed 2-form on
-`ℝ³ \ {0}`.)
+value `0` on the unlink and `±1` on the Hopf link depending on the chosen
+orientations, and is invariant under ambient isotopy of the oriented link.
+(Invariance follows from a Stokes-style computation: the integrand is the
+pullback of a closed 2-form on `ℝ³ \ {0}`.)
 
 See <https://en.wikipedia.org/wiki/Linking_number> for a reference. -/
 @[eval_problem]
