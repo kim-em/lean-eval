@@ -444,6 +444,39 @@ def module_source_path(module_name: str) -> pathlib.Path:
     return REPO_ROOT.joinpath(*module_name.split(".")).with_suffix(".lean")
 
 
+def source_imports(source_text: str) -> list[str]:
+    imports: list[str] = []
+    for raw in source_text.splitlines():
+        stripped = raw.strip()
+        if stripped.startswith("import "):
+            imports.append(stripped.split(maxsplit=1)[1])
+    return imports
+
+
+def repo_local_import_modules(module_name: str, seen: set[str] | None = None) -> list[str]:
+    if seen is None:
+        seen = set()
+    source_path = module_source_path(module_name)
+    if not source_path.is_file():
+        return []
+    source_text = source_path.read_text(encoding="utf-8")
+    modules: list[str] = []
+    for imported in source_imports(source_text):
+        if imported.startswith("Mathlib.") or imported == "Mathlib":
+            continue
+        if imported.startswith("EvalTools."):
+            continue
+        if imported == module_name or imported in seen:
+            continue
+        imported_path = module_source_path(imported)
+        if not imported_path.is_file():
+            continue
+        seen.add(imported)
+        modules.extend(repo_local_import_modules(imported, seen))
+        modules.append(imported)
+    return modules
+
+
 def offset_for_line_column(text: str, line: int, column: int) -> int:
     if line < 1:
         raise GenerationError(f"Invalid source line {line}")
@@ -549,59 +582,74 @@ def render_challenge_deps(problem: ProblemSpec, extracted: ExtractedTheorem) -> 
         raise GenerationError(f"Source file for module '{problem.module}' not found: {source_path}")
 
     source_text = source_path.read_text(encoding="utf-8")
-    body_start = import_prelude_length(source_text)
+    challenge_deps_parts: list[str] = []
+
+    for imported_module in repo_local_import_modules(problem.module):
+        imported_path = module_source_path(imported_module)
+        imported_text = imported_path.read_text(encoding="utf-8")
+        imported_body = _strip_problem_markers(imported_text[import_prelude_length(imported_text):]).lstrip("\n")
+        if imported_body and not imported_body.endswith("\n"):
+            imported_body += "\n"
+        if imported_body:
+            challenge_deps_parts.append(imported_body)
+
     metadata = load_ilean_metadata(problem.module)
     keep_declarations = set(extracted.same_module_dependencies)
-    if not keep_declarations:
+    if keep_declarations:
+        body_start = import_prelude_length(source_text)
+        all_declarations = {
+            str(name): value
+            for name, value in metadata.get("decls", {}).items()
+            if isinstance(name, str) and isinstance(value, list) and len(value) >= 4
+        }
+
+        declaration_starts: list[tuple[str, int]] = []
+        for declaration_name, raw_range in all_declarations.items():
+            declaration_start = offset_for_line_column(
+                source_text,
+                int(raw_range[0]) + 1,
+                int(raw_range[1]),
+            )
+            declaration_starts.append((declaration_name, declaration_start))
+        declaration_starts.sort(key=lambda item: item[1])
+
+        theorem_start, theorem_end = offset_range_for_source_range(source_text, extracted.source_range)
+        remove_ranges: list[tuple[int, int]] = []
+        for index, (declaration_name, declaration_start) in enumerate(declaration_starts):
+            if declaration_name in keep_declarations:
+                continue
+            if declaration_name == extracted.declaration_name:
+                remove_ranges.append((theorem_start, theorem_end))
+                continue
+
+            if index + 1 < len(declaration_starts):
+                next_start = declaration_starts[index + 1][1]
+            else:
+                next_start = find_top_level_end_offset(source_text, declaration_start)
+            remove_ranges.append((declaration_start, next_start))
+
+        remove_ranges.sort()
+        pieces: list[str] = []
+        cursor = body_start
+        for start, end in remove_ranges:
+            if end <= body_start:
+                continue
+            start = max(start, body_start)
+            if start < cursor:
+                continue
+            pieces.append(source_text[cursor:start])
+            cursor = end
+        pieces.append(source_text[cursor:])
+        challenge_deps_body = "".join(pieces).lstrip("\n")
+        if challenge_deps_body and not challenge_deps_body.endswith("\n"):
+            challenge_deps_body += "\n"
+        if challenge_deps_body:
+            challenge_deps_parts.append(challenge_deps_body)
+
+    if not challenge_deps_parts:
         return None
-    all_declarations = {
-        str(name): value
-        for name, value in metadata.get("decls", {}).items()
-        if isinstance(name, str) and isinstance(value, list) and len(value) >= 4
-    }
 
-    declaration_starts: list[tuple[str, int]] = []
-    for declaration_name, raw_range in all_declarations.items():
-        declaration_start = offset_for_line_column(
-            source_text,
-            int(raw_range[0]) + 1,
-            int(raw_range[1]),
-        )
-        declaration_starts.append((declaration_name, declaration_start))
-    declaration_starts.sort(key=lambda item: item[1])
-
-    theorem_start, theorem_end = offset_range_for_source_range(source_text, extracted.source_range)
-    remove_ranges: list[tuple[int, int]] = []
-    for index, (declaration_name, declaration_start) in enumerate(declaration_starts):
-        if declaration_name in keep_declarations:
-            continue
-        if declaration_name == extracted.declaration_name:
-            remove_ranges.append((theorem_start, theorem_end))
-            continue
-
-        if index + 1 < len(declaration_starts):
-            next_start = declaration_starts[index + 1][1]
-        else:
-            next_start = find_top_level_end_offset(source_text, declaration_start)
-        remove_ranges.append((declaration_start, next_start))
-
-    remove_ranges.sort()
-    pieces: list[str] = []
-    cursor = body_start
-    for start, end in remove_ranges:
-        if end <= body_start:
-            continue
-        start = max(start, body_start)
-        if start < cursor:
-            continue
-        pieces.append(source_text[cursor:start])
-        cursor = end
-    pieces.append(source_text[cursor:])
-    challenge_deps_body = "".join(pieces).lstrip("\n")
-    if challenge_deps_body and not challenge_deps_body.endswith("\n"):
-        challenge_deps_body += "\n"
-
-    return "import Mathlib\n\n" + challenge_deps_body
+    return "import Mathlib\n\n" + "\n".join(part.rstrip("\n") for part in challenge_deps_parts) + "\n"
 
 
 def extract_context_opens(problem: ProblemSpec, *, include_namespaces: bool = False) -> str:
@@ -778,9 +826,7 @@ def render_workspace(
         if challenge_deps is not None
         else "import Mathlib\nimport Submission.Helpers\n\n"
     )
-    context_open_block = extract_context_opens(
-        problem, include_namespaces=challenge_deps is not None
-    )
+    context_open_block = extract_context_opens(problem, include_namespaces=True)
     if context_open_block and not context_open_block.endswith("\n\n"):
         context_open_block += "\n"
     readme_lines = [
