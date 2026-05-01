@@ -479,3 +479,14 @@ submitter = "Kim Morrison"
 notes = "If a finite group acts faithfully and 5-transitively on a set X with |X| ≥ 5, then |G| is one of n!, n!/2 (only when n ≥ 7), 95040 (= |M₁₂|), or 244823040 (= |M₂₄|). The 5 ≤ |X| hypothesis prevents the 5-transitivity condition from being vacuously satisfied (otherwise small groups like C₃ on Fin 3 would qualify). Classification is folklore via CFSG; no CFSG-free proof is known."
 source = "Folklore via CFSG; classical work of Mathieu, Jordan; modern accounts in P. Cameron, Permutation Groups (1999)."
 informal_solution = "By CFSG, the only finite 2-transitive groups are explicitly classified. Restricting to 5-transitive: the symmetric group Sₙ is k-transitive for all k ≤ n; the alternating group Aₙ is k-transitive for k ≤ n − 2 (so 5-transitive for n ≥ 7); among the Mathieu groups, M₁₂ is sharply 5-transitive on 12 points and M₂₄ is 5-transitive on 24 points. M₁₁ and M₂₃ are only 4-transitive and so do not appear. No other finite simple group has a 5-transitive permutation representation."
+
+[[problem]]
+id = "topoloigcal_classification_of_surfaces"
+title = "Topological classification of surfaces"
+test = false
+module = "LeanEval.Topology.ClassificationOfSurfaces"
+holes = ["classification_of_surfaces"]
+submitter = "Junyan Xu"
+notes = "A compact connected surface with boundary is homeomorphic to one of the representative surfaces that we formalize."
+source = "Jean Gallier & Dianna Xu, *A Guide to the Classification Theorem for Compact Surfaces*, https://www.cis.upenn.edu/~jean/surfclassif-root.pdf"
+informal_solution = "Show surfaces are triangulable and therefore homeomorphic to cell complexes, and show each cell complex is equivalent to one in normal form."
