@@ -198,17 +198,6 @@
     "generated_path": "generated/exists_complementary_polynomial_on_unit_circle"
   },
   {
-    "id": "isStarNormal_mul_of_commute",
-    "title": "Product of commuting normal elements is normal",
-    "test": false,
-    "submitter": "Kim Morrison",
-    "module": "LeanEval.Algebra.NormalProduct",
-    "holes": [
-      "isStarNormal_mul_of_commute"
-    ],
-    "generated_path": "generated/isStarNormal_mul_of_commute"
-  },
-  {
     "id": "posSemidef_map_exp",
     "title": "Entrywise exponential of a PSD matrix is PSD",
     "test": false,
