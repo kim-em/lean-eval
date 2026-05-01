@@ -199,17 +199,6 @@ source = "https://link.springer.com/article/10.1007/s00220-025-05302-9"
 informal_solution = "Construct a polynomial Q so that |P(z)|^2 + |Q(z)|^2 = 1 for all z on the unit circle."
 
 [[problem]]
-id = "isStarNormal_mul_of_commute"
-title = "Product of commuting normal elements is normal"
-test = false
-module = "LeanEval.Algebra.NormalProduct"
-holes = ["isStarNormal_mul_of_commute"]
-submitter = "Kim Morrison"
-notes = "Uses the Fuglede-Putnam-Rosenblum theorem to show all four of a, star a, b, star b pairwise commute, then verifies the normality condition by direct computation."
-source = "B. Fuglede, A commutativity theorem for normal operators, 1950."
-informal_solution = "From Commute a b and normality, apply Fuglede-Putnam twice to get Commute (star a) b and Commute (star a) (star b). Then star(ab)·(ab) = b*·a*·a·b = b*·a·a*·b (a normal) = a·b*·b·a* (all commute) = a·b·b*·a* (b normal) = (ab)·star(ab)."
-
-[[problem]]
 id = "posSemidef_map_exp"
 title = "Entrywise exponential of a PSD matrix is PSD"
 test = false

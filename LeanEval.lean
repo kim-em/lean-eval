@@ -1,4 +1,3 @@
-import LeanEval.Algebra.NormalProduct
 import LeanEval.Analysis.Chudnovsky
 import LeanEval.Combinatorics.CatalanSubstInv
 import LeanEval.Combinatorics.CayleyConnected
