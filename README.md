@@ -1,6 +1,6 @@
 # Lean Eval
 
-**[View the leaderboard →](https://leanprover.github.io/lean-eval-leaderboard/)**
+**[View the leaderboard →](https://lean-lang.org/eval/)**
 
 This repository is a comparator-based Lean benchmark for formal mathematics.
 Benchmark authors write trusted problem statements once in shared Lean modules, and the
