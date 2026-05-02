@@ -1,0 +1,40 @@
+name: Notify leaderboard of main advance
+
+# Wakes up the leaderboard repo whenever a problem-affecting change
+# lands on `main`, so it can advance benchmark-snapshot/.benchmark-commit
+# and (transitively) re-deploy the live site.
+#
+# The dispatched SHA is advisory only — the leaderboard's
+# bump-benchmark-snapshot.yml re-resolves origin/main itself.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'LeanEval/**'
+      - 'EvalTools/**'
+      - 'manifests/problems.toml'
+      - 'scripts/generate_projects.py'
+      - 'lakefile.toml'
+      - 'lean-toolchain'
+  workflow_dispatch:
+
+concurrency:
+  group: notify-leaderboard
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Fire repository_dispatch into lean-eval-leaderboard
+        env:
+          GH_TOKEN: ${{ secrets.LEADERBOARD_WRITE_TOKEN }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          gh api repos/leanprover/lean-eval-leaderboard/dispatches \
+            -X POST \
+            -F event_type=lean-eval-main-advanced \
+            -F "client_payload[sha]=$SHA"
