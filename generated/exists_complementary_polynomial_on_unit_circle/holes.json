@@ -6,7 +6,7 @@
       "name": "LeanEval.ComplexAnalysis.exists_complementary_polynomial_on_unit_circle",
       "basename": "exists_complementary_polynomial_on_unit_circle",
       "kind": "theorem",
-      "body": "/-- If `P` is bounded by `1` on the unit circle, then there is a polynomial `Q` of the same degree\nwhose squared moduli complement `P` to `1` on the unit circle. -/\ntheorem exists_complementary_polynomial_on_unit_circle\n    (P : \u2102[X])\n    (hP : \u2200 z : Circle, \u2016P.eval (z : \u2102)\u2016 \u2264 1) :\n    \u2203 Q : \u2102[X],\n      Q.natDegree = P.natDegree \u2227\n        \u2200 z : Circle, \u2016P.eval (z : \u2102)\u2016 ^ 2 + \u2016Q.eval (z : \u2102)\u2016 ^ 2 = 1 := by\n  sorry"
+      "body": "/-- If `P` is bounded by `1` on the unit circle, then there is a polynomial `Q` of degree at most\nthat of `P` whose squared moduli complement `P` to `1` on the unit circle. -/\ntheorem exists_complementary_polynomial_on_unit_circle\n    (P : \u2102[X])\n    (hP : \u2200 z : Circle, \u2016P.eval (z : \u2102)\u2016 \u2264 1) :\n    \u2203 Q : \u2102[X],\n      Q.natDegree \u2264 P.natDegree \u2227\n        \u2200 z : Circle, \u2016P.eval (z : \u2102)\u2016 ^ 2 + \u2016Q.eval (z : \u2102)\u2016 ^ 2 = 1 := by\n  sorry"
     }
   ]
 }
