@@ -414,6 +414,39 @@ submitter = "Kim Morrison"
 notes = "Minimal example exercising instance + theorem holes; instances must be named so the comparator can address them."
 
 [[problem]]
+id = "exists_nonisotopic_link"
+title = "Existence of a non-isotopic pair of oriented two-component links"
+test = false
+module = "LeanEval.KnotTheory.Linking"
+holes = ["exists_nonisotopic_link"]
+submitter = "Kim Morrison"
+notes = "Warmup for the knot-theory benchmark. Asks for two oriented smooth two-component links in R^3 that are not ambient-isotopic. The benchmark uses an orientation-sensitive notion of isotopy induced by the parametrizations, so the Gauss linking integral is a natural real-valued invariant distinguishing the unlink (lk = 0) from the Hopf link (lk = +/- 1, depending on orientation choice)."
+source = "Classical; see https://en.wikipedia.org/wiki/Linking_number."
+informal_solution = "Take L1 = unlink (two unit circles in parallel planes) and L2 = Hopf link, with explicit orientations induced by the parametrizations. Define lk(K, L) by the Gauss double integral (1/4 pi) int int <K(s) - L(t), K'(s) x L'(t)> / |K(s) - L(t)|^3 ds dt. Prove lk is invariant under ambient isotopy of oriented links by exhibiting it as the integral of a closed 2-form on R^3 minus the origin pulled back along (K, L), so Stokes-style arguments show invariance. Compute lk(unlink) = 0 and choose the Hopf-link orientations so that lk(Hopf) = 1. Conclude L1 and L2 are not ambient-isotopic."
+
+[[problem]]
+id = "exists_nonisotopic_knots"
+title = "Existence of a non-isotopic pair of oriented knots"
+test = false
+module = "LeanEval.KnotTheory.NonIsotopicKnots"
+holes = ["exists_nonisotopic_knots"]
+submitter = "Kim Morrison"
+notes = "Asks for two oriented smooth knots in R^3 that are not ambient-isotopic. The benchmark uses an orientation-sensitive notion of isotopy induced by the parametrizations. Mathlib has no knot-invariant infrastructure, so the model must construct an isotopy invariant from scratch. Suggested: the Alexander polynomial / knot determinant, or the Fox 3-coloring count, both of which distinguish the unknot from the trefoil."
+source = "Classical; see https://en.wikipedia.org/wiki/Knot_invariant."
+informal_solution = "Take K1 = unknot (round circle in the xy-plane) and K2 = right-handed trefoil parametrized as t -> (sin t + 2 sin 2t, cos t - 2 cos 2t, -sin 3t). Construct an ambient-isotopy invariant; the simplest computable choice is the number of Fox 3-colorings of any diagram of K, which counts homomorphisms from the knot group to D_3. The unknot admits 3 such colorings (all monochromatic); the trefoil admits 9. Hence the two knots are not ambient-isotopic."
+
+[[problem]]
+id = "exists_chiral_knot"
+title = "Existence of a chiral oriented knot"
+test = false
+module = "LeanEval.KnotTheory.Chiral"
+holes = ["exists_chiral_knot"]
+submitter = "Kim Morrison"
+notes = "Challenge problem of the knot-theory benchmark. Asks for an oriented smooth knot whose image is not ambient-isotopic to its mirror image (under reflection through the xy-plane), using the benchmark's orientation-sensitive notion of isotopy induced by the parametrization. The model must construct an ambient-isotopy invariant that takes different values on a knot and its mirror -- the knot determinant and Alexander polynomial alone do not suffice, since the figure-eight is amphichiral in the usual unoriented sense."
+source = "Classical; see https://en.wikipedia.org/wiki/Chirality_(mathematics) and https://en.wikipedia.org/wiki/Trefoil_knot."
+informal_solution = "Take K = right-handed trefoil. Construct the knot signature sigma(K) from a Seifert matrix V as the signature of V + V^T, and verify that sigma is an ambient-isotopy invariant of knots that negates under mirror reflection. Compute sigma(right trefoil) = -2, so sigma(K) != sigma(mirror K) and K is chiral. (Alternatively, use the Jones polynomial V_K(t) = -t^{-4} + t^{-3} + t^{-1}, which is not symmetric under t <-> t^{-1}.)"
+
+[[problem]]
 id = "brauer_character_in_cyclotomic"
 title = "Character values of finite groups lie in cyclotomic fields"
 test = false
@@ -489,6 +522,15 @@ submitter = "Junyan Xu"
 notes = "A compact connected surface with boundary is homeomorphic to one of the representative surfaces that we formalize."
 source = "Jean Gallier & Dianna Xu, *A Guide to the Classification Theorem for Compact Surfaces*, https://www.cis.upenn.edu/~jean/surfclassif-root.pdf"
 informal_solution = "Show surfaces are triangulable and therefore homeomorphic to cell complexes, and show each cell complex is equivalent to one in normal form."
+
+[[problem]]
+id = "deBranges_theorem"
+title = "De Branges's theorem (Bieberbach conjecture)"
+test = false
+module = "LeanEval.ComplexAnalysis.DeBranges"
+holes = ["deBranges"]
+submitter = "Junyan Xu"
+source = "John B. Conway, *Functions of One Complex Variable II*, Chapter 17."
 
 [[problem]]
 id = "cubic_decay_asymptotic"

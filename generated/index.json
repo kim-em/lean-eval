@@ -418,6 +418,39 @@
     "generated_path": "generated/instance_hole_example"
   },
   {
+    "id": "exists_nonisotopic_link",
+    "title": "Existence of a non-isotopic pair of oriented two-component links",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.KnotTheory.Linking",
+    "holes": [
+      "exists_nonisotopic_link"
+    ],
+    "generated_path": "generated/exists_nonisotopic_link"
+  },
+  {
+    "id": "exists_nonisotopic_knots",
+    "title": "Existence of a non-isotopic pair of oriented knots",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.KnotTheory.NonIsotopicKnots",
+    "holes": [
+      "exists_nonisotopic_knots"
+    ],
+    "generated_path": "generated/exists_nonisotopic_knots"
+  },
+  {
+    "id": "exists_chiral_knot",
+    "title": "Existence of a chiral oriented knot",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.KnotTheory.Chiral",
+    "holes": [
+      "exists_chiral_knot"
+    ],
+    "generated_path": "generated/exists_chiral_knot"
+  },
+  {
     "id": "brauer_character_in_cyclotomic",
     "title": "Character values of finite groups lie in cyclotomic fields",
     "test": false,
@@ -482,6 +515,17 @@
       "five_transitive_card_classification"
     ],
     "generated_path": "generated/five_transitive_card_classification"
+  },
+  {
+    "id": "deBranges_theorem",
+    "title": "De Branges's theorem (Bieberbach conjecture)",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.ComplexAnalysis.DeBranges",
+    "holes": [
+      "deBranges"
+    ],
+    "generated_path": "generated/deBranges_theorem"
   },
   {
     "id": "cubic_decay_asymptotic",

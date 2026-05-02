@@ -1,0 +1,12 @@
+{
+  "id": "deBranges_theorem",
+  "module": "LeanEval.ComplexAnalysis.DeBranges",
+  "holes": [
+    {
+      "name": "LeanEval.ComplexAnalysis.deBranges",
+      "basename": "deBranges",
+      "kind": "theorem",
+      "body": "/-- De Branges's theorem (Bieberbach conjecture): a univalent function (injective holomorphic\nfunction from the unit disc to the complex plane) with Taylor coefficients a\u2080=0 and a\u2081=1 satisfies\n|a\u2099|\u2264 n for all n. -/\ntheorem deBranges (f : \u2102 \u2192 \u2102) (diff : DifferentiableOn \u2102 f (ball 0 1)) (inj : (ball 0 1).InjOn f)\n    (h0 : f 0 = 0) (h1 : deriv f 0 = 1) (n : \u2115) : \u2016iteratedDeriv n f 0 / n.factorial\u2016 \u2264 n := by\n  sorry"
+    }
+  ]
+}

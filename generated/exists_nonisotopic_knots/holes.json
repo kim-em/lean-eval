@@ -1,0 +1,12 @@
+{
+  "id": "exists_nonisotopic_knots",
+  "module": "LeanEval.KnotTheory.NonIsotopicKnots",
+  "holes": [
+    {
+      "name": "LeanEval.KnotTheory.exists_nonisotopic_knots",
+      "basename": "exists_nonisotopic_knots",
+      "kind": "theorem",
+      "body": "/-- **Existence of a non-isotopic pair of oriented smooth knots.**\n\nThere exist two oriented smooth knots in `\u211d\u00b3` that are not ambient-isotopic.\n\n*Suggestion.* Take `K\u2081` to be the **unknot**, parametrized as the round\nunit circle in the `xy`-plane, and `K\u2082` to be the **right-handed trefoil**,\nparametrized for instance by\n\n  `t \u21a6 (sin t + 2 sin (2 t), cos t \u2212 2 cos (2 t), \u2212sin (3 t))`\n\n(this is a smooth, 2\u03c0-periodic immersion, and it is injective on `[0, 2\u03c0)`).\n\nTo distinguish them, you must construct an ambient-isotopy invariant of\nknots. Two computationally tractable options, each fully developed from\nelementary ingredients:\n\n* The **knot determinant** `|\u0394_K(\u22121)|`, where `\u0394_K \u2208 \u2124[t, t\u207b\u00b9]` is the\n  Alexander polynomial. The unknot has determinant `1`; the trefoil has\n  determinant `3`.\n* The number of **Fox 3-colorings** of any diagram of `K`, which counts\n  homomorphisms from the knot group to the dihedral group `D\u2083` and is an\n  isotopy invariant. The unknot admits only monochromatic 3-colorings\n  (3 of them); the trefoil admits 9.\n\nSee <https://en.wikipedia.org/wiki/Knot_invariant> for a survey. -/\ntheorem exists_nonisotopic_knots : \u2203 K\u2081 K\u2082 : Knot, \u00ac K\u2081.Isotopic K\u2082 := by\n  sorry"
+    }
+  ]
+}

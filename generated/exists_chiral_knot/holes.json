@@ -1,0 +1,12 @@
+{
+  "id": "exists_chiral_knot",
+  "module": "LeanEval.KnotTheory.Chiral",
+  "holes": [
+    {
+      "name": "LeanEval.KnotTheory.exists_chiral_knot",
+      "basename": "exists_chiral_knot",
+      "kind": "theorem",
+      "body": "/-- **Existence of a chiral oriented smooth knot.**\n\nThere exists an oriented smooth knot in `\u211d\u00b3` that is not ambient-isotopic\nto its mirror image (the reflection of the image through the `xy`-plane).\n\n*Suggestion.* The right-handed trefoil is chiral. Parametrize it for\ninstance as\n\n  `t \u21a6 (sin t + 2 sin (2 t), cos t \u2212 2 cos (2 t), \u2212sin (3 t))`.\n\nHere chirality is understood in the orientation-sensitive sense induced by\nthe benchmark's notion of isotopy. Proving chirality therefore requires an\nambient-isotopy invariant that takes *different* values on a knot and its\nmirror image. The figure-eight knot *is* isotopic to its mirror in the usual\nunoriented sense, so the invariant must be sensitive to chirality \u2014 in\nparticular, the knot determinant and the Alexander polynomial alone do *not*\nsuffice (both are mirror-symmetric).\n\nStandard chirality-detecting invariants:\n\n* The **knot signature** `\u03c3(K) \u2208 \u2124`, computed from a Seifert matrix\n  `V` as the signature of `V + V\u1d40`. Mirroring negates the signature, so\n  any knot with `\u03c3(K) \u2260 0` is chiral. The right-handed trefoil has\n  `\u03c3 = \u22122`.\n* The **Jones polynomial** `V_K(t) \u2208 \u2124[t^{1/2}, t^{-1/2}]`. Mirroring\n  sends `V_K(t)` to `V_K(t\u207b\u00b9)`, so any knot whose Jones polynomial is not\n  symmetric under `t \u2194 t\u207b\u00b9` is chiral. The right-handed trefoil has\n  `V_K(t) = \u2212t^{\u22124} + t^{\u22123} + t^{\u22121}`.\n\nSee <https://en.wikipedia.org/wiki/Chirality_(mathematics)> and\n<https://en.wikipedia.org/wiki/Trefoil_knot>. -/\ntheorem exists_chiral_knot : \u2203 K : Knot, K.Chiral := by\n  sorry"
+    }
+  ]
+}
