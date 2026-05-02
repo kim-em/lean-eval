@@ -19,12 +19,7 @@ concurrency:
 
 jobs:
   fetch:
-    # SECURITY: workflow disabled while we investigate / fix unsandboxed
-    # elaboration of user-supplied Submission.lean in
-    # scripts/evaluate_submission.py:_prime_workspace. Do not re-enable
-    # without confirming comparator's landrun sandbox is the only place
-    # the submitter's Lean code is built.
-    if: false && github.event.label.name == 'submission'
+    if: github.event.label.name == 'submission'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
