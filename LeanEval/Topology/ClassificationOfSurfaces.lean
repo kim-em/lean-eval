@@ -28,8 +28,8 @@ namespace LeanEval.Topology.ClassificationOfSurfaces
 
 open Complex Set
 
-/-- The representative orientable surface homeomorphic to a closed genus `p` surface with
-`n` discs removed, obtained by identifying the boundary of a disc in the pattern
+/-- The representative orientable surface homeomorphic to a closed orientable genus `p`
+surface with `n` discs removed, obtained by identifying the boundary of a disc in the pattern
 `a₁b₁a₁⁻¹b₁⁻¹⋯aₚbₚaₚbₚ⁻¹c₁h₁c₁⁻¹⋯cₙhₙcₙ⁻¹`. -/
 inductive OrientableRel (p n : ℕ) : ClosedUnitDisc → ClosedUnitDisc → Prop
   | a (x : Icc (0 : ℝ) 1) (i : Fin p) : OrientableRel p n
