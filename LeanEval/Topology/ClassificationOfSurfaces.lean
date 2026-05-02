@@ -30,7 +30,7 @@ open Complex Set
 
 /-- The representative orientable surface homeomorphic to a closed orientable genus `p`
 surface with `n` discs removed, obtained by identifying the boundary of a disc in the pattern
-`a₁b₁a₁⁻¹b₁⁻¹⋯aₚbₚaₚbₚ⁻¹c₁h₁c₁⁻¹⋯cₙhₙcₙ⁻¹`. -/
+`a₁b₁a₁⁻¹b₁⁻¹⋯aₚbₚaₚ⁻¹bₚ⁻¹c₁h₁c₁⁻¹⋯cₙhₙcₙ⁻¹`. -/
 inductive OrientableRel (p n : ℕ) : ClosedUnitDisc → ClosedUnitDisc → Prop
   | a (x : Icc (0 : ℝ) 1) (i : Fin p) : OrientableRel p n
       (.bdyPtOfReal <| (4 * i + x) / (4 * p + 3 * n))
@@ -38,18 +38,18 @@ inductive OrientableRel (p n : ℕ) : ClosedUnitDisc → ClosedUnitDisc → Prop
   | b (x : Icc (0 : ℝ) 1) (i : Fin p) : OrientableRel p n
       (.bdyPtOfReal <| (4 * i + 1 + x) / (4 * p + 3 * n))
       (.bdyPtOfReal <| (4 * i + 4 - x) / (4 * p + 3 * n))
-  | c (x : Icc (0 : ℝ) 1) (i : Fin p) : OrientableRel p n
+  | c (x : Icc (0 : ℝ) 1) (i : Fin n) : OrientableRel p n
       (.bdyPtOfReal <| - (3 * i + x) / (4 * p + 3 * n))
       (.bdyPtOfReal <| - (3 * i + 3 - x) / (4 * p + 3 * n))
 
 /-- The representative non-orientable surface homeomorphic to a direct sum of `p` projective
 planes with `n` discs removed, obtained by identifying the boundary of a disc in the pattern
-a₁a₁⋯aₚaₚc₁h₁c₁⁻¹⋯cₙhₙcₙ⁻¹. -/
+`a₁a₁⋯aₚaₚc₁h₁c₁⁻¹⋯cₙhₙcₙ⁻¹`. -/
 inductive NonOrientableRel (p n : ℕ) : ClosedUnitDisc → ClosedUnitDisc → Prop
   | a (x : Icc (0 : ℝ) 1) (i : Fin p) : NonOrientableRel p n
       (.bdyPtOfReal <| (2 * i + x) / (2 * p + 3 * n))
       (.bdyPtOfReal <| (2 * i + 1 + x) / (2 * p + 3 * n))
-  | c (x : Icc (0 : ℝ) 1) (i : Fin p) : NonOrientableRel p n
+  | c (x : Icc (0 : ℝ) 1) (i : Fin n) : NonOrientableRel p n
       (.bdyPtOfReal <| -(3 * i + x) / (2 * p + 3 * n))
       (.bdyPtOfReal <| -(3 * i + 3 - x) / (2 * p + 3 * n))
 

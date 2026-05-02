@@ -481,7 +481,7 @@ source = "Folklore via CFSG; classical work of Mathieu, Jordan; modern accounts 
 informal_solution = "By CFSG, the only finite 2-transitive groups are explicitly classified. Restricting to 5-transitive: the symmetric group Sₙ is k-transitive for all k ≤ n; the alternating group Aₙ is k-transitive for k ≤ n − 2 (so 5-transitive for n ≥ 7); among the Mathieu groups, M₁₂ is sharply 5-transitive on 12 points and M₂₄ is 5-transitive on 24 points. M₁₁ and M₂₃ are only 4-transitive and so do not appear. No other finite simple group has a 5-transitive permutation representation."
 
 [[problem]]
-id = "topoloigcal_classification_of_surfaces"
+id = "topological_classification_of_surfaces"
 title = "Topological classification of surfaces"
 test = false
 module = "LeanEval.Topology.ClassificationOfSurfaces"
