@@ -1,0 +1,12 @@
+{
+  "id": "linear_ode_asymptotic_stability",
+  "module": "LeanEval.Analysis.ODE.LinearStability",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.ODE.linear_ode_asymptotic_stability",
+      "basename": "linear_ode_asymptotic_stability",
+      "kind": "theorem",
+      "body": "/-- **Asymptotic stability of a linear ODE with eigenvalues in the open left half-plane.**\n\nLet `A : Matrix (Fin n) (Fin n) \u211d`. Suppose every (complex) eigenvalue of the\ncomplexification of `A` has strictly negative real part. Then every solution of the\nlinear ODE `x'(t) = A \u00b7 x(t)` tends to `0` in norm as `t \u2192 \u221e`. -/\ntheorem linear_ode_asymptotic_stability\n    (n : \u2115) (A : Matrix (Fin n) (Fin n) \u211d)\n    (hA : \u2200 \u03bc : \u2102,\n        Module.End.HasEigenvalue\n          (Matrix.toLin' (A.map (algebraMap \u211d \u2102))) \u03bc \u2192 \u03bc.re < 0)\n    (x : \u211d \u2192 (Fin n \u2192 \u211d))\n    (hx : \u2200 t : \u211d, 0 < t \u2192 HasDerivAt x (A.mulVec (x t)) t) :\n    Filter.Tendsto (fun t : \u211d => \u2016x t\u2016) Filter.atTop (nhds 0) := by\n  sorry"
+    }
+  ]
+}

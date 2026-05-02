@@ -1,0 +1,12 @@
+{
+  "id": "dirichlet_eigenvalues_eq_nat_sq",
+  "module": "LeanEval.Analysis.ODE.DirichletEigenvalues",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.ODE.dirichlet_eigenvalues_eq_nat_sq",
+      "basename": "dirichlet_eigenvalues_eq_nat_sq",
+      "kind": "theorem",
+      "body": "/-- **Dirichlet eigenvalue characterization.** A real `\u03bb` is a Dirichlet eigenvalue of\n`-y'' = \u03bb y` on `[0, \u03c0]` (i.e. there is a nontrivial `C\u00b2` solution on some open interval\ncontaining `[0, \u03c0]`, vanishing at both endpoints) iff `\u03bb = n\u00b2` for some positive natural\nnumber `n`. -/\ntheorem dirichlet_eigenvalues_eq_nat_sq (lam : \u211d) :\n    (\u2203 (y : \u211d \u2192 \u211d) (J : Set \u211d),\n        IsOpen J \u2227 Set.Icc (0 : \u211d) Real.pi \u2286 J \u2227\n        (\u2200 x \u2208 J, HasDerivAt y (deriv y x) x) \u2227\n        (\u2200 x \u2208 J, HasDerivAt (deriv y) (-(lam * y x)) x) \u2227\n        y 0 = 0 \u2227 y Real.pi = 0 \u2227\n        \u2203 x \u2208 Set.Ioo (0 : \u211d) Real.pi, y x \u2260 0) \u2194\n      \u2203 n : \u2115, 0 < n \u2227 lam = (n : \u211d) ^ 2 := by\n  sorry"
+    }
+  ]
+}

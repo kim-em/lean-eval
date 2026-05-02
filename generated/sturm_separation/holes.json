@@ -1,0 +1,12 @@
+{
+  "id": "sturm_separation",
+  "module": "LeanEval.Analysis.ODE.SturmSeparation",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.ODE.sturm_separation",
+      "basename": "sturm_separation",
+      "kind": "theorem",
+      "body": "/-- **Sturm separation theorem.** Suppose `y\u2081, y\u2082 : \u211d \u2192 \u211d` are `C\u00b2` solutions on an open\ninterval `J` containing `[a, b]` of the linear homogeneous ODE `y'' + p y' + q y = 0`\nwith `p, q` continuous on `J`, and their Wronskian is nonzero at some point of `J`. If\n`a < b \u2208 J` are consecutive zeros of `y\u2081` (i.e. `y\u2081 a = y\u2081 b = 0` and `y\u2081 x \u2260 0` on\n`(a, b)`), then `y\u2082` has exactly one zero in `(a, b)`. -/\ntheorem sturm_separation\n    (p q y\u2081 y\u2082 : \u211d \u2192 \u211d) (a b : \u211d) (hab : a < b)\n    (J : Set \u211d) (hJ_open : IsOpen J) (hJ_sub : Set.Icc a b \u2286 J)\n    (hp : ContinuousOn p J) (hq : ContinuousOn q J)\n    (hy\u2081 : \u2200 x \u2208 J, HasDerivAt y\u2081 (deriv y\u2081 x) x)\n    (hy\u2081' : \u2200 x \u2208 J, HasDerivAt (deriv y\u2081) (-(p x * deriv y\u2081 x + q x * y\u2081 x)) x)\n    (hy\u2082 : \u2200 x \u2208 J, HasDerivAt y\u2082 (deriv y\u2082 x) x)\n    (hy\u2082' : \u2200 x \u2208 J, HasDerivAt (deriv y\u2082) (-(p x * deriv y\u2082 x + q x * y\u2082 x)) x)\n    (hW : \u2203 x\u2080 \u2208 J, y\u2081 x\u2080 * deriv y\u2082 x\u2080 - y\u2082 x\u2080 * deriv y\u2081 x\u2080 \u2260 0)\n    (hza : y\u2081 a = 0) (hzb : y\u2081 b = 0)\n    (hne : \u2200 x \u2208 Set.Ioo a b, y\u2081 x \u2260 0) :\n    \u2203! c, c \u2208 Set.Ioo a b \u2227 y\u2082 c = 0 := by\n  sorry"
+    }
+  ]
+}

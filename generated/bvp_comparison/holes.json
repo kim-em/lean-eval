@@ -1,0 +1,12 @@
+{
+  "id": "bvp_comparison",
+  "module": "LeanEval.Analysis.ODE.BVPComparison",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.ODE.bvp_comparison",
+      "basename": "bvp_comparison",
+      "kind": "theorem",
+      "body": "/-- **Comparison principle for the Dirichlet BVP.** If two functions are `C\u00b2` on an open\ninterval `J` containing `[0, 1]`, satisfy `-u'' \u2264 -v''` on the interior, and are ordered\nat the boundary, then `u \u2264 v` throughout `[0, 1]`. -/\ntheorem bvp_comparison\n    (J : Set \u211d) (hJ_open : IsOpen J) (hJ_sub : Set.Icc (0 : \u211d) 1 \u2286 J)\n    (u v : \u211d \u2192 \u211d)\n    (hu : \u2200 x \u2208 J, HasDerivAt u (deriv u x) x)\n    (hu' : \u2200 x \u2208 J, HasDerivAt (deriv u) (deriv (deriv u) x) x)\n    (hv : \u2200 x \u2208 J, HasDerivAt v (deriv v x) x)\n    (hv' : \u2200 x \u2208 J, HasDerivAt (deriv v) (deriv (deriv v) x) x)\n    (hineq : \u2200 x \u2208 Set.Ioo (0 : \u211d) 1, -deriv (deriv u) x \u2264 -deriv (deriv v) x)\n    (hu0 : u 0 \u2264 v 0) (hu1 : u 1 \u2264 v 1) :\n    \u2200 x \u2208 Set.Icc (0 : \u211d) 1, u x \u2264 v x := by\n  sorry"
+    }
+  ]
+}
