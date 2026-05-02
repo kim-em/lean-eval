@@ -416,3 +416,31 @@ environment (kernel, landlock ABI, filesystem layout).
 - The three-job split with `LEADERBOARD_WRITE_TOKEN` in `record` only.
 - The landrun sandbox itself. This file exists *because* the sandbox is
   non-negotiable for this project.
+- **`_prime_workspace` (in `scripts/evaluate_submission.py`) must NEVER
+  invoke `lake build <target>` for any target whose transitive imports
+  include `Submission`.** That includes `Submission` itself, `Solution`
+  (which imports `Submission` in every generated workspace), and any
+  `Challenge` whose imports reach `Submission` (none today, but audit
+  every problem's `Challenge.lean` before adding it back). The only
+  shell-outs `_prime_workspace` may perform outside landrun are `lake
+  update` and `lake exe cache get`, both of which fetch packages and
+  Mathlib oleans without elaborating any project source. Comparator's
+  sandboxed `lake build` inside landrun is the sole intended place for
+  `Submission` to be elaborated.
+
+  Why this matters: Lean elaboration runs arbitrary IO via `#eval`,
+  `initialize`, custom elaborators, and macros, so building
+  attacker-controlled `Submission.lean` outside landrun is
+  RCE-equivalent on the runner. Independently, comparator's README
+  assumption #2 explicitly forbids pre-compiling `Solution` (or any
+  potentially adversarial file) before invoking comparator —
+  pre-compilation can let an adversarial submission compromise the
+  `Challenge` file so comparator appears to verify a different theorem
+  than the intended one. So the rule protects both runner integrity
+  and comparator's correctness guarantee.
+
+  This rule was violated on 2026-04-12 by commit 3474943 ("Pre-build
+  Challenge, Solution, Submission during workspace priming"), reverted
+  on 2026-05-02 in #92 ("security: stop building user code outside
+  landrun in `_prime_workspace`"). The current docstring in
+  `_prime_workspace` carries the same warning at the call site.

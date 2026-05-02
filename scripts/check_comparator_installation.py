@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 """
 Run a real comparator check against a tiny generated workspace.
+
+This script edits a `Submission.lean` with a maintainer-controlled proof
+(`norm_num` for `2 + 2 = 4`) and then runs `lake update` + `lake exe
+cache get` + `lake test` outside landrun. The `lake test` step invokes
+WorkspaceTest -> comparator, and comparator's sandboxed `lake build`
+inside landrun is what compiles the (maintainer-controlled) `Submission`.
+The Submission content here is hardcoded by the maintainer, NEVER fed
+from a submitter, so this script's pattern is safe even though it
+superficially resembles `_prime_workspace` in scripts/evaluate_submission.py.
+
+Do not generalize this script to accept submitter-supplied Submission
+content without re-reading LANDRUN.md "What must not regress when this
+is fixed".
 """
 
 from __future__ import annotations
