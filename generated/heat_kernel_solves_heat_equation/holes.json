@@ -1,0 +1,12 @@
+{
+  "id": "heat_kernel_solves_heat_equation",
+  "module": "LeanEval.Analysis.ODE.HeatKernel",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.ODE.heat_kernel_solves_heat_equation",
+      "basename": "heat_kernel_solves_heat_equation",
+      "kind": "theorem",
+      "body": "/-- **The Gaussian heat kernel solves the heat equation.**\n\nFor continuous bounded `f : \u211d \u2192 \u211d`, the heat-kernel convolution `u := heatSolution f`\nsatisfies the 1D heat equation `\u2202_t u = \u2202_x\u00b2 u` on `(0, \u221e) \u00d7 \u211d` (in the sense that the\nrequired spatial derivatives exist and equal the time derivative), and `u(t, x) \u2192 f x`\nas `t \u2193 0` for every `x`. -/\ntheorem heat_kernel_solves_heat_equation\n    (f : \u211d \u2192 \u211d) (hf_cont : Continuous f) (hf_bdd : \u2203 M : \u211d, \u2200 x, |f x| \u2264 M) :\n    -- The PDE on (0, \u221e) \u00d7 \u211d.\n    (\u2200 t : \u211d, 0 < t \u2192 \u2200 x : \u211d, \u2203 ux : \u211d \u2192 \u211d, \u2203 uxx : \u211d,\n        (\u2200 y : \u211d, HasDerivAt (fun z => heatSolution f t z) (ux y) y) \u2227\n        HasDerivAt ux uxx x \u2227\n        HasDerivAt (fun s => heatSolution f s x) uxx t) \u2227\n    -- Initial condition recovered as a one-sided limit at t = 0.\n    (\u2200 x : \u211d,\n        Filter.Tendsto (fun t : \u211d => heatSolution f t x)\n          (nhdsWithin (0 : \u211d) (Set.Ioi 0)) (nhds (f x))) := by\n  sorry"
+    }
+  ]
+}

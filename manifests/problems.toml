@@ -413,7 +413,6 @@ holes = ["WidgetCarrier", "instInhabitedWidget"]
 submitter = "Kim Morrison"
 notes = "Minimal example exercising instance + theorem holes; instances must be named so the comparator can address them."
 
-
 [[problem]]
 id = "brauer_character_in_cyclotomic"
 title = "Character values of finite groups lie in cyclotomic fields"
@@ -489,3 +488,68 @@ holes = ["deBranges"]
 submitter = "Junyan Xu"
 source = "John B. Conway, *Functions of One Complex Variable II*, Chapter 17."
 
+[[problem]]
+id = "cubic_decay_asymptotic"
+title = "Polynomial decay rate of y' = -y^3"
+test = false
+module = "LeanEval.Analysis.ODE.CubicDecay"
+holes = ["cubic_decay_asymptotic"]
+submitter = "Kim Morrison"
+notes = "Asymptotic rate y t * sqrt t -> 1/sqrt 2 for the unique solution of y' = -y^3 on (0, infty) with y continuous at 0 and y 0 = 1."
+source = "Standard ODE textbook exercise."
+informal_solution = "The closed form is y(t) = (1 + 2t)^{-1/2}, so y(t) sqrt(t) = sqrt(t / (1 + 2t)) -> 1/sqrt(2). Uniqueness on (0, infty) follows by Grönwall: any two solutions u, v of u' = -u^3 with the same right-limit 1 at 0 satisfy |u - v|' bounded by a Lipschitz constant on bounded subintervals, and continuity at 0 forces |u(t) - v(t)| -> 0 as t -> 0+, hence u = v."
+
+[[problem]]
+id = "sturm_separation"
+title = "Sturm separation theorem"
+test = false
+module = "LeanEval.Analysis.ODE.SturmSeparation"
+holes = ["sturm_separation"]
+submitter = "Kim Morrison"
+notes = "Between consecutive zeros of one solution of a second-order linear homogeneous ODE, any linearly independent solution has exactly one zero."
+source = "C. Sturm, Mémoire sur les équations différentielles linéaires du second ordre, 1836."
+informal_solution = "On (a, b), y_1 has constant sign and never vanishes. The Wronskian W = y_1 y_2' - y_2 y_1' satisfies W' = -p W (Liouville), so W has constant sign on J. Hence (y_2 / y_1)' = -W / y_1^2 has constant sign and y_2 / y_1 is strictly monotone on (a, b). The Wronskian also forces y_2(a), y_2(b) ≠ 0 (else W(a) or W(b) would vanish, contradicting nonvanishing of W). If y_2 had no zero in (a, b), continuity gives sign(y_2(a)) = sign(y_2(b)); then y_2 / y_1 tends to the same infinite sign at both endpoints, contradicting strict monotonicity. Thus y_2 has a zero in (a, b). Uniqueness follows because a strictly monotone function can cross 0 at most once."
+
+[[problem]]
+id = "dirichlet_eigenvalues_eq_nat_sq"
+title = "Dirichlet eigenvalues of -y'' = lambda y on [0,pi] are n^2"
+test = false
+module = "LeanEval.Analysis.ODE.DirichletEigenvalues"
+holes = ["dirichlet_eigenvalues_eq_nat_sq"]
+submitter = "Kim Morrison"
+notes = "Characterises the spectrum of the Dirichlet Laplacian on [0,pi]: lambda is an eigenvalue iff lambda = n^2 for some positive natural n."
+source = "Classical Sturm-Liouville theory."
+informal_solution = "Case-split on the sign of lambda. For lambda <= 0 only the zero solution satisfies both boundary conditions. For lambda > 0 the general solution is A sin(sqrt lambda x) + B cos(sqrt lambda x); the boundary conditions force B = 0 and sqrt lambda in N_{>0}. Conversely, for lambda = n^2 with n in N_{>0}, the function sin(n x) is a nontrivial Dirichlet eigenfunction."
+
+[[problem]]
+id = "linear_ode_asymptotic_stability"
+title = "Linear ODE with negative-real-part eigenvalues is asymptotically stable"
+test = false
+module = "LeanEval.Analysis.ODE.LinearStability"
+holes = ["linear_ode_asymptotic_stability"]
+submitter = "Kim Morrison"
+notes = "If every eigenvalue of A has negative real part, every solution of x' = Ax decays to zero in norm."
+source = "Classical linear stability theory; Hirsch-Smale-Devaney."
+informal_solution = "Pass to the complexification; bring A to (Schur or Jordan) upper-triangular form; the matrix exponential satisfies ||exp(tA)|| <= C(1+t^{n-1}) exp(alpha t) for any alpha greater than the maximum real part of the spectrum, hence decays to 0. For any t_1 > 0, x(t) = exp((t - t_1) A) x(t_1) for t >= t_1 by uniqueness of the linear IVP, so ||x(t)|| -> 0 as t -> infty."
+
+[[problem]]
+id = "bvp_comparison"
+title = "Comparison principle for the Dirichlet BVP"
+test = false
+module = "LeanEval.Analysis.ODE.BVPComparison"
+holes = ["bvp_comparison"]
+submitter = "Kim Morrison"
+notes = "1D maximum principle: -u'' <= -v'' on (0,1) and u <= v at the endpoints implies u <= v on [0,1]."
+source = "Standard maximum-principle argument; Protter-Weinberger."
+informal_solution = "From -u'' <= -v'' we get (u - v)'' >= 0 on (0, 1), so u - v is convex on [0, 1] (using continuity at the endpoints). A convex function lies below its chord, which here is non-positive at both endpoints, so u - v <= chord <= 0. A perturbation form: psi := (u - v) - delta x (1 - x) is strictly convex (psi'' >= 2 delta > 0) and attains its supremum at the boundary, where psi <= 0; let delta -> 0+."
+
+[[problem]]
+id = "heat_kernel_solves_heat_equation"
+title = "Gaussian heat kernel solves the 1D heat equation"
+test = false
+module = "LeanEval.Analysis.ODE.HeatKernel"
+holes = ["heat_kernel_solves_heat_equation"]
+submitter = "Kim Morrison"
+notes = "The Gaussian convolution u(t,x) = (4 pi t)^{-1/2} integral exp(-(x-y)^2/(4t)) f(y) dy satisfies the heat equation on (0, infty) x R, with initial datum f recovered as t -> 0+."
+source = "Classical heat-equation theory."
+informal_solution = "Differentiate under the integral sign in t and twice in x; the kernel itself satisfies the heat equation, so does its convolution with f. As t -> 0+, the Gaussian is an approximate identity with total mass 1. After the change of variables y = x + sqrt(t) z, the integral becomes an average of f(x + sqrt(t) z) against a fixed integrable Gaussian weight; continuity of f at x and boundedness of f then give pointwise convergence to f(x) by dominated convergence in z."

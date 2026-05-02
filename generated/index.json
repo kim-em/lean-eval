@@ -482,5 +482,71 @@
       "five_transitive_card_classification"
     ],
     "generated_path": "generated/five_transitive_card_classification"
+  },
+  {
+    "id": "cubic_decay_asymptotic",
+    "title": "Polynomial decay rate of y' = -y^3",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.ODE.CubicDecay",
+    "holes": [
+      "cubic_decay_asymptotic"
+    ],
+    "generated_path": "generated/cubic_decay_asymptotic"
+  },
+  {
+    "id": "sturm_separation",
+    "title": "Sturm separation theorem",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.ODE.SturmSeparation",
+    "holes": [
+      "sturm_separation"
+    ],
+    "generated_path": "generated/sturm_separation"
+  },
+  {
+    "id": "dirichlet_eigenvalues_eq_nat_sq",
+    "title": "Dirichlet eigenvalues of -y'' = lambda y on [0,pi] are n^2",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.ODE.DirichletEigenvalues",
+    "holes": [
+      "dirichlet_eigenvalues_eq_nat_sq"
+    ],
+    "generated_path": "generated/dirichlet_eigenvalues_eq_nat_sq"
+  },
+  {
+    "id": "linear_ode_asymptotic_stability",
+    "title": "Linear ODE with negative-real-part eigenvalues is asymptotically stable",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.ODE.LinearStability",
+    "holes": [
+      "linear_ode_asymptotic_stability"
+    ],
+    "generated_path": "generated/linear_ode_asymptotic_stability"
+  },
+  {
+    "id": "bvp_comparison",
+    "title": "Comparison principle for the Dirichlet BVP",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.ODE.BVPComparison",
+    "holes": [
+      "bvp_comparison"
+    ],
+    "generated_path": "generated/bvp_comparison"
+  },
+  {
+    "id": "heat_kernel_solves_heat_equation",
+    "title": "Gaussian heat kernel solves the 1D heat equation",
+    "test": false,
+    "submitter": "Kim Morrison",
+    "module": "LeanEval.Analysis.ODE.HeatKernel",
+    "holes": [
+      "heat_kernel_solves_heat_equation"
+    ],
+    "generated_path": "generated/heat_kernel_solves_heat_equation"
   }
 ]

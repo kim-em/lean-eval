@@ -1,0 +1,12 @@
+{
+  "id": "cubic_decay_asymptotic",
+  "module": "LeanEval.Analysis.ODE.CubicDecay",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.ODE.cubic_decay_asymptotic",
+      "basename": "cubic_decay_asymptotic",
+      "kind": "theorem",
+      "body": "/-- Asymptotic decay rate for `y' = -y\u00b3, y(0) = 1`: the solution satisfies\n`y t \u00b7 \u221at \u2192 1/\u221a2` as `t \u2192 \u221e`. -/\ntheorem cubic_decay_asymptotic\n    (y : \u211d \u2192 \u211d) (hy_diff : \u2200 t : \u211d, 0 < t \u2192 HasDerivAt y (-(y t) ^ 3) t)\n    (hy_cont : ContinuousWithinAt y (Set.Ici 0) 0)\n    (hy0 : y 0 = 1) :\n    Tendsto (fun t : \u211d => y t * Real.sqrt t) atTop (\ud835\udcdd (1 / Real.sqrt 2)) := by\n  sorry"
+    }
+  ]
+}
