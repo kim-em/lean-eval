@@ -240,11 +240,24 @@ with a bogus check of the same name.
 
 ### Acceptable consequences of the bypass
 
-- `regenerate-main.yml`'s pushes to `main` will *not* trigger downstream
-  workflows (anti-loop protection still applies; bypass doesn't change
-  this). The regen workflow validates `python scripts/generate_projects.py`
-  inside the workflow, so the artifact landing on `main` is already
-  vetted.
+- `regenerate-main.yml`'s pushes to `main` will *not* re-trigger
+  `regenerate-main.yml` itself: that workflow's `paths:` filter only
+  fires on source changes (`LeanEval/**`, `EvalTools/**`,
+  `manifests/problems.toml`, `scripts/generate_projects.py`,
+  `lakefile.toml`, `lean-toolchain`), and the bot only writes under
+  `generated/`. The bypass doesn't change this; the `paths:` filter
+  is what prevents the loop.
+
+  Other workflows on `main` push events *do* run on regenerator
+  commits — most notably `ci.yml`'s `verify` job, which has no
+  `paths:` filter. That is intentional: it exercises the regenerated
+  workspace. Per-step gating is the regenerator's responsibility when
+  a check is genuinely PR-only (see the `pull_request`-gated
+  Submission Policy Diff Check in `ci.yml`).
+
+  The regen workflow itself runs `python scripts/generate_projects.py`
+  before pushing, so the artifact landing on `main` is already vetted
+  against the source.
 - Anyone who can land a PR that modifies `regenerate-main.yml` to push
   arbitrary content to `main` could, after merge, exfiltrate that
   capability. This is the same trust boundary as merging any PR.
