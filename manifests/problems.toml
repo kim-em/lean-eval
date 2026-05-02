@@ -533,6 +533,15 @@ source = "Standard ODE textbook exercise."
 informal_solution = "The closed form is y(t) = (1 + 2t)^{-1/2}, so y(t) sqrt(t) = sqrt(t / (1 + 2t)) -> 1/sqrt(2). Uniqueness on (0, infty) follows by Grönwall: any two solutions u, v of u' = -u^3 with the same right-limit 1 at 0 satisfy |u - v|' bounded by a Lipschitz constant on bounded subintervals, and continuity at 0 forces |u(t) - v(t)| -> 0 as t -> 0+, hence u = v."
 
 [[problem]]
+id = "bakerWustholz_linearForms_logs"
+title = "Baker-Wüstholz theorem on linear forms in logarithms"
+test = false
+module = "LeanEval.NumberTheory.BakerWustholz"
+holes = ["bakerWustholz_linearForms_logs"]
+submitter = "Ralf Stephan"
+source = "A. Baker, G. Wüstholz, Logarithmic forms and group varieties, J. reine angew. Math. 442 (1993), 19-62."
+
+[[problem]]
 id = "sturm_separation"
 title = "Sturm separation theorem"
 test = false

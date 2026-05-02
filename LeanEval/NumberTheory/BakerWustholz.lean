@@ -1,0 +1,88 @@
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.Analysis.SpecialFunctions.Complex.Log
+import EvalTools.Markers
+
+/-!
+# The Baker–Wüstholz theorem on linear forms in logarithms (axiomatized)
+
+Reference: A. Baker and G. Wüstholz, *Logarithmic forms and group varieties*,
+J. reine angew. Math. **442** (1993), 19–62. In particular, their "main theorem"
+is a refinement of the 1966-68 Baker bound, with the outer exponent on `log B`
+essentially `1` rather than `(2n+1)²`.
+
+This file states the effective form of Baker–Wüstholz as an axiom. Downstream
+developments (`Ellison.lean`, `Pomme.lean`) use it to derive Pomme's inequality
+over a vastly smaller threshold on `i` than the Ellison-form Baker would give.
+
+## Statement conventions
+
+* `α₁, …, αₙ` are nonzero elements of a number field `K`. We work through a
+  ring-hom embedding `φ : K →+* ℂ`, and use `Complex.log` (principal branch)
+  for the logs of the images.
+* `d := Module.finrank ℚ K` is the field degree.
+* `h(α) := Height.logHeight₁ α / d` is the **normalized** logarithmic Weil
+  height. (Mathlib's `logHeight₁` is the unnormalized product-over-places
+  sum; dividing by `d` gives the classical absolute height.)
+* `h'(α) := max(h(α), |log φ(α)| / d, 1 / d)` is the **modified height** used
+  by Baker–Wüstholz. The extra terms handle the case where `α` is very close
+  to 1 (so `h(α)` is small) or where the chosen log determination is large.
+* `B := max(|b₁|, …, |bₙ|, 2)` is the maximum coefficient (clamped to 2 so
+  `log B > 0`).
+* `C(n, d) := 18 · (n + 1)! · n^(n+1) · (32d)^(n+2) · log(2nd)` is the
+  Baker–Wüstholz constant.
+
+## Conclusion
+
+If `Λ := ∑ᵢ bᵢ · log(φ(αᵢ))` is nonzero, then
+`log |Λ| ≥ -C(n, d) · log B · ∏ᵢ h'(αᵢ)`.
+
+This is a refinement of Ellison's Lemma 2: the outer exponent on `log B`
+has dropped from `(2n+1)²` to `1`, at the cost of a more intricate
+constant `C(n, d)`.
+-/
+
+open Complex
+
+namespace BakerWustholz
+
+/-- The Baker–Wüstholz constant
+`C(n, d) = 18 · (n + 1)! · n^{n+1} · (32 d)^{n+2} · log (2nd)`. -/
+noncomputable def C (n d : ℕ) : ℝ :=
+  18 * (n + 1).factorial * (n : ℝ) ^ (n + 1) *
+    (32 * (d : ℝ)) ^ (n + 2) * Real.log (2 * n * d)
+
+/-- The modified height `h'(α) = max(h(α), |log φ(α)| / d, 1 / d)` where
+`h(α) := logHeight₁ α / d` is the normalized logarithmic Weil height. -/
+noncomputable def modifiedHeight
+    {K : Type*} [Field K] [NumberField K] (φ : K →+* ℂ) (α : K) : ℝ :=
+  let d : ℝ := Module.finrank ℚ K
+  max (Height.logHeight₁ α / d) (max (‖Complex.log (φ α)‖ / d) (1 / d))
+
+end BakerWustholz
+
+/-- **Baker–Wüstholz theorem on linear forms in logarithms**, effective form.
+
+Reference: A. Baker, G. Wüstholz, *Logarithmic forms and group varieties*,
+J. reine angew. Math. **442** (1993), 19–62.
+
+Let `α₁, …, αₙ` (with `1 ≤ n`) be nonzero elements of a number field `K` of
+degree `d := Module.finrank ℚ K`, embedded in `ℂ` via `φ`. Let `b₁, …, bₙ`
+be rational integers with `|bᵢ| ≤ B` and `B ≥ 2`. If the linear form
+`Λ := ∑ᵢ bᵢ · log (φ (αᵢ))` (complex log, principal branch) is nonzero,
+then
+`log |Λ| ≥ -C(n, d) · log B · ∏ᵢ h'(αᵢ)`
+
+where `C(n, d)` is `BakerWustholz.C n d` and `h'(α)` is
+`BakerWustholz.modifiedHeight φ α`. -/
+@[eval_problem]
+theorem bakerWustholz_linearForms_logs
+    {n : ℕ} (hn : 0 < n)
+    {K : Type*} [Field K] [NumberField K] (φ : K →+* ℂ)
+    (α : Fin n → K) (hα : ∀ i, α i ≠ 0)
+    (b : Fin n → ℤ) {B : ℕ} (hB : 2 ≤ B) (hbB : ∀ i, (b i).natAbs ≤ B)
+    (hΛ_ne_zero : (∑ i, (b i : ℂ) * Complex.log (φ (α i))) ≠ 0) :
+    Real.log ‖∑ i, (b i : ℂ) * Complex.log (φ (α i))‖
+      ≥ -(BakerWustholz.C n (Module.finrank ℚ K)
+          * Real.log B
+          * ∏ i, BakerWustholz.modifiedHeight φ (α i)) := by
+  sorry
