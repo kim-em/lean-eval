@@ -361,3 +361,34 @@ jobs:
           gh issue close ${{ github.event.issue.number }} \
             --repo "${{ github.repository }}" \
             --reason "completed"
+
+  # Catches the case where `fetch` succeeded but the pipeline did not
+  # complete cleanly — most often `evaluate` failing because the
+  # submitter's Submission.lean did not compile. Without this, the
+  # `record` job is skipped (its `needs: evaluate` dependency was unmet)
+  # and the submitter sees no comment at all.
+  notify:
+    needs: [fetch, evaluate, record]
+    if: always() && needs.fetch.result == 'success' && needs.record.result != 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Comment on workflow failure and close issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVALUATE_RESULT: ${{ needs.evaluate.result }}
+          RECORD_RESULT: ${{ needs.record.result }}
+        run: |
+          if [ "$EVALUATE_RESULT" = "success" ]; then
+            BODY="❌ Recording the submission to the leaderboard did not complete (record job: $RECORD_RESULT). See the workflow logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            BODY="❌ Submission evaluation did not produce results (evaluate job: $EVALUATE_RESULT). The most common cause is that \`Submission.lean\` failed to compile. See the workflow logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --body "$BODY"
+          gh issue close ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --reason "not planned" || true
