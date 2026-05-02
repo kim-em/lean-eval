@@ -3,16 +3,12 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Log
 import EvalTools.Markers
 
 /-!
-# The Baker–Wüstholz theorem on linear forms in logarithms (axiomatized)
+# The Baker–Wüstholz theorem on linear forms in logarithms
 
 Reference: A. Baker and G. Wüstholz, *Logarithmic forms and group varieties*,
 J. reine angew. Math. **442** (1993), 19–62. In particular, their "main theorem"
 is a refinement of the 1966-68 Baker bound, with the outer exponent on `log B`
 essentially `1` rather than `(2n+1)²`.
-
-This file states the effective form of Baker–Wüstholz as an axiom. Downstream
-developments (`Ellison.lean`, `Pomme.lean`) use it to derive Pomme's inequality
-over a vastly smaller threshold on `i` than the Ellison-form Baker would give.
 
 ## Statement conventions
 
@@ -30,15 +26,6 @@ over a vastly smaller threshold on `i` than the Ellison-form Baker would give.
   `log B > 0`).
 * `C(n, d) := 18 · (n + 1)! · n^(n+1) · (32d)^(n+2) · log(2nd)` is the
   Baker–Wüstholz constant.
-
-## Conclusion
-
-If `Λ := ∑ᵢ bᵢ · log(φ(αᵢ))` is nonzero, then
-`log |Λ| ≥ -C(n, d) · log B · ∏ᵢ h'(αᵢ)`.
-
-This is a refinement of Ellison's Lemma 2: the outer exponent on `log B`
-has dropped from `(2n+1)²` to `1`, at the cost of a more intricate
-constant `C(n, d)`.
 -/
 
 open Complex
