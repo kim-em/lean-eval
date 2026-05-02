@@ -155,13 +155,13 @@ source = "Classical theorem in finite group theory."
 informal_solution = "Use character theory and induction on the group order to prove solvability."
 
 [[problem]]
-id = "rouche_logCounting_zero_eq"
+id = "rouche_zero_count_eq"
 title = "Rouche theorem via zero counting"
 test = false
 module = "LeanEval.ComplexAnalysis.Rouche"
-holes = ["rouche_logCounting_zero_eq"]
+holes = ["rouche_zero_count_eq"]
 submitter = "Kim Morrison"
-notes = "Phrases Rouché's theorem as equality of zero-counting functions for f and f + g."
+notes = "Phrases Rouché's theorem as equality of multiplicity-counted zero counts for f and f + g on the closed disk of radius R."
 source = "Classical theorem in complex analysis."
 informal_solution = "If |g| < |f| on the boundary circle, then f and f + g have the same number of zeros inside, counted with multiplicity."
 
