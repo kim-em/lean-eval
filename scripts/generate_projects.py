@@ -576,7 +576,11 @@ def find_top_level_end_offset(source_text: str, start: int) -> int:
     return start + match.start()
 
 
-def render_challenge_deps(problem: ProblemSpec, extracted: ExtractedTheorem) -> str | None:
+def render_challenge_deps(
+    problem: ProblemSpec,
+    extracted: ExtractedTheorem,
+    local_imports: list[str] | None = None,
+) -> str | None:
     source_path = module_source_path(problem.module)
     if not source_path.is_file():
         raise GenerationError(f"Source file for module '{problem.module}' not found: {source_path}")
@@ -584,7 +588,10 @@ def render_challenge_deps(problem: ProblemSpec, extracted: ExtractedTheorem) -> 
     source_text = source_path.read_text(encoding="utf-8")
     challenge_deps_parts: list[str] = []
 
-    for imported_module in repo_local_import_modules(problem.module):
+    if local_imports is None:
+        local_imports = repo_local_import_modules(problem.module)
+
+    for imported_module in local_imports:
         imported_path = module_source_path(imported_module)
         imported_text = imported_path.read_text(encoding="utf-8")
         imported_body = _strip_problem_markers(imported_text[import_prelude_length(imported_text):]).lstrip("\n")
@@ -814,7 +821,8 @@ def render_workspace(
     solution_exact = f"Submission.{theorem_name}"
     if solution_args:
         solution_exact += " " + " ".join(solution_args)
-    challenge_deps = render_challenge_deps(problem, extracted)
+    local_imports = repo_local_import_modules(problem.module)
+    challenge_deps = render_challenge_deps(problem, extracted, local_imports)
     challenge_import = "import ChallengeDeps\n\n" if challenge_deps is not None else "import Mathlib\n\n"
     solution_imports = (
         "import ChallengeDeps\nimport Submission\n\n"
@@ -826,7 +834,10 @@ def render_workspace(
         if challenge_deps is not None
         else "import Mathlib\nimport Submission.Helpers\n\n"
     )
-    context_open_block = extract_context_opens(problem, include_namespaces=True)
+    context_open_block = extract_context_opens(
+        problem,
+        include_namespaces=(challenge_deps is not None or bool(local_imports)),
+    )
     if context_open_block and not context_open_block.endswith("\n\n"):
         context_open_block += "\n"
     readme_lines = [
