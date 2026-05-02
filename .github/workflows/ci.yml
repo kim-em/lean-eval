@@ -96,27 +96,21 @@ jobs:
       - name: Submission Policy Check
         run: python scripts/validate_submission.py --file generated/two_plus_two/Solution.lean
 
+      # Submission diff validation is a PR-time contributor policy: it
+      # decides whether a PR that only touches `generated/` looks like a
+      # well-formed submission. On `push` to `main` the diffs we see are
+      # either merged PR results or the regenerator bot's
+      # `chore: regenerate generated/ workspaces` commit, neither of
+      # which the submission policy applies to. `main` itself is
+      # PR-protected for humans (see docs/ci-secrets.md), so we lose no
+      # meaningful coverage by gating this step on `pull_request`.
       - name: Submission Policy Diff Check
+        if: github.event_name == 'pull_request'
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          PUSH_BEFORE_SHA: ${{ github.event.before }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          CURRENT_SHA: ${{ github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            BASE_SHA="$PR_BASE_SHA"
-            HEAD_SHA="$PR_HEAD_SHA"
-          else
-            BASE_SHA="$PUSH_BEFORE_SHA"
-            HEAD_SHA="$CURRENT_SHA"
-          fi
-
-          if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            BASE_SHA="$(git rev-list --max-parents=0 "$HEAD_SHA" | tail -n 1)"
-          fi
 
           mapfile -t CHANGED_FILES < <(git diff --name-only "$BASE_SHA..$HEAD_SHA")
 
