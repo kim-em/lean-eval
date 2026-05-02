@@ -2,7 +2,7 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "rouche_logCounting_zero_eq"
+    "rouche_zero_count_eq"
   ],
   "permitted_axioms": [
     "propext",

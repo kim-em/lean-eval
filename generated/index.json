@@ -154,15 +154,15 @@
     "generated_path": "generated/finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
   },
   {
-    "id": "rouche_logCounting_zero_eq",
+    "id": "rouche_zero_count_eq",
     "title": "Rouche theorem via zero counting",
     "test": false,
     "submitter": "Kim Morrison",
     "module": "LeanEval.ComplexAnalysis.Rouche",
     "holes": [
-      "rouche_logCounting_zero_eq"
+      "rouche_zero_count_eq"
     ],
-    "generated_path": "generated/rouche_logCounting_zero_eq"
+    "generated_path": "generated/rouche_zero_count_eq"
   },
   {
     "id": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
