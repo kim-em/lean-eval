@@ -1,0 +1,12 @@
+{
+  "id": "exists_nonisotopic_link",
+  "module": "LeanEval.KnotTheory.Linking",
+  "holes": [
+    {
+      "name": "LeanEval.KnotTheory.exists_nonisotopic_link",
+      "basename": "exists_nonisotopic_link",
+      "kind": "theorem",
+      "body": "/-- **Existence of a non-isotopic pair of oriented two-component links.**\n\nThere exist two oriented smooth two-component links in `\u211d\u00b3` that are not\nambient-isotopic.\n\n*Suggestion.* Take `L\u2081` to be the **unlink** \u2014 for instance, the two unit\ncircles in the planes `z = 0` and `z = 2`, both centered on the `z`-axis \u2014\nand `L\u2082` to be the **Hopf link** \u2014 for instance, the unit circle in the\n`xy`-plane together with the unit circle in the `xz`-plane shifted by `(1, 0, 0)`.\n\nTo distinguish them, use the **Gauss linking integral**\n\n  `lk(K, L) = (1 / (4\u03c0)) \u222b\u2080^{2\u03c0} \u222b\u2080^{2\u03c0}`\n              `\u27e8K(s) \u2212 L(t), K\u2032(s) \u00d7 L\u2032(t)\u27e9 / \u2016K(s) \u2212 L(t)\u2016\u00b3 ds dt`,\n\nwhich is well-defined when the components have disjoint images, takes the\nvalue `0` on the unlink and `\u00b11` on the Hopf link depending on the chosen\norientations, and is invariant under ambient isotopy of the oriented link.\n(Invariance follows from a Stokes-style computation: the integrand is the\npullback of a closed 2-form on `\u211d\u00b3 \\ {0}`.)\n\nSee <https://en.wikipedia.org/wiki/Linking_number> for a reference. -/\ntheorem exists_nonisotopic_link : \u2203 L\u2081 L\u2082 : TwoLink, \u00ac L\u2081.Isotopic L\u2082 := by\n  sorry"
+    }
+  ]
+}
