@@ -281,22 +281,34 @@ def _share_packages(
 
 
 def _prime_workspace(target: pathlib.Path) -> None:
-    """Populate the workspace's packages and pre-build Challenge, Solution,
-    and Submission *outside* of landrun, so comparator's sandboxed
-    `lake build` is effectively a no-op.
+    """Populate the workspace's packages outside of landrun.
 
-    Comparator's safeLakeBuild whitelists reads on `projectDir` and writes
-    on `projectDir/.lake` only. If lake tries to touch `lake-manifest.json`
-    (not inside `.lake`) or clone packages into scratch dirs, landrun
-    denies. Pre-building everything outside the sandbox avoids every
-    such write.
+    `lake update` and `lake exe cache get` need network access and
+    write to `lake-manifest.json` and the package cache, both of which
+    comparator's landrun policy denies. They do not elaborate any
+    project source files (only fetch packages and Mathlib oleans), so
+    running them outside the sandbox is safe.
 
-    Matches the priming in scripts/check_comparator_installation.py.
+    SECURITY: do NOT add `lake build <target>` here for any target whose
+    transitive imports include `Submission` (the user-controlled file
+    overlaid by overlay_match). Lean elaboration runs arbitrary IO via
+    #eval, initialize, custom elaborators, and macros; building such a
+    target outside landrun is RCE-equivalent on the runner. In the
+    generated workspaces, `Solution` imports `Submission` and
+    `Submission` imports `Submission.Helpers` — so `Solution` and
+    `Submission` are off-limits here. Even `Challenge`, although it
+    does not currently import `Submission`, should not be added back
+    without explicit auditing of every problem's `Challenge.lean`.
+
+    Comparator's sandboxed `lake build` is responsible for building
+    Submission. If that build fails because comparator's landrun policy
+    is too restrictive for lake's legitimate writes, fix the policy in
+    comparator (or pass lake flags to suppress those writes); do not
+    pre-build outside the sandbox as a workaround.
     """
     commands = (
         ["lake", "update"],
         ["lake", "exe", "cache", "get"],
-        ["lake", "build", "Challenge", "Solution", "Submission"],
     )
     for args in commands:
         result = subprocess.run(
