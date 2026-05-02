@@ -10,6 +10,11 @@ overlays the matched `Submission.lean` + `Submission/**/*.lean` onto a
 copy of the pristine `generated/<id>/` workspace, invokes
 `lake exe lean-eval run-eval --json --problem <id>... --workspaces-root <tempdir>`,
 and writes results.json + summary.json artifacts for the `record` job.
+
+SECURITY: untrusted submitter Lean code is ONLY ever elaborated inside
+comparator's landrun sandbox. `_prime_workspace` (below) must not invoke
+`lake build` for any user-controlled target. See LANDRUN.md "What must
+not regress when this is fixed" for the full rule and rationale.
 """
 
 from __future__ import annotations

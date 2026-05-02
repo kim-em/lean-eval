@@ -1,5 +1,14 @@
 # Auth (lean-eval-bot GitHub App + LEADERBOARD_WRITE_TOKEN PAT) is
 # documented in docs/ci-secrets.md.
+#
+# Security model: untrusted submitter Lean code is ONLY ever elaborated
+# inside comparator's landrun sandbox (invoked from `lake test` via
+# WorkspaceTest.lean). The non-negotiable invariants of this workflow
+# (read-only token in the evaluate job, .git stripped before lake runs,
+# `_prime_workspace` not pre-building any user-controlled targets, etc.)
+# are documented in LANDRUN.md → "What must not regress when this is
+# fixed". Read that section before editing this file or
+# `scripts/evaluate_submission.py`.
 name: Submission
 
 on:
