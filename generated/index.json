@@ -517,6 +517,17 @@
     "generated_path": "generated/five_transitive_card_classification"
   },
   {
+    "id": "deBranges_theorem",
+    "title": "De Branges's theorem (Bieberbach conjecture)",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.ComplexAnalysis.DeBranges",
+    "holes": [
+      "deBranges"
+    ],
+    "generated_path": "generated/deBranges_theorem"
+  },
+  {
     "id": "cubic_decay_asymptotic",
     "title": "Polynomial decay rate of y' = -y^3",
     "test": false,
