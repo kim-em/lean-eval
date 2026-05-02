@@ -281,22 +281,43 @@ def _share_packages(
 
 
 def _prime_workspace(target: pathlib.Path) -> None:
-    """Populate the workspace's packages and pre-build Challenge, Solution,
-    and Submission *outside* of landrun, so comparator's sandboxed
-    `lake build` is effectively a no-op.
+    """Populate the workspace's packages outside of landrun.
 
-    Comparator's safeLakeBuild whitelists reads on `projectDir` and writes
-    on `projectDir/.lake` only. If lake tries to touch `lake-manifest.json`
-    (not inside `.lake`) or clone packages into scratch dirs, landrun
-    denies. Pre-building everything outside the sandbox avoids every
-    such write.
+    Per comparator's README assumptions, `lake exe cache get` before
+    invoking comparator is explicitly allowed. `lake update` is needed
+    here too because comparator's landrun policy denies the
+    `lake-manifest.json` writes lake update performs. Neither command
+    elaborates project source files, so neither violates comparator's
+    trust model.
 
-    Matches the priming in scripts/check_comparator_installation.py.
+    SECURITY: do NOT add `lake build <target>` here for any target
+    whose transitive imports include `Submission` (the user-controlled
+    file overlaid by overlay_match). Comparator's README assumption #2
+    requires that the Solution file (and any other potentially
+    adversarial file) has not been pre-compiled before comparator
+    runs, because pre-compilation can let an adversarial Submission
+    compromise Challenge so that comparator appears to verify a
+    different theorem than the intended one. Concretely, in the
+    generated workspaces `Solution` imports `Submission` and
+    `Submission` imports `Submission.Helpers`, so `Solution` and
+    `Submission` are off-limits here. Even `Challenge`, although it
+    does not currently import `Submission`, should not be added back
+    without auditing every problem's `Challenge.lean`.
+
+    Aside from breaking comparator's correctness guarantee, building
+    `Submission` outside landrun also runs arbitrary attacker IO on
+    the runner: Lean elaboration executes IO via #eval, initialize,
+    custom elaborators, and macros.
+
+    Comparator's sandboxed `lake build` inside landrun is the intended
+    place for `Submission` to be elaborated. Comparator + landrun (from
+    upstream `main`, per its README and check_comparator_installation.py)
+    is designed to handle this on a workspace primed only with `lake
+    update` + `lake exe cache get`.
     """
     commands = (
         ["lake", "update"],
         ["lake", "exe", "cache", "get"],
-        ["lake", "build", "Challenge", "Solution", "Submission"],
     )
     for args in commands:
         result = subprocess.run(
