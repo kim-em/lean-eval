@@ -57,10 +57,12 @@ degree `d := Module.finrank ℚ K`, embedded in `ℂ` via `φ`. Let `b₁, …, 
 be rational integers with `|bᵢ| ≤ B` and `B ≥ 2`. If the linear form
 `Λ := ∑ᵢ bᵢ · log (φ (αᵢ))` (complex log, principal branch) is nonzero,
 then
-`log |Λ| ≥ -C(n, d) · log B · ∏ᵢ h'(αᵢ)`
+`log |Λ| ≥ -C(n, d) · max(log B, 1/d) · ∏ᵢ h'(αᵢ)`
 
 where `C(n, d)` is `BakerWustholz.C n d` and `h'(α)` is
-`BakerWustholz.modifiedHeight φ α`. -/
+`BakerWustholz.modifiedHeight φ α`. The `max(log B, 1/d)` factor (rather
+than bare `log B`) is the standard Baker–Wüstholz formulation; it avoids
+spuriously sharpening the bound at `d = 1`, `B = 2`. -/
 @[eval_problem]
 theorem bakerWustholz_linearForms_logs
     {n : ℕ} (hn : 0 < n)
@@ -70,6 +72,6 @@ theorem bakerWustholz_linearForms_logs
     (hΛ_ne_zero : (∑ i, (b i : ℂ) * Complex.log (φ (α i))) ≠ 0) :
     Real.log ‖∑ i, (b i : ℂ) * Complex.log (φ (α i))‖
       ≥ -(BakerWustholz.C n (Module.finrank ℚ K)
-          * Real.log B
+          * max (Real.log B) (1 / (Module.finrank ℚ K : ℝ))
           * ∏ i, BakerWustholz.modifiedHeight φ (α i)) := by
   sorry
