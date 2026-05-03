@@ -1,0 +1,12 @@
+{
+  "id": "fermat_last_theorem",
+  "module": "LeanEval.NumberTheory.FermatLastTheorem",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.fermat_last_theorem",
+      "basename": "fermat_last_theorem",
+      "kind": "theorem",
+      "body": "theorem fermat_last_theorem :\n    FermatLastTheorem := by\n  sorry"
+    }
+  ]
+}
