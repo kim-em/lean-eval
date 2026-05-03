@@ -517,6 +517,17 @@
     "generated_path": "generated/five_transitive_card_classification"
   },
   {
+    "id": "topological_classification_of_surfaces",
+    "title": "Topological classification of surfaces",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.Topology.ClassificationOfSurfaces",
+    "holes": [
+      "classification_of_surfaces"
+    ],
+    "generated_path": "generated/topological_classification_of_surfaces"
+  },
+  {
     "id": "deBranges_theorem",
     "title": "De Branges's theorem (Bieberbach conjecture)",
     "test": false,
