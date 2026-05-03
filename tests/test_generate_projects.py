@@ -143,6 +143,66 @@ submitter = "Kim"
         self.assertIn("- Test Problem: yes", files["README.md"])
         self.assertIn('rev = "example-rev"', files["lakefile.toml"])
 
+    def test_extract_context_opens_walks_to_eval_problem_line(self) -> None:
+        # When the @[eval_problem] declaration is preceded by other top-level
+        # definitions inside their own namespaces (or by `open` directives
+        # nested inside the theorem's namespace), the generator must still
+        # collect every `open` that's in scope at the theorem and emit an
+        # `open` for the theorem's containing namespace. The bug fixed here
+        # caused only `open Complex` (the namespace of the *first* declaration
+        # in the file) to leak into Challenge.lean / Submission.lean.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            module = "LeanEval.Topology.SurfacesFixture"
+            src_dir = pathlib.Path(tmpdir) / "LeanEval" / "Topology"
+            src_dir.mkdir(parents=True)
+            (src_dir / "SurfacesFixture.lean").write_text(
+                "import Mathlib\n"
+                "\n"
+                "namespace Complex\n"
+                "\n"
+                "abbrev Aux : Nat := 0\n"
+                "\n"
+                "end Complex\n"
+                "\n"
+                "namespace LeanEval.Topology.SurfacesFixture\n"
+                "\n"
+                "open Complex Set\n"
+                "\n"
+                "inductive R : Prop\n"
+                "  | a\n"
+                "\n"
+                "open scoped Manifold\n"
+                "\n"
+                "@[eval_problem]\n"
+                "theorem foo : True := by trivial\n"
+                "\n"
+                "end LeanEval.Topology.SurfacesFixture\n",
+                encoding="utf-8",
+            )
+            problem = _spec(id="x", title="x", module=module, holes=("foo",))
+            extracted = gp.ExtractedTheorem(
+                declaration_name=f"{module}.foo",
+                module=module,
+                # `@[eval_problem]` sits on line 18 of the fixture above.
+                source_range=(18, 0, 19, 25),
+                same_module_dependencies=(f"{module}.R",),
+                kind="theorem",
+            )
+            saved_root = gp.REPO_ROOT
+            gp.REPO_ROOT = pathlib.Path(tmpdir)
+            try:
+                block = gp.extract_context_opens(
+                    problem, extracted, include_namespaces=True
+                )
+            finally:
+                gp.REPO_ROOT = saved_root
+        self.assertEqual(
+            block,
+            "open LeanEval.Topology.SurfacesFixture\n"
+            "open Complex Set\n"
+            "open scoped Manifold\n\n",
+        )
+
     def test_check_workspace_detects_stale_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             problem_dir = pathlib.Path(tmpdir) / "two_plus_two"
