@@ -659,32 +659,49 @@ def render_challenge_deps(
     return "import Mathlib\n\n" + "\n".join(part.rstrip("\n") for part in challenge_deps_parts) + "\n"
 
 
-def extract_context_opens(problem: ProblemSpec, *, include_namespaces: bool = False) -> str:
+def extract_context_opens(
+    problem: ProblemSpec,
+    extracted: ExtractedTheorem | None = None,
+    *,
+    include_namespaces: bool = False,
+) -> str:
     source_path = module_source_path(problem.module)
     if not source_path.is_file():
         raise GenerationError(f"Source file for module '{problem.module}' not found: {source_path}")
     lines = source_path.read_text(encoding="utf-8").splitlines()
-    context_lines: list[str] = []
+    target_line = extracted.source_range[0] if extracted is not None else None
     namespace_stack: list[str] = []
+    # `open` directives encountered, partitioned per namespace nesting level.
+    # Index 0 is top-level; each `namespace` push adds a new layer that is
+    # popped (and its scoped opens discarded) when the matching `end` runs.
+    open_layers: list[list[str]] = [[]]
     in_body = False
-    for line in lines:
+    for index, line in enumerate(lines, start=1):
+        if target_line is not None and index >= target_line:
+            break
         stripped = line.strip()
         if not in_body:
             if stripped.startswith("import ") or stripped == "":
                 continue
             in_body = True
-        if stripped.startswith("@[") or re.match(
-            r"^(theorem|lemma|def|abbrev|opaque|axiom|instance|class|structure)\b",
-            stripped,
+        if target_line is None and (
+            stripped.startswith("@[")
+            or re.match(
+                r"^(theorem|lemma|def|abbrev|opaque|axiom|instance|class|structure)\b",
+                stripped,
+            )
         ):
             break
         if stripped.startswith("namespace "):
             namespace_stack.append(stripped.split(maxsplit=1)[1].strip())
+            open_layers.append([])
         elif re.match(r"^end\b", stripped):
             if namespace_stack:
                 namespace_stack.pop()
+                open_layers.pop()
         elif stripped.startswith("open "):
-            context_lines.append(line)
+            open_layers[-1].append(line)
+    context_lines = [line for layer in open_layers for line in layer]
     if include_namespaces and namespace_stack:
         context_lines.insert(0, "open " + ".".join(namespace_stack))
     return "\n".join(context_lines) + ("\n\n" if context_lines else "")
@@ -836,6 +853,7 @@ def render_workspace(
     )
     context_open_block = extract_context_opens(
         problem,
+        extracted,
         include_namespaces=(challenge_deps is not None or bool(local_imports)),
     )
     if context_open_block and not context_open_block.endswith("\n\n"):
