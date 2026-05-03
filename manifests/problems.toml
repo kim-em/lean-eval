@@ -596,3 +596,14 @@ holes = ["contractibleSpace_houseWithTwoRooms"]
 submitter = "Junyan Xu"
 source = "Allen Hatcher, *Algebraic Topology*."
 informal_solution = "Show that a neighborhood of the space deformation retracts onto it and is homeomorphic to a 3-ball."
+
+[[problem]]
+id = "fermat_last_theorem"
+title = "Fermat's Last Theorem"
+test = false
+module = "LeanEval.NumberTheory.FermatLastTheorem"
+holes = ["fermat_last_theorem"]
+submitter = "Xuanji Li"
+notes = "Fermat's Last Theorem: a^n + b^n = c^n has no nontrivial natural solution when n >= 3."
+source = "https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem"
+informal_solution = "via https://en.wikipedia.org/wiki/Modularity_theorem"

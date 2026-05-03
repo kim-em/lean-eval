@@ -592,5 +592,16 @@
       "heat_kernel_solves_heat_equation"
     ],
     "generated_path": "generated/heat_kernel_solves_heat_equation"
+  },
+  {
+    "id": "fermat_last_theorem",
+    "title": "Fermat's Last Theorem",
+    "test": false,
+    "submitter": "Xuanji Li",
+    "module": "LeanEval.NumberTheory.FermatLastTheorem",
+    "holes": [
+      "fermat_last_theorem"
+    ],
+    "generated_path": "generated/fermat_last_theorem"
   }
 ]

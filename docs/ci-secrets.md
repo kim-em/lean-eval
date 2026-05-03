@@ -11,7 +11,7 @@ posture from this file alone — no UI screenshots, no tribal knowledge.
 | --- | --- | --- | --- |
 | `lean-eval-bot` | GitHub App (owner: `kim-em`) | `LEAN_EVAL_BOT_APP_ID`, `LEAN_EVAL_BOT_PRIVATE_KEY` | `submission.yml` |
 | `lean-eval-regenerator` | GitHub App (owner: `kim-em`) | `LEAN_EVAL_REGENERATOR_APP_ID`, `LEAN_EVAL_REGENERATOR_PRIVATE_KEY` | `regenerate-main.yml` |
-| `LEADERBOARD_WRITE_TOKEN` | Fine-grained PAT | `LEADERBOARD_WRITE_TOKEN` | `submission.yml` |
+| `LEADERBOARD_WRITE_TOKEN` | Fine-grained PAT | `LEADERBOARD_WRITE_TOKEN` (in both `leanprover/lean-eval` and `leanprover/lean-eval-leaderboard`) | `submission.yml`, `notify-leaderboard.yml` (this repo); `bump-benchmark-snapshot.yml` (leaderboard) |
 | Ruleset `main protection` | Repository Ruleset | (config in this repo, applied via API) | branch protection on `main` |
 
 To check the live state at any time:
@@ -142,29 +142,60 @@ fallback steps:
 
 ## PAT: `LEADERBOARD_WRITE_TOKEN`
 
-Fine-grained Personal Access Token used by
-[`.github/workflows/submission.yml`](../.github/workflows/submission.yml)
-to push to the leaderboard repository
-(<https://github.com/leanprover/lean-eval-leaderboard>) when a submission
-succeeds.
+Fine-grained Personal Access Token used by three workflows to drive the
+leaderboard repository (<https://github.com/leanprover/lean-eval-leaderboard>):
 
-### Repository secret
+- [`.github/workflows/submission.yml`](../.github/workflows/submission.yml)
+  in this repo — pushes a `record:` commit to leaderboard `main` when a
+  submission succeeds.
+- [`.github/workflows/notify-leaderboard.yml`](../.github/workflows/notify-leaderboard.yml)
+  in this repo — fires a `repository_dispatch` event into the leaderboard
+  whenever a problem-affecting change lands on this repo's `main`,
+  signalling that the snapshot pin should advance.
+- `.github/workflows/bump-benchmark-snapshot.yml` in the leaderboard
+  repo — listens for that dispatch (and `workflow_dispatch`),
+  regenerates `benchmark-snapshot/` from the latest `lean-eval` main,
+  runs `lake build` as the gate, and direct-pushes the bump to
+  leaderboard `main`. The deploy workflow then republishes the site.
 
-- `LEADERBOARD_WRITE_TOKEN` — the PAT.
+The token must be a fine-grained PAT issued under your personal account
+(not the org), with the leaderboard repo selected and `Contents: Read
+and write`. That permission is sufficient both for direct pushes (the
+PAT owner is a leaderboard admin and so bypasses branch protection) and
+for `repository_dispatch` (per
+<https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event>).
+
+### Repository secrets
+
+The same token value is stored in **two** places — once per repo that
+needs to use it:
+
+- `LEADERBOARD_WRITE_TOKEN` in `leanprover/lean-eval` (used by
+  `submission.yml` and `notify-leaderboard.yml`).
+- `LEADERBOARD_WRITE_TOKEN` in `leanprover/lean-eval-leaderboard` (used
+  by `bump-benchmark-snapshot.yml`).
+
+When rotating the PAT, update **both** secrets together. Forgetting one
+causes silent half-failures: e.g., dispatch fires but the bump's
+push step rejects, or vice versa.
 
 ### Reconstruction from scratch
 
 1. Open <https://github.com/settings/personal-access-tokens/new>.
-2. Resource owner: **leanprover** (requires org owner approval — this
-   was the
-   [`personal-access-token-requests` step](https://github.com/organizations/leanprover/settings/personal-access-token-requests)
-   referenced when the leaderboard moved into the org).
+2. Resource owner: **leanprover** (requires org owner approval —
+   another org owner must approve the request, you cannot self-approve
+   even if you are an owner; see the
+   [`personal-access-token-requests` page](https://github.com/organizations/leanprover/settings/personal-access-token-requests)).
 3. Repository access: **Only select repositories** →
    `leanprover/lean-eval-leaderboard`.
 4. Repository permissions: **Contents: Read and write**.
-5. Save the token, then:
+5. Save the token, then write it to both repos:
    ```bash
+   # lean-eval is the side that fires the dispatch and pushes records.
    gh secret set LEADERBOARD_WRITE_TOKEN -R leanprover/lean-eval --body <TOKEN>
+   # The leaderboard side checks itself out with this token so its
+   # snapshot-bump push back to its own main bypasses branch protection.
+   gh secret set LEADERBOARD_WRITE_TOKEN -R leanprover/lean-eval-leaderboard --body <TOKEN>
    ```
 
 ## Branch protection on `main` (Repository Ruleset)
