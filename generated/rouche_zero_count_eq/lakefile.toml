@@ -1,4 +1,4 @@
-name = "rouche_logCounting_zero_eq"
+name = "rouche_zero_count_eq"
 testDriver = "workspace_test"
 defaultTargets = ["Challenge", "Solution", "Submission"]
 

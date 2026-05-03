@@ -1,0 +1,12 @@
+{
+  "id": "rouche_zero_count_eq",
+  "module": "LeanEval.ComplexAnalysis.Rouche",
+  "holes": [
+    {
+      "name": "LeanEval.ComplexAnalysis.rouche_zero_count_eq",
+      "basename": "rouche_zero_count_eq",
+      "kind": "theorem",
+      "body": "theorem rouche_zero_count_eq\n    {f g : \u2102 \u2192 \u2102} {R : \u211d}\n    (hR : 0 < R)\n    (hf : MeromorphicOn f Set.univ)\n    (hg : AnalyticOn \u2102 g Set.univ)\n    (hbound : \u2200 z : \u2102, \u2016z\u2016 = R \u2192 \u2016g z\u2016 < \u2016f z\u2016) :\n    (\u2211\u1da0 z, ((divisor (f + g) (Metric.closedBall 0 R))\u207a) z) =\n      (\u2211\u1da0 z, ((divisor f (Metric.closedBall 0 R))\u207a) z) := by\n  sorry"
+    }
+  ]
+}

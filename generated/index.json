@@ -154,15 +154,15 @@
     "generated_path": "generated/finite_group_isSolvable_of_card_eq_prime_pow_mul_prime_pow"
   },
   {
-    "id": "rouche_logCounting_zero_eq",
+    "id": "rouche_zero_count_eq",
     "title": "Rouche theorem via zero counting",
     "test": false,
     "submitter": "Kim Morrison",
     "module": "LeanEval.ComplexAnalysis.Rouche",
     "holes": [
-      "rouche_logCounting_zero_eq"
+      "rouche_zero_count_eq"
     ],
-    "generated_path": "generated/rouche_logCounting_zero_eq"
+    "generated_path": "generated/rouche_zero_count_eq"
   },
   {
     "id": "mem_convexHull_finset_extremePoints_of_mem_compact_convex",
@@ -592,5 +592,16 @@
       "heat_kernel_solves_heat_equation"
     ],
     "generated_path": "generated/heat_kernel_solves_heat_equation"
+  },
+  {
+    "id": "fermat_last_theorem",
+    "title": "Fermat's Last Theorem",
+    "test": false,
+    "submitter": "Xuanji Li",
+    "module": "LeanEval.NumberTheory.FermatLastTheorem",
+    "holes": [
+      "fermat_last_theorem"
+    ],
+    "generated_path": "generated/fermat_last_theorem"
   }
 ]

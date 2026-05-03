@@ -155,13 +155,13 @@ source = "Classical theorem in finite group theory."
 informal_solution = "Use character theory and induction on the group order to prove solvability."
 
 [[problem]]
-id = "rouche_logCounting_zero_eq"
+id = "rouche_zero_count_eq"
 title = "Rouche theorem via zero counting"
 test = false
 module = "LeanEval.ComplexAnalysis.Rouche"
-holes = ["rouche_logCounting_zero_eq"]
+holes = ["rouche_zero_count_eq"]
 submitter = "Kim Morrison"
-notes = "Phrases Rouché's theorem as equality of zero-counting functions for f and f + g."
+notes = "Phrases Rouché's theorem as equality of multiplicity-counted zero counts for f and f + g on the closed disk of radius R."
 source = "Classical theorem in complex analysis."
 informal_solution = "If |g| < |f| on the boundary circle, then f and f + g have the same number of zeros inside, counted with multiplicity."
 
@@ -597,3 +597,14 @@ submitter = "Kim Morrison"
 notes = "The Gaussian convolution u(t,x) = (4 pi t)^{-1/2} integral exp(-(x-y)^2/(4t)) f(y) dy satisfies the heat equation on (0, infty) x R, with initial datum f recovered as t -> 0+."
 source = "Classical heat-equation theory."
 informal_solution = "Differentiate under the integral sign in t and twice in x; the kernel itself satisfies the heat equation, so does its convolution with f. As t -> 0+, the Gaussian is an approximate identity with total mass 1. After the change of variables y = x + sqrt(t) z, the integral becomes an average of f(x + sqrt(t) z) against a fixed integrable Gaussian weight; continuity of f at x and boundedness of f then give pointwise convergence to f(x) by dominated convergence in z."
+
+[[problem]]
+id = "fermat_last_theorem"
+title = "Fermat's Last Theorem"
+test = false
+module = "LeanEval.NumberTheory.FermatLastTheorem"
+holes = ["fermat_last_theorem"]
+submitter = "Xuanji Li"
+notes = "Fermat's Last Theorem: a^n + b^n = c^n has no nontrivial natural solution when n >= 3."
+source = "https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem"
+informal_solution = "via https://en.wikipedia.org/wiki/Modularity_theorem"
