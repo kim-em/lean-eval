@@ -5,8 +5,7 @@ import EvalTools.Markers
 /-!
 # Radó's theorem on Riemann surfaces
 
-Radó's theorem, proved by Tibor Radó (1925), states that every connected Riemann surface
-is second-countable (has a countable base for its topology).
+Every connected Riemann surface is second-countable (Tibor Radó, 1925).
 A prerequisite to the uniformization theorem in John Hamal Hubbard,
 *Teichmüller theory and applications to geometry, topology, and dynamics. Vol. 1* (§1.3).
 
