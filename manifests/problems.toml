@@ -627,3 +627,12 @@ submitter = "Xuanji Li"
 notes = "Fermat's Last Theorem: a^n + b^n = c^n has no nontrivial natural solution when n >= 3."
 source = "https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem"
 informal_solution = "via https://en.wikipedia.org/wiki/Modularity_theorem"
+
+[[problem]]
+id = "rado_riemannSurface"
+title = "Radó's theorem on Riemann surfaces"
+test = false
+module = "LeanEval.Geometry.RadoTheorem"
+holes = ["rado_riemannSurface"]
+submitter = "Junyan Xu"
+source = "https://en.wikipedia.org/wiki/Rad%C3%B3%27s_theorem_(Riemann_surfaces)"
