@@ -636,3 +636,12 @@ module = "LeanEval.Geometry.RadoTheorem"
 holes = ["rado_riemannSurface"]
 submitter = "Junyan Xu"
 source = "John Hamal Hubbard, *Teichmüller theory and applications to geometry, topology, and dynamics. Vol. 1*, §1.3."
+
+[[problem]]
+id = "neukirch_uchida"
+title = "Neukirch–Uchida theorem"
+test = false
+module = "LeanEval.NumberTheory.NeukirchUchida"
+holes = ["neukirch_uchida"]
+submitter = "Junyan Xu"
+source = "Jürgen Neukirch, Alexander Schmidt, Kay Wingberg. *Cohomology of Number Fields*, Theorem 12.2.1."
