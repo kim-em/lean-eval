@@ -5,8 +5,9 @@ import EvalTools.Markers
 /-!
 # The Neukirch–Uchida theorem
 
-Every topological group isomorphism between absolute Galois groups of two number fields is
-induced by a unique isomorphism between the fields. A foundational result of anabelian geometry.
+Every topological group isomorphism between absolute Galois groups of two number fields is induced
+by a unique isomorphism between their separable closures that sends one field to the other.
+A foundational result of anabelian geometry.
 
 References:
 https://en.wikipedia.org/wiki/Neukirch%E2%80%93Uchida_theorem
