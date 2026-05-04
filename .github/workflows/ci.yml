@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Free up disk space
-        uses: jlumbroso/free-disk-space@v1.3.1
+        # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
+        # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
         with:
           tool-cache: false
           android: true
@@ -20,28 +22,37 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - uses: actions/checkout@v4
+      # actions/checkout pinned to 11bd7190 (= refs/tags/v4.2.2 as of 2026-05-04).
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
 
-      - uses: leanprover/lean-action@v1
+      # leanprover/lean-action pinned to 38fbc41a (= refs/tags/v1.5.0, also v1 HEAD as of 2026-05-04).
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
         with:
           use-mathlib-cache: true
 
-      - uses: actions/setup-go@v5
+      # actions/setup-go pinned to d35c59ab (= refs/tags/v5.5.0 as of 2026-05-04).
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
-          go-version: stable
+          # Concrete Go version, not `stable`, so a runner-image bump cannot
+          # silently change the toolchain we install landrun with.
+          go-version: '1.24.0'
 
       - name: Install landrun
         run: |
-          go install github.com/zouuup/landrun/cmd/landrun@main
+          # landrun pinned to 5ed4a3db (zouuup/landrun main HEAD as of 2026-05-04).
+          # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+          go install github.com/zouuup/landrun/cmd/landrun@5ed4a3db3a4ad930d577215c6b9abaa19df7f99f
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Build lean4export
         run: |
           git clone https://github.com/leanprover/lean4export.git .ci/lean4export
           cd .ci/lean4export
-          git checkout v4.30.0-rc2
+          # lean4export pinned to 12581a6b (= refs/tags/v4.30.0-rc2 as of 2026-05-04).
+          # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+          git checkout 12581a6b680d8478175596338eb2d53383a323e3  # pin-audit: exempt -- SHA, see comment
           lake build lean4export
           echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
 
@@ -49,9 +60,28 @@ jobs:
         run: |
           git clone https://github.com/leanprover/comparator.git .ci/comparator
           cd .ci/comparator
-          git checkout 71b52ec29e06d4b7d882726553b1ceb99a2499e0
+          # comparator pinned to 71b52ec2 (leanprover/comparator, originally adopted before 2026-05-04).
+          # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+          git checkout 71b52ec29e06d4b7d882726553b1ceb99a2499e0  # pin-audit: exempt -- SHA, see comment
           lake build comparator
           echo "$PWD/.lake/build/bin" >> "$GITHUB_PATH"
+
+      - name: Audit workflow action pins
+        run: python scripts/action_pin_audit.py
+
+      # SECURITY: assert comparator's landrun sandbox actually denies
+      # writes outside .lake/. Catches landrun fail-open on novel
+      # kernels and policy regressions in comparator. See SECURITY.md
+      # > "Validations done at submission time" > sandbox-engaged.
+      - name: Probe sandbox is engaged
+        run: python scripts/sandbox_engaged_probe.py --require-tools
+
+      # SECURITY: assert env-var allowlist seen by Submission's
+      # elaboration is exactly {PATH, HOME, LEAN_ABORT_ON_PANIC}.
+      # Catches secret-env-var leakage to user code if comparator's
+      # envPass ever drifts. See SECURITY.md > "env allowlist".
+      - name: Probe env-var allowlist
+        run: python scripts/security_probes/env_dump_probe.py --require-tools
 
       - name: Python Syntax Checks
         run: python -m py_compile scripts/*.py tests/*.py

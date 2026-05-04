@@ -30,7 +30,10 @@ from dataclasses import dataclass
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 MIN_LANDRUN_VERSION = (0, 1, 14)
-LANDRUN_INSTALL_TARGET = "main"
+# landrun pinned to 5ed4a3db (zouuup/landrun main HEAD as of 2026-05-04).
+# Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+# Keep this in lockstep with .github/workflows/{ci,submission}.yml.
+LANDRUN_INSTALL_TARGET = "5ed4a3db3a4ad930d577215c6b9abaa19df7f99f"
 REQUIRED_LANDRUN_FLAGS = (
     "--best-effort",
     "--ro",
@@ -90,12 +93,14 @@ def landrun_install_advice() -> str:
                 "Released tags through `v0.1.15` are not enough to reliably satisfy comparator's"
                 " sandboxing needs."
             ),
-            "As of 2026-04-10, the upstream default branch is `main`, not `master`.",
-            "Install or reinstall it with:",
+            "Install or reinstall the project's pinned commit with:",
             f"  go install github.com/zouuup/landrun/cmd/landrun@{LANDRUN_INSTALL_TARGET}",
             (
-                "Version strings are not sufficient to distinguish the `v0.1.15` tag from the"
-                " current `main` branch, because upstream `main` still reports `0.1.15`."
+                "Version strings are not sufficient to distinguish landrun commits — upstream"
+                " main has long reported `0.1.15` even when the SHA differs. The constant"
+                " `LANDRUN_INSTALL_TARGET` in this file holds the project's pin (kept in"
+                " lockstep with .github/workflows/{ci,submission}.yml). See SECURITY.md"
+                " > 'Bumping pinned dependencies'."
             ),
         ]
     )

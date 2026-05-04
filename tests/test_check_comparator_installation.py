@@ -24,10 +24,13 @@ class CheckComparatorInstallationTests(unittest.TestCase):
         help_text = "usage: landrun --best-effort --ro --rw --rox --rwx --ldd"
         self.assertEqual(comparator_check.missing_landrun_flags(help_text), ["--add-exec"])
 
-    def test_landrun_install_advice_points_to_main(self) -> None:
+    def test_landrun_install_advice_points_to_pinned_sha(self) -> None:
         advice = comparator_check.landrun_install_advice()
-        self.assertIn("@main", advice)
-        self.assertIn("not `master`", advice)
+        target = comparator_check.LANDRUN_INSTALL_TARGET
+        # Pin must be a 40-char hex SHA (no branches, no tags) so the
+        # bump procedure is auditable and CI cannot drift silently.
+        self.assertRegex(target, r"^[0-9a-f]{40}$")
+        self.assertIn(f"@{target}", advice)
 
     def test_validate_landrun_rejects_missing_flags(self) -> None:
         inspection = comparator_check.LandrunInspection(

@@ -27,17 +27,20 @@ jobs:
     steps:
       - name: Mint lean-eval-regenerator installation token
         id: app_token
-        uses: actions/create-github-app-token@v1
+        # actions/create-github-app-token pinned to d72941d7 (= refs/tags/v1 as of 2026-05-04).
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547
         with:
           app-id: ${{ secrets.LEAN_EVAL_REGENERATOR_APP_ID }}
           private-key: ${{ secrets.LEAN_EVAL_REGENERATOR_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      # actions/checkout pinned to 11bd7190 (= refs/tags/v4.2.2 as of 2026-05-04).
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           token: ${{ steps.app_token.outputs.token }}
 
-      - uses: leanprover/lean-action@v1
+      # leanprover/lean-action pinned to 38fbc41a (= refs/tags/v1.5.0, also v1 HEAD as of 2026-05-04).
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
         with:
           use-mathlib-cache: true
 
