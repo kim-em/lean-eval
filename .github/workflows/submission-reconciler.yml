@@ -1,0 +1,43 @@
+# Safety net for the Submission workflow: if an issue is labeled
+# `submission` but no bot comment has appeared within 2 hours, post a
+# generic orphan-notice and close. Catches cases the in-workflow
+# handlers cannot:
+#   - workflow administratively disabled (run conclusion = skipped)
+#   - workflow file has a syntax error / never dispatches
+#   - runner died before the `if: failure()` step ran in `fetch`
+#   - the `notify` job itself failed
+#
+# 2h threshold > evaluate's 90 min timeout, so legitimate long runs are
+# not closed prematurely.
+name: Submission reconciler
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  actions: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # actions/checkout pinned to 11bd7190 (= refs/tags/v4.2.2 as of 2026-05-04).
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      # actions/setup-python pinned to a26af69b (= refs/tags/v5.6.0 as of 2026-05-04).
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11.10'
+
+      - name: Reconcile orphaned submission issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SERVER_URL: ${{ github.server_url }}
+        run: python scripts/reconcile_orphan_submissions.py
