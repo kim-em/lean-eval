@@ -37,22 +37,21 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 TOOLCHAIN = (REPO_ROOT / "lean-toolchain").read_text(encoding="utf-8").strip()
 
 
-# Vars we EXPECT Submission's elaboration to see. The set has two
-# sources, both of which need updating in lockstep with this constant:
-#   1. Comparator's `envPass` whitelists which parent env vars landrun
-#      forwards: PATH, HOME, LEAN_ABORT_ON_PANIC. Sensitive secrets
-#      (GH_TOKEN, AWS_*, LD_PRELOAD, etc.) are stripped here.
-#   2. Lake itself injects LEAN_PATH and LD_LIBRARY_PATH when invoking
-#      `lean` to build a module — these point at the workspace's
-#      .lake/build/lib and the toolchain's shared libs respectively.
-#      They are NOT secrets and are expected; they are required for
-#      lean to find its imports.
-# If this set ever changes intentionally, update SECURITY.md >
-# "Validations done at submission time" > env allowlist accordingly.
-EXPECTED_VISIBLE = {
-    "PATH", "HOME", "LEAN_ABORT_ON_PANIC",
-    "LEAN_PATH", "LD_LIBRARY_PATH",
-}
+# Required vars: comparator's `envPass` whitelist guarantees these
+# three reach Submission. Sensitive secrets (GH_TOKEN, AWS_*,
+# LD_PRELOAD, etc.) are stripped at this layer.
+REQUIRED_VISIBLE = {"PATH", "HOME", "LEAN_ABORT_ON_PANIC"}
+
+# Optional, but allowed: lake injects LEAN_PATH (always) and
+# LD_LIBRARY_PATH (only when the toolchain or shared-libs setup
+# requires it; e.g. NixOS sets it, Ubuntu typically does not) when
+# spawning `lean`. These are NOT secrets — they are paths needed for
+# lean to find its imports / shared libs — and we tolerate either
+# being present or absent.
+ALLOWED_VISIBLE = REQUIRED_VISIBLE | {"LEAN_PATH", "LD_LIBRARY_PATH"}
+
+# If either set ever changes intentionally, update SECURITY.md >
+# "Validations done at submission time" > env allowlist in lockstep.
 
 # A representative sample of decoy secrets we shove into the parent env
 # before invoking comparator. These are NOT the only vars we care about —
@@ -225,9 +224,9 @@ def run_probe(*, require_tools: bool = False) -> int:
         except ProbeError as exc:
             print(f"env_dump_probe: FAIL\n  {exc}", file=sys.stderr)
             return 1
-        unexpected = visible - EXPECTED_VISIBLE
-        missing_expected = EXPECTED_VISIBLE - visible
-        if unexpected or missing_expected:
+        unexpected = visible - ALLOWED_VISIBLE
+        missing_required = REQUIRED_VISIBLE - visible
+        if unexpected or missing_required:
             print("env_dump_probe: FAIL — env allowlist drifted.", file=sys.stderr)
             if unexpected:
                 # Sort and limit length so a 100-var leak is still legible.
@@ -243,15 +242,21 @@ def run_probe(*, require_tools: bool = False) -> int:
                         f"  - of which decoys (means real secrets would also leak): {', '.join(leaked_decoys)}",
                         file=sys.stderr,
                     )
-            if missing_expected:
+            if missing_required:
                 print(
-                    f"  - missing expected: {', '.join(sorted(missing_expected))}. "
+                    f"  - missing required: {', '.join(sorted(missing_required))}. "
                     "If a needed var is missing, comparator's safeLakeBuild "
                     "may have stopped passing it.",
                     file=sys.stderr,
                 )
             return 1
-    print("env_dump_probe: PASS — Submission sees exactly", sorted(EXPECTED_VISIBLE))
+    print(
+        "env_dump_probe: PASS — Submission sees a subset of",
+        sorted(ALLOWED_VISIBLE),
+        "containing required",
+        sorted(REQUIRED_VISIBLE),
+        "(actual:", sorted(visible), ")",
+    )
     return 0
 
 

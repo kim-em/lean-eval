@@ -243,14 +243,18 @@ every CI build; an unpinned dependency cannot be merged.
   runs in `ci.yml` and on every `submission` workflow run. The probe
   salts the parent env with decoy secrets (`GH_TOKEN`,
   `LD_PRELOAD`, `AWS_ACCESS_KEY_ID`, `LEAN_EVAL_BOT_PRIVATE_KEY`,
-  etc.) and asserts that `Submission`'s elaboration sees **exactly**
-  `{PATH, HOME, LEAN_ABORT_ON_PANIC, LEAN_PATH, LD_LIBRARY_PATH}`.
+  etc.) and asserts that `Submission`'s elaboration sees a subset
+  of `{PATH, HOME, LEAN_ABORT_ON_PANIC, LEAN_PATH, LD_LIBRARY_PATH}`
+  containing the required `{PATH, HOME, LEAN_ABORT_ON_PANIC}`.
   Allowlist-based, not spot-check, so the next unknown token class
-  can't slip through. The first three are forwarded by comparator's
-  `envPass`; the last two are added by `lake` itself when it spawns
-  `lean` to build a module — they point at the workspace's
-  `.lake/build/lib` and the toolchain's shared libs and contain no
-  secrets. Confirmed empirically on Linux on 2026-05-04.
+  can't slip through. The required three are forwarded by comparator's
+  `envPass`; `LEAN_PATH` and `LD_LIBRARY_PATH` are added by `lake`
+  itself when it spawns `lean` and may or may not be present
+  depending on the OS (NixOS sets both, Ubuntu typically only sets
+  LEAN_PATH). They point at the workspace's `.lake/build/lib` and the
+  toolchain's shared libs and contain no secrets. Confirmed
+  empirically on Linux/NixOS on 2026-05-04 (runs both vars) and on
+  Ubuntu GHA runners 2026-05-04 (runs only LEAN_PATH).
 - **Overlay restriction.** `evaluate_submission.py:overlay_match` only
   copies `Submission.lean` and files matching `*.lean` under
   `Submission/`. Symlinks are rejected at submission walk and at
