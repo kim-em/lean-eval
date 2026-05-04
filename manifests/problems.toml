@@ -635,4 +635,4 @@ test = false
 module = "LeanEval.Geometry.RadoTheorem"
 holes = ["rado_riemannSurface"]
 submitter = "Junyan Xu"
-source = "https://en.wikipedia.org/wiki/Rad%C3%B3%27s_theorem_(Riemann_surfaces)"
+source = "John Hamal Hubbard, *Teichmüller theory and applications to geometry, topology, and dynamics. Vol. 1*, §1.3."
