@@ -1,0 +1,12 @@
+{
+  "id": "bakerWustholz_linearForms_logs",
+  "module": "LeanEval.NumberTheory.BakerWustholz",
+  "holes": [
+    {
+      "name": "bakerWustholz_linearForms_logs",
+      "basename": "bakerWustholz_linearForms_logs",
+      "kind": "theorem",
+      "body": "/-- **Baker\u2013W\u00fcstholz theorem on linear forms in logarithms**, effective form.\n\nReference: A. Baker, G. W\u00fcstholz, *Logarithmic forms and group varieties*,\nJ. reine angew. Math. **442** (1993), 19\u201362.\n\nLet `\u03b1\u2081, \u2026, \u03b1\u2099` (with `1 \u2264 n`) be nonzero elements of a number field `K` of\ndegree `d := Module.finrank \u211a K`, embedded in `\u2102` via `\u03c6`. Let `b\u2081, \u2026, b\u2099`\nbe rational integers with `|b\u1d62| \u2264 B` and `B \u2265 2`. If the linear form\n`\u039b := \u2211\u1d62 b\u1d62 \u00b7 log (\u03c6 (\u03b1\u1d62))` (complex log, principal branch) is nonzero,\nthen\n`log |\u039b| \u2265 -C(n, d) \u00b7 max(log B, 1/d) \u00b7 \u220f\u1d62 h'(\u03b1\u1d62)`\n\nwhere `C(n, d)` is `BakerWustholz.C n d` and `h'(\u03b1)` is\n`BakerWustholz.modifiedHeight \u03c6 \u03b1`. The `max(log B, 1/d)` factor (rather\nthan bare `log B`) is the standard Baker\u2013W\u00fcstholz formulation; it avoids\nspuriously sharpening the bound at `d = 1`, `B = 2`. -/\ntheorem bakerWustholz_linearForms_logs\n    {n : \u2115} (hn : 0 < n)\n    {K : Type*} [Field K] [NumberField K] (\u03c6 : K \u2192+* \u2102)\n    (\u03b1 : Fin n \u2192 K) (h\u03b1 : \u2200 i, \u03b1 i \u2260 0)\n    (b : Fin n \u2192 \u2124) {B : \u2115} (hB : 2 \u2264 B) (hbB : \u2200 i, (b i).natAbs \u2264 B)\n    (h\u039b_ne_zero : (\u2211 i, (b i : \u2102) * Complex.log (\u03c6 (\u03b1 i))) \u2260 0) :\n    Real.log \u2016\u2211 i, (b i : \u2102) * Complex.log (\u03c6 (\u03b1 i))\u2016\n      \u2265 -(BakerWustholz.C n (Module.finrank \u211a K)\n          * max (Real.log B) (1 / (Module.finrank \u211a K : \u211d))\n          * \u220f i, BakerWustholz.modifiedHeight \u03c6 (\u03b1 i)) := by\n  sorry"
+    }
+  ]
+}

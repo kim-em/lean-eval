@@ -550,6 +550,17 @@
     "generated_path": "generated/cubic_decay_asymptotic"
   },
   {
+    "id": "bakerWustholz_linearForms_logs",
+    "title": "Baker-W\u00fcstholz theorem on linear forms in logarithms",
+    "test": false,
+    "submitter": "Ralf Stephan",
+    "module": "LeanEval.NumberTheory.BakerWustholz",
+    "holes": [
+      "bakerWustholz_linearForms_logs"
+    ],
+    "generated_path": "generated/bakerWustholz_linearForms_logs"
+  },
+  {
     "id": "sturm_separation",
     "title": "Sturm separation theorem",
     "test": false,
