@@ -1,0 +1,12 @@
+{
+  "id": "neukirch_uchida",
+  "module": "LeanEval.NumberTheory.NeukirchUchida",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.neukirch_uchida",
+      "basename": "neukirch_uchida",
+      "kind": "theorem",
+      "body": "theorem neukirch_uchida {K\u2081 K\u2082 K\u2081' K\u2082' : Type*} [Field K\u2081] [Field K\u2082] [Field K\u2081'] [Field K\u2082']\n    [NumberField K\u2081] [NumberField K\u2082] [Algebra K\u2081 K\u2081'] [Algebra K\u2082 K\u2082'] [IsSepClosure K\u2081 K\u2081']\n    [IsSepClosure K\u2082 K\u2082'] (\u03d5 : Gal(K\u2081'/K\u2081) \u2243* Gal(K\u2082'/K\u2082)) (he : IsHomeomorph \u03d5) :\n    \u2203! \u03c3 : K\u2082' \u2243+* K\u2081', (algebraMap K\u2082 K\u2082').range.map \u03c3.toRingHom = (algebraMap K\u2081 K\u2081').range \u2227\n      \u2200 g : Gal(K\u2081'/K\u2081), \u03d5 g = \u03c3.trans (g.toRingEquiv.trans \u03c3.symm) := by\n  sorry"
+    }
+  ]
+}

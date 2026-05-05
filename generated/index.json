@@ -647,5 +647,16 @@
       "rado_riemannSurface"
     ],
     "generated_path": "generated/rado_riemannSurface"
+  },
+  {
+    "id": "neukirch_uchida",
+    "title": "Neukirch\u2013Uchida theorem",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.NumberTheory.NeukirchUchida",
+    "holes": [
+      "neukirch_uchida"
+    ],
+    "generated_path": "generated/neukirch_uchida"
   }
 ]
