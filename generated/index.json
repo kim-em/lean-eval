@@ -636,5 +636,16 @@
       "fermat_last_theorem"
     ],
     "generated_path": "generated/fermat_last_theorem"
+  },
+  {
+    "id": "rado_riemannSurface",
+    "title": "Rad\u00f3's theorem on Riemann surfaces",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.Geometry.RadoTheorem",
+    "holes": [
+      "rado_riemannSurface"
+    ],
+    "generated_path": "generated/rado_riemannSurface"
   }
 ]

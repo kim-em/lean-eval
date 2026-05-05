@@ -1,0 +1,12 @@
+{
+  "id": "rado_riemannSurface",
+  "module": "LeanEval.Geometry.RadoTheorem",
+  "holes": [
+    {
+      "name": "LeanEval.Geometry.rado_riemannSurface",
+      "basename": "rado_riemannSurface",
+      "kind": "theorem",
+      "body": "theorem rado_riemannSurface {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X]\n    [ChartedSpace \u2102 X] [IsManifold (modelWithCornersSelf \u2102 \u2102) 1 X] :\n    SecondCountableTopology X := by\n  sorry"
+    }
+  ]
+}
