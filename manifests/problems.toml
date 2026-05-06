@@ -651,6 +651,6 @@ id = "balanceable_bounded_partitions"
 title = "Balanceable k-bounded partitions"
 test = false
 module = "LeanEval.Combinatorics.BalanceableBoundedPartitions"
-holes = ["minimal_boundedImpliesBalanceable"]
+holes = ["minimal_balanceable_of_bounded"]
 submitter = "Julia M. Himmel"
 source = "https://projecteuler.net/problem=772"
