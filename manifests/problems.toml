@@ -645,3 +645,11 @@ module = "LeanEval.NumberTheory.NeukirchUchida"
 holes = ["neukirch_uchida"]
 submitter = "Junyan Xu"
 source = "Jürgen Neukirch, Alexander Schmidt, Kay Wingberg. *Cohomology of Number Fields*, Theorem 12.2.1."
+
+[[problem]]
+id = "handlebody_boundary"
+title = "Boundary of a 3-dimensional handlebody"
+test = false
+module = "LeanEval.Topology.Prelude"
+holes = ["nonempty_frontier_handlebody_homeomorph_quot_orientableRel"]
+submitter = "Junyan Xu"
