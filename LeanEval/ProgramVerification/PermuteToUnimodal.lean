@@ -64,6 +64,10 @@ The number of indices at which the two given vectors differ
 def differences {n : Nat} (a b : Vector Nat n) : Nat :=
   (List.finRange n).filter (fun i => a[i] ≠ b[i]) |>.length
 
+/--
+`minRearrange` correctly computes the smallest number of indices that need to be permuted in order to
+turn `arr` into a unimodal permutation.
+-/
 @[eval_problem]
 theorem minRearrange_correct {arr : Array Nat} :
     arr.Perm (1...=arr.size).toArray →
