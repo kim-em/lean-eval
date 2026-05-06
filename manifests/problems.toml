@@ -648,8 +648,24 @@ source = "Jürgen Neukirch, Alexander Schmidt, Kay Wingberg. *Cohomology of Numb
 
 [[problem]]
 id = "handlebody_boundary"
-title = "Boundary of a 3-dimensional handlebody"
+title = "Boundary of a 3-dimensional handlebody with nonzero genus"
 test = false
 module = "LeanEval.Topology.Prelude"
-holes = ["nonempty_frontier_handlebody_homeomorph_orientableRepr"]
+holes = ["frontierHandlebodyHomeomorphOrientableRepr"]
+submitter = "Junyan Xu"
+
+[[problem]]
+id = "handlebody_boundary_sphere"
+title = "Boundary of a 3-dimensional handlebody with zero genus"
+test = false
+module = "LeanEval.Topology.Prelude"
+holes = ["frontierHandlebodyHomeomorphSphere"]
+submitter = "Junyan Xu"
+
+[[problem]]
+id = "handlebody_boundary_S1xS1"
+title = "Boundary of a 3-dimensional handlebody with genus 1"
+test = false
+module = "LeanEval.Topology.Prelude"
+holes = ["frontierHandlebodyHomeomorphAddCircleProd"]
 submitter = "Junyan Xu"

@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Complex.Circle
+import Mathlib.Analysis.InnerProductSpace.PiL2
 import EvalTools.Markers
 
 /-!
@@ -69,8 +70,18 @@ def handlebody (g : ℕ) : Set (ℝ × ℝ × ℝ) :=
   Icc 0 1 ×ˢ (Icc 0 (2 * (g : ℝ) + 1) ×ˢ Icc 0 3 \ ⋃ i : Fin g, Ioo (2 * (i : ℝ) + 1) (2 * i + 2) ×ˢ Ioo 1 2)
 
 @[eval_problem]
-theorem nonempty_frontier_handlebody_homeomorph_orientableRepr (g : ℕ) (hg : g ≠ 0) :
-    Nonempty (frontier (handlebody g) ≃ₜ Surface.OrientableRepr g 0) := by
+def frontierHandlebodyHomeomorphOrientableRepr (g : ℕ) (hg : g ≠ 0) :
+    frontier (handlebody g) ≃ₜ Surface.OrientableRepr g 0 := by
+  sorry
+
+@[eval_problem]
+def frontierHandlebodyHomeomorphSphere :
+    frontier (handlebody 0) ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 := by
+  sorry
+
+@[eval_problem]
+def frontierHandlebodyHomeomorphAddCircleProd :
+    frontier (handlebody 1) ≃ₜ AddCircle (1 : ℝ) × AddCircle (1 : ℝ) := by
   sorry
 
 end LeanEval.Topology
