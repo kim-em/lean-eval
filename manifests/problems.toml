@@ -651,5 +651,5 @@ id = "handlebody_boundary"
 title = "Boundary of a 3-dimensional handlebody"
 test = false
 module = "LeanEval.Topology.Prelude"
-holes = ["nonempty_frontier_handlebody_homeomorph_quot_orientableRel"]
+holes = ["nonempty_frontier_handlebody_homeomorph_orientableRepr"]
 submitter = "Junyan Xu"

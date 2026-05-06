@@ -56,6 +56,10 @@ inductive NonOrientableRel (p n : ℕ) : ClosedUnitDisc → ClosedUnitDisc → P
       (.bdyPtOfReal <| -(3 * i + x) / (2 * p + 3 * n))
       (.bdyPtOfReal <| -(3 * i + 3 - x) / (2 * p + 3 * n))
 
+abbrev OrientableRepr (p n : ℕ) := Quot (Surface.OrientableRel p n)
+
+abbrev NonOrientableRepr (p n : ℕ) := Quot (Surface.NonOrientableRel p n)
+
 end Surface
 
 open Set
@@ -65,8 +69,8 @@ def handlebody (g : ℕ) : Set (ℝ × ℝ × ℝ) :=
   Icc 0 1 ×ˢ (Icc 0 (2 * (g : ℝ) + 1) ×ˢ Icc 0 3 \ ⋃ i : Fin g, Ioo (2 * (i : ℝ) + 1) (2 * i + 2) ×ˢ Ioo 1 2)
 
 @[eval_problem]
-theorem nonempty_frontier_handlebody_homeomorph_quot_orientableRel (g : ℕ) (hg : g ≠ 0) :
-    Nonempty (frontier (handlebody g) ≃ₜ Quot (Surface.OrientableRel g 0)) := by
+theorem nonempty_frontier_handlebody_homeomorph_orientableRepr (g : ℕ) (hg : g ≠ 0) :
+    Nonempty (frontier (handlebody g) ≃ₜ Surface.OrientableRepr g 0) := by
   sorry
 
 end LeanEval.Topology
