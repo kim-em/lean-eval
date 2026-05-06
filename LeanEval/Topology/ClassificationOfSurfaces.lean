@@ -1,4 +1,3 @@
-import Mathlib.Analysis.Complex.Circle
 import Mathlib.Geometry.Manifold.Instances.Real
 import LeanEval.Topology.Prelude
 import EvalTools.Markers

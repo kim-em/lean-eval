@@ -651,7 +651,7 @@ id = "handlebody_boundary"
 title = "Boundary of a 3-dimensional handlebody with nonzero genus"
 test = false
 module = "LeanEval.Topology.Prelude"
-holes = ["frontierHandlebodyHomeomorphOrientableRepr"]
+holes = ["frontierHandlebody₃HomeomorphOrientableRepr"]
 submitter = "Junyan Xu"
 
 [[problem]]
@@ -659,7 +659,7 @@ id = "handlebody_boundary_sphere"
 title = "Boundary of a 3-dimensional handlebody with zero genus"
 test = false
 module = "LeanEval.Topology.Prelude"
-holes = ["frontierHandlebodyHomeomorphSphere"]
+holes = ["frontierHandlebody₃HomeomorphSphere"]
 submitter = "Junyan Xu"
 
 [[problem]]
@@ -667,5 +667,13 @@ id = "handlebody_boundary_S1xS1"
 title = "Boundary of a 3-dimensional handlebody with genus 1"
 test = false
 module = "LeanEval.Topology.Prelude"
-holes = ["frontierHandlebodyHomeomorphAddCircleProd"]
+holes = ["frontierHandlebody₃HomeomorphAddCircleProd"]
+submitter = "Junyan Xu"
+
+[[problem]]
+id = "complHandelbodyHomeomorph"
+title = "The complement of a 3-dimensional handlebody"
+test = false
+module = "LeanEval.Topology.Prelude"
+holes = ["complHandelbody₃Homeomorph"]
 submitter = "Junyan Xu"

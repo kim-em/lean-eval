@@ -10,8 +10,10 @@ import EvalTools.Markers
 
 ## Main definitions
 
-+ `singularHomology`, `bettiNumber`: the singular homology and Betti numbers of a topological
-space with coefficients in an abelian group.
++ `singularHomology`: the singular homology of a topological space
+with coefficients in an abelian group.
+
++ `bettiNumber`: the Betti numbers with integer coefficients of a topological space.
 
 + `ContinuousMap.toEndSingularHomology`: the homomorphism from the monoid of continuous maps
 from a space to itself to the endomorphism monoid of one of its singular homology groups.
@@ -127,21 +129,29 @@ open Set
 
 /-- A 3-dimensional handlebody of genus `g`. -/
 def handlebody₃ (g : ℕ) : Set (ℝ × ℝ × ℝ) :=
-  Icc 0 1 ×ˢ (Icc 0 (2 * (g : ℝ) + 1) ×ˢ Icc 0 3 \ ⋃ i : Fin g, Ioo (2 * (i : ℝ) + 1) (2 * i + 2) ×ˢ Ioo 1 2)
+  Icc 0 1 ×ˢ (Icc 0 (2 * (g : ℝ) + 1) ×ˢ Icc 0 3 \
+    ⋃ i : Fin g, Ioo (2 * (i : ℝ) + 1) (2 * i + 2) ×ˢ Ioo 1 2)
 
 @[eval_problem]
-def frontierHandlebodyHomeomorphOrientableRepr (g : ℕ) (hg : g ≠ 0) :
+def frontierHandlebody₃HomeomorphOrientableRepr (g : ℕ) (hg : g ≠ 0) :
     frontier (handlebody₃ g) ≃ₜ Surface.OrientableRepr g 0 := by
   sorry
 
 @[eval_problem]
-def frontierHandlebodyHomeomorphSphere :
+def frontierHandlebody₃HomeomorphSphere :
     frontier (handlebody₃ 0) ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 := by
   sorry
 
 @[eval_problem]
-def frontierHandlebodyHomeomorphAddCircleProd :
+def frontierHandlebody₃HomeomorphAddCircleProd :
     frontier (handlebody₃ 1) ≃ₜ AddCircle (1 : ℝ) × AddCircle (1 : ℝ) := by
+  sorry
+
+/-- The complement of our handlebody in ℝ³ is homeomorphic to the interior of a handlebody
+with a point removed. -/
+@[eval_problem]
+def complHandelbody₃Homeomorph (g : ℕ) :
+    ↥(handlebody₃ g)ᶜ ≃ₜ ↥(interior (handlebody₃ g) \ {(0.5, 0.5, 1.5)}) := by
   sorry
 
 end LeanEval.Topology
