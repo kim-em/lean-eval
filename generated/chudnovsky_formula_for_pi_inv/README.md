@@ -5,9 +5,9 @@ Chudnovsky formula for pi inverse
 - Problem ID: `chudnovsky_formula_for_pi_inv`
 - Test Problem: no
 - Submitter: Kim Morrison
-- Notes: Uses the existing Mathlib definition of the Chudnovsky series and asks for the missing identity with pi inverse.
-- Source: https://link.springer.com/article/10.1007/s40316-018-0102-6
-- Informal solution: Evaluate the Chudnovsky series and prove that it sums to 1 / pi.
+- Notes: Uses the existing Mathlib definition of the Chudnovsky series and asks for the missing identity with pi inverse. The Chudnovsky formula states 1/π = (12 / 640320^(3/2)) · ∑_{n=0}^∞ (-1)^n · (6n)! · (545140134·n + 13591409) / ((3n)! · (n!)^3 · 640320^(3n)).
+- Source: https://arxiv.org/abs/1809.00533
+- Informal solution: Prove that the Chudnovsky series 1/π = (12 / 640320^(3/2)) · ∑_{n=0}^∞ (-1)^n · (6n)! · (545140134·n + 13591409) / ((3n)! · (n!)^3 · 640320^(3n)) holds, e.g. following Milla's detailed complex-analytic proof.
 
 Do not modify `Challenge.lean` or `Solution.lean`. Those files are part of the
 trusted benchmark and fixed by the repository.

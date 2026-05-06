@@ -40,9 +40,9 @@ test = false
 module = "LeanEval.Analysis.Chudnovsky"
 holes = ["chudnovsky_formula_for_pi_inv"]
 submitter = "Kim Morrison"
-notes = "Uses the existing Mathlib definition of the Chudnovsky series and asks for the missing identity with pi inverse."
-source = "https://link.springer.com/article/10.1007/s40316-018-0102-6"
-informal_solution = "Evaluate the Chudnovsky series and prove that it sums to 1 / pi."
+notes = "Uses the existing Mathlib definition of the Chudnovsky series and asks for the missing identity with pi inverse. The Chudnovsky formula states 1/π = (12 / 640320^(3/2)) · ∑_{n=0}^∞ (-1)^n · (6n)! · (545140134·n + 13591409) / ((3n)! · (n!)^3 · 640320^(3n))."
+source = "https://arxiv.org/abs/1809.00533"
+informal_solution = "Prove that the Chudnovsky series 1/π = (12 / 640320^(3/2)) · ∑_{n=0}^∞ (-1)^n · (6n)! · (545140134·n + 13591409) / ((3n)! · (n!)^3 · 640320^(3n)) holds, e.g. following Milla's detailed complex-analytic proof."
 
 [[problem]]
 id = "pi1_circle_mulEquiv_int"
