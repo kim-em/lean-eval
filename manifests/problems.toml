@@ -645,3 +645,12 @@ module = "LeanEval.NumberTheory.NeukirchUchida"
 holes = ["neukirch_uchida"]
 submitter = "Junyan Xu"
 source = "Jürgen Neukirch, Alexander Schmidt, Kay Wingberg. *Cohomology of Number Fields*, Theorem 12.2.1."
+
+[[problem]]
+id = "uniformization"
+title = "Uniformization theorem for Riemann surfaces"
+test = false
+module = "LeanEval.Geometry.Uniformization"
+holes = ["uniformization"]
+submitter = "Junyan Xu"
+source = "John Hamal Hubbard, *Teichmüller theory and applications to geometry, topology, and dynamics. Vol. 1*, Chapter 1."
