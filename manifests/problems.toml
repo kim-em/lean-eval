@@ -645,3 +645,12 @@ module = "LeanEval.NumberTheory.NeukirchUchida"
 holes = ["neukirch_uchida"]
 submitter = "Junyan Xu"
 source = "Jürgen Neukirch, Alexander Schmidt, Kay Wingberg. *Cohomology of Number Fields*, Theorem 12.2.1."
+
+[[problem]]
+id = "mostow_rigidity"
+title = "Mostow rigidity"
+test = false
+module = "LeanEval.Geometry.MostowRigidity"
+holes = ["mostow_rigidity"]
+submitter = "Junyan Xu"
+source = "https://en.wikipedia.org/wiki/Mostow_rigidity_theorem#Algebraic_form"
