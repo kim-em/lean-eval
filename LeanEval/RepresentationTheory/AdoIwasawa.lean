@@ -8,14 +8,19 @@ namespace LeanEval.RepresentationTheory.AdoIwasawa
 
 These problems ask for a faithful finite-dimensional representation of a
 finite-dimensional Lie algebra. The first assumes that the base field has
-characteristic zero; the second makes no assumption on its characteristic.
+characteristic zero; the second makes no assumption on its characteristic and
+therefore subsumes the first. They remain separate benchmark entries because
+the characteristic-zero proof is a substantial, distinct milestone.
 -/
 
-universe u
+universe u v
 
 /-- Endomorphisms carry the commutator Lie bracket used in the representation
-targets below. This named instance is also exported to generated workspaces. -/
-instance moduleEndLieRing (K V : Type u) [Field K] [AddCommGroup V] [Module K V] :
+targets below. Mathlib exposes this as a local instance, but the workspace
+generator carries named same-module dependencies rather than `attribute`
+commands, so a named instance is needed in generated challenge workspaces. -/
+instance moduleEndLieRing (K : Type u) (V : Type v)
+    [Field K] [AddCommGroup V] [Module K V] :
     LieRing (Module.End K V) :=
   LieRing.ofAssociativeRing
 
