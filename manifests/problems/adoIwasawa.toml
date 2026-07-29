@@ -1,0 +1,9 @@
+id = "adoIwasawa"
+title = "Ado–Iwasawa theorem over an arbitrary field"
+test = false
+module = "LeanEval.RepresentationTheory.AdoIwasawa"
+holes = ["adoIwasawa"]
+submitter = "Kim Morrison"
+notes = "Every finite-dimensional Lie algebra L over an arbitrary field K admits a faithful finite-dimensional representation. The representation is exhibited explicitly as an injective K-linear Lie homomorphism from L to the commutator Lie algebra of endomorphisms of a finite-dimensional K-vector space. The statement has no characteristic or algebraic-closure hypothesis."
+source = "K. Iwasawa, On the representation of Lie algebras, Japanese Journal of Mathematics 19 (1948), 405–426. See also the Tau Ceti Ado–Iwasawa roadmap, https://github.com/TauCetiProject/TauCetiRoadmap/pull/102."
+informal_solution = "Split on the characteristic of K. In characteristic zero, apply Ado's theorem. In characteristic p, use PBW and central p-polynomials to make the universal enveloping algebra finite over a central commutative subalgebra. A generalized Krull intersection argument produces a finite-dimensional quotient that remains injective on L; its left-regular action is the required faithful representation."

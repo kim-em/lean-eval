@@ -1,0 +1,9 @@
+id = "adoCharZero"
+title = "Ado's theorem in characteristic zero"
+test = false
+module = "LeanEval.RepresentationTheory.AdoIwasawa"
+holes = ["adoCharZero"]
+submitter = "Kim Morrison"
+notes = "Every finite-dimensional Lie algebra L over a characteristic-zero field K admits a faithful finite-dimensional representation. The representation is exhibited explicitly as an injective K-linear Lie homomorphism from L to the commutator Lie algebra of endomorphisms of a finite-dimensional K-vector space; no algebraic-closure hypothesis is imposed."
+source = "Classical Ado theorem; W. Fulton and J. Harris, Representation Theory: A First Course, Appendix C. See also the Tau Ceti Ado–Iwasawa roadmap, https://github.com/TauCetiProject/TauCetiRoadmap/pull/102."
+informal_solution = "Construct a faithful nilrepresentation of the center and extend it through an ideal flag in the solvable radical using derivation-stable cofinite ideals of universal enveloping algebras. Extend across a Levi complement, retaining a representation whose kernel meets the center trivially. Finally take its direct sum with the adjoint representation, whose kernel is the center; the direct sum is faithful."
