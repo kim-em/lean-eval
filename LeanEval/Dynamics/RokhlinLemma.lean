@@ -5,16 +5,16 @@ namespace LeanEval
 namespace Dynamics
 
 /-!
-# Rokhlin lemma (Rokhlin 1947; independently Kakutani 1943)
+# Rokhlin lemma (Rokhlin 1948; independently Kakutani 1943)
 
 §109 of Knill's *Some Fundamental Theorems in Mathematics* states the
-classical automorphism form. The formal target below uses a stronger
-non-invertible, forward-image formulation: `T` is any aperiodic
-measure-preserving transformation of a standard Borel probability space, and
-for every height `n` and every `ε > 0` there is a measurable base `B` such that
-`B, T B, …, T^{n−1} B` are pairwise disjoint and their union has measure at
-least `1 − ε`. Non-invertible versions are often phrased using preimage
-towers; this problem deliberately uses forward images.
+classical automorphism form. The formal target below strengthens this by
+dropping invertibility: `T` is any aperiodic measure-preserving transformation
+of a standard Borel probability space. Its conclusion is phrased using forward
+images: for every height `n` and every `ε > 0` there is a measurable base `B`
+such that `B, T B, …, T^{n−1} B` are pairwise disjoint and their union has outer
+measure at least `1 − ε`. Non-invertible versions are often phrased using
+preimage towers; the forward-image conclusion here follows from that form.
 
 Mathlib has `MeasurePreserving`, `IsProbabilityMeasure`, periodic-point
 infrastructure (`Function.periodicPts`), `Set.PairwiseDisjoint`, and
@@ -55,17 +55,19 @@ def towerUnion {Ω : Type*} (T : Ω → Ω) (B : Set Ω) (n : ℕ) : Set Ω :=
 
 /-- The measurable set `B` is the base of a **Rokhlin tower of height `n`** for
 `T` if the forward-image floors `B, T B, …, T^{n−1} B` are pairwise disjoint.
-Only the measurability of the base is included in this predicate. -/
+Only the measurability of the base is included in this predicate. For a
+non-invertible `T`, the floors need not be measurable, so evaluating a measure
+on their union uses its outer measure. -/
 def IsRokhlinTower {Ω : Type*} [MeasurableSpace Ω]
     (T : Ω → Ω) (B : Set Ω) (n : ℕ) : Prop :=
   MeasurableSet B ∧
     (Finset.range n : Set ℕ).PairwiseDisjoint (towerFloor T B)
 
-/-- **Rokhlin lemma, non-invertible forward-image form.** For every aperiodic
-measure-preserving transformation `T` of a standard Borel probability space
-`(Ω, μ)`, every height `n ≥ 1`, and every `ε > 0`, there is a measurable
+/-- **Rokhlin lemma, not-necessarily-invertible forward-image form.** For every
+aperiodic measure-preserving transformation `T` of a standard Borel probability
+space `(Ω, μ)`, every height `n ≥ 1`, and every `ε > 0`, there is a measurable
 base whose `n` forward-image floors `B, T B, …, T^{n−1} B` are pairwise
-disjoint and whose union has measure at least `1 − ε`. No invertibility
+disjoint and whose union has outer measure at least `1 − ε`. No invertibility
 assumption is made. -/
 @[eval_problem]
 theorem rokhlin_lemma {Ω : Type*} [MeasurableSpace Ω]
