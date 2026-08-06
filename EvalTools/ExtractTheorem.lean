@@ -14,6 +14,10 @@ structure ExtractedTheorem where
   declarationName : String
   module : String
   sourceRange : SourceRange
+  /-- Names of the explicit parameters in the elaborated declaration type, in
+  application order. This includes source-level `variable` parameters exactly
+  when Lean actually retained them in the declaration. -/
+  explicitParameters : Array String
   /-- Names of declarations from the same module that appear (transitively) in the
   type or value of this theorem. Computed from the elaborated terms, so this captures
   uses introduced by typeclass synthesis (which the `.ilean` references metadata
@@ -24,6 +28,12 @@ structure ExtractedTheorem where
   or `definition_names` in the comparator config. -/
   kind : String
   deriving ToJson
+
+def explicitParameterNames : Expr → Array String
+  | .forallE name _ body binderInfo =>
+      let rest := explicitParameterNames body
+      if binderInfo == .default && !name.isAnonymous then #[name.toString] ++ rest else rest
+  | _ => #[]
 
 def parseName (text : String) : Name :=
   text.splitOn "." |>.foldl Name.str .anonymous
@@ -180,6 +190,7 @@ def extractTheorem (moduleNameText declNameText : String) : IO ExtractedTheorem 
         declarationName := toString resolvedDeclName
         module := moduleNameText
         sourceRange := sourceRange
+        explicitParameters := explicitParameterNames constantInfo.type
         sameModuleDependencies := deps.map toString
         kind := kind
       }

@@ -50,6 +50,19 @@ def main : IO UInt32 := do
     pure <| assertEq "statement" actual
       ":\n    let marker := \"fake := by and := sorry\"\n    marker.length = 24"
 
+  check "extractStatementText ignores nested proof assignments" passes fails do
+    let declaration :=
+      "theorem target (h : True := by trivial) : True := by\n" ++
+      "  have nested : True := sorry"
+    let actual ← extractStatementText "nested-assignment" "Demo.lean" declaration "target"
+    pure <| assertEq "statement" actual "(h : True := by trivial) : True"
+
+  check "extractStatementText handles quote characters" passes fails do
+    let declaration :=
+      "theorem target : ('\"' : Char) = '\"' := by sorry"
+    let actual ← extractStatementText "char-literal" "Demo.lean" declaration "target"
+    pure <| assertEq "statement" actual ": ('\"' : Char) = '\"'"
+
   check "extractContextSyntaxDeclarations respects scope" passes fails do
     let source :=
       "section\n" ++
@@ -70,14 +83,6 @@ def main : IO UInt32 := do
     let context := extractContextSyntaxDeclarations source (some extracted)
     pure <| assertEq "active notation kept" ((context.find? "local notation:arg").isSome) true
       |>.or (assertEq "closed notation dropped" ((context.find? "closed").isSome) false)
-
-  check "contextVariableApplicationArgs keeps only explicit binders" passes fails do
-    let context :=
-      "variable {α : Type*} (n : Nat)\n" ++
-      "  (f : α → α)\n" ++
-      "variable [DecidableEq α] (x y : α)\n\n"
-    pure <| assertEq "arguments"
-      (contextVariableApplicationArgs context) #["n", "f", "x", "y"]
 
   -- Regression for https://github.com/leanprover/lean-eval/pull/467:
   -- Mathlib-style copyright headers precede imports. The generator must drop

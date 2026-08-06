@@ -115,6 +115,7 @@ structure ExtractedTheorem where
   startColumn : Nat
   endLine : Nat
   endColumn : Nat
+  explicitParameters : Option (Array String) := none
   sameModuleDependencies : Array String
   kind : String
   deriving Inhabited
@@ -129,6 +130,14 @@ private def parseExtractedTheorem (payload : String) : Except String ExtractedTh
   let startColumn ← range.getObjValAs? Nat "startColumn"
   let endLine ← range.getObjValAs? Nat "endLine"
   let endColumn ← range.getObjValAs? Nat "endColumn"
+  let explicitParameters ← match json.getObjVal? "explicitParameters" with
+    | .error _ => pure none
+    | .ok paramsJson => do
+        let paramsJson ← paramsJson.getArr?
+        let mut params : Array String := #[]
+        for paramJson in paramsJson do
+          params := params.push (← paramJson.getStr?)
+        pure (some params)
   let depNames : Array String ←
     match json.getObjVal? "sameModuleDependencies" with
     | .error _ => pure #[]
@@ -140,7 +149,7 @@ private def parseExtractedTheorem (payload : String) : Except String ExtractedTh
           acc := acc.push s
         pure acc
   return {
-    declarationName, module, startLine, startColumn, endLine, endColumn
+    declarationName, module, startLine, startColumn, endLine, endColumn, explicitParameters
     sameModuleDependencies := depNames
     kind
   }
@@ -633,18 +642,36 @@ private def Source.stringLiteralEnd (s : Source) (start : Nat) : Nat := Id.run d
       i := i + 1
   return s.size
 
+/-- If `start` begins a character literal, return its end. Apostrophes used in
+identifiers are rejected by requiring a closing quote in the literal shape. -/
+private def Source.charLiteralEnd? (s : Source) (start : Nat) : Option Nat :=
+  if start + 2 < s.size && s[start + 2]! == '\'' then some (start + 3)
+  else if start + 3 < s.size && s[start + 1]! == '\\' && s[start + 3]! == '\'' then
+    some (start + 4)
+  else none
+
+/-- Skip a French-quoted identifier such as `«a := by»`. -/
+private def Source.quotedIdentifierEnd (s : Source) (start : Nat) : Nat := Id.run do
+  let mut i := start + 1
+  while i < s.size do
+    if s[i]! == '»' then return i + 1
+    i := i + 1
+  return s.size
+
 /-- Locate the body marker of an eval-problem theorem without assuming the
 literal spelling `:= by`. Candidates inside comments and strings are ignored;
 arbitrary trivia may follow `:=`; and both the usual `by ... sorry` body and a
 direct `sorry` body are accepted.
 
 A direct `sorry` candidate is only accepted when it is the complete remaining
-body. For `by` bodies we retain the previous last-candidate behavior, while
-making its whitespace and comment handling lexical rather than literal. -/
+body. Only top-level markers are considered, so default binder values and
+nested proof assignments cannot be mistaken for the declaration body. -/
 def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option Nat := Id.run do
   let mut i := start
-  let mut byMarker : Option Nat := none
-  let mut directSorryMarker : Option Nat := none
+  let mut roundDepth := 0
+  let mut squareDepth := 0
+  let mut braceDepth := 0
+  let mut angleDepth := 0
   while i < s.size do
     if Source.startsWithAt s i "--".toList then
       while i < s.size && s[i]! != '\n' do
@@ -653,21 +680,34 @@ def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option Nat := Id.r
       i := blockCommentEnd s i
     else if s[i]! == '"' then
       i := Source.stringLiteralEnd s i
-    else if Source.startsWithAt s i ":=".toList then
+    else if s[i]! == '\'' then
+      match Source.charLiteralEnd? s i with
+      | some literalEnd => i := literalEnd
+      | none => i := i + 1
+    else if s[i]! == '«' then
+      i := Source.quotedIdentifierEnd s i
+    else if s[i]! == '(' then roundDepth := roundDepth + 1; i := i + 1
+    else if s[i]! == ')' then roundDepth := roundDepth - 1; i := i + 1
+    else if s[i]! == '[' then squareDepth := squareDepth + 1; i := i + 1
+    else if s[i]! == ']' then squareDepth := squareDepth - 1; i := i + 1
+    else if s[i]! == '{' then braceDepth := braceDepth + 1; i := i + 1
+    else if s[i]! == '}' then braceDepth := braceDepth - 1; i := i + 1
+    else if s[i]! == '⟨' then angleDepth := angleDepth + 1; i := i + 1
+    else if s[i]! == '⟩' then angleDepth := angleDepth - 1; i := i + 1
+    else if roundDepth == 0 && squareDepth == 0 && braceDepth == 0 && angleDepth == 0
+        && Source.startsWithAt s i ":=".toList then
       let bodyStart := Source.skipTrivia s (i + 2)
       if Source.startsWithAt s bodyStart "sorry".toList
           && Source.atWordEnd s (bodyStart + "sorry".length)
           && Source.skipTrivia s (bodyStart + "sorry".length) == s.size then
-        directSorryMarker := some i
+        return some i
       else if Source.startsWithAt s bodyStart "by".toList
           && Source.atWordEnd s (bodyStart + "by".length) then
-        byMarker := some i
+        return some i
       i := i + 2
     else
       i := i + 1
-  return match directSorryMarker with
-    | some marker => some marker
-    | none => byMarker
+  return none
 
 /-- Extract the theorem statement text from a sliced declaration body.
 The body marker is found lexically so direct `:= sorry` holes and flexible
@@ -1041,6 +1081,16 @@ private def isSyntaxContextDeclaration (declarationText : String) : Bool := Id.r
     if startsWithKeyword text kw then return true
   return false
 
+private def isLocalSyntaxContextDeclaration (declarationText : String) : Bool := Id.run do
+  let text := declarationText.trimAsciiStart.toString
+  let prefixes := #[
+    "local notation", "local infix", "local infixl", "local infixr",
+    "local prefix", "local postfix", "local syntax"
+  ]
+  for kw in prefixes do
+    if startsWithKeyword text kw then return true
+  return false
+
 /-- Top-level command keywords that begin a fresh declaration/command. A
 whitespace-indented line opening with one of these is never a continuation of a
 preceding `variable`/`universe` block (Lean permits indented top-level
@@ -1157,27 +1207,6 @@ def extractContextVariables (source : String) (extracted? : Option ExtractedTheo
   extractScopedCommandBlocks source extracted? "variable"
     (fun block => !variableShadowedByTheorem block theoremBinderNames)
 
-/-- Explicit arguments introduced by the emitted `variable` context. These
-parameters precede the theorem's own binders in the generated declaration and
-must also be supplied when `Solution` delegates to `Submission`. -/
-def contextVariableApplicationArgs (contextVariables : String) : Array String := Id.run do
-  let mut args : Array String := #[]
-  let mut current := ""
-  for line in contextVariables.splitOn "\n" do
-    let stripped := line.trimAsciiStart.toString
-    if startsWithKeyword stripped "variable" then
-      if !current.isEmpty then
-        args := args ++ explicitBinderApplicationArgs current
-      current := (stripped.drop "variable".length).toString
-    else if !current.isEmpty && isLineStartingWithWhitespace line then
-      current := current ++ "\n" ++ line
-    else if !current.isEmpty then
-      args := args ++ explicitBinderApplicationArgs current
-      current := ""
-  if !current.isEmpty then
-    args := args ++ explicitBinderApplicationArgs current
-  return args
-
 /-- Collect top-level `universe` commands in scope at the theorem. A source
 module may declare `universe u v` and refer to `u`/`v` in a theorem whose
 reconstructed `Challenge.lean` slice (`theorem … := by sorry`) would otherwise
@@ -1192,6 +1221,10 @@ commands must accompany them just like scoped variables and universes do. -/
 def extractContextSyntaxDeclarations (source : String)
     (extracted? : Option ExtractedTheorem) : String :=
   extractScopedCommandBlocksWhere source extracted? isSyntaxContextDeclaration (fun _ => true)
+
+def extractContextLocalSyntaxDeclarations (source : String)
+    (extracted? : Option ExtractedTheorem) : String :=
+  extractScopedCommandBlocksWhere source extracted? isLocalSyntaxContextDeclaration (fun _ => true)
 
 /-! ## Render ChallengeDeps.lean -/
 
@@ -1656,7 +1689,10 @@ private def renderWorkspaceMultiHole (root : System.FilePath) (entry : EvalProbl
     let some lastEq := Source.rfind betweenSrc betweenSrc.size ":=".toList
       | throw <| IO.userError s!"Source decl for hole '{fullName}' has no `:=` body marker."
     let statement := Source.slice betweenSrc 0 lastEq
-    let explicitArgs := explicitBinderApplicationArgs statement
+    let explicitArgs := match extracteds.find? (fun e => e.declarationName == fullName) with
+      | some extracted => extracted.explicitParameters.getD
+          (explicitBinderApplicationArgs statement)
+      | none => explicitBinderApplicationArgs statement
     let applied :=
       if explicitArgs.isEmpty then s!"Submission.{fullName}"
       else s!"Submission.{fullName} " ++ " ".intercalate explicitArgs.toList
@@ -1752,10 +1788,12 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
     extractContextUniverses sourceText (some extracted)
   let contextSyntaxBlock :=
     extractContextSyntaxDeclarations sourceText (some extracted)
+  let contextLocalSyntaxBlock :=
+    extractContextLocalSyntaxDeclarations sourceText (some extracted)
   let contextVariablesBlock :=
     extractContextVariables sourceText (some extracted) theoremBinderNames
-  let solutionArgs := contextVariableApplicationArgs contextVariablesBlock ++
-    explicitBinderApplicationArgs theoremStatement
+  let solutionArgs := extracted.explicitParameters.getD
+    (explicitBinderApplicationArgs theoremStatement)
   let solutionExact :=
     if solutionArgs.isEmpty then s!"Submission.{theoremName}"
     else s!"Submission.{theoremName} " ++ " ".intercalate solutionArgs.toList
@@ -1777,15 +1815,17 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
   let readmeLines := renderReadmeLines entry #[extracted] (multiHole := false)
   let readme := "\n".intercalate readmeLines.toList ++ "\n"
   let challengeFile :=
-    challengeImport ++ contextOpenBlock ++ contextUniverseBlock ++ contextSyntaxBlock ++
+    challengeImport ++ contextOpenBlock ++ contextUniverseBlock ++
+      (if hasChallengeDeps then contextLocalSyntaxBlock else contextSyntaxBlock) ++
       contextVariablesBlock ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n"
   let solutionFile :=
-    solutionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextSyntaxBlock ++
+    solutionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextLocalSyntaxBlock ++
       contextVariablesBlock ++
     s!"theorem {theoremName} {theoremStatement} := by\n  exact {solutionExact}\n"
   let submissionFile :=
-    submissionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextSyntaxBlock ++
+    submissionImports ++ contextOpenBlock ++ contextUniverseBlock ++
+      (if hasChallengeDeps then contextLocalSyntaxBlock else contextSyntaxBlock) ++
       contextVariablesBlock ++
     "namespace Submission\n\n" ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n\n" ++
