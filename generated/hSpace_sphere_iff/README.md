@@ -1,0 +1,25 @@
+# `hSpace_sphere_iff`
+
+Adams: S^n is an H-space iff n = 0, 1, 3, 7
+
+- Problem ID: `hSpace_sphere_iff`
+- Test Problem: no
+- Submitter: Vasily Ilin
+- Notes: Adams' Hopf-invariant-one theorem in its H-space formulation, stated against Mathlib's HSpace class. Mathlib's HSpace is the strictly-pointed variant (mu (e, e) = e holds strictly and the two-sided unit homotopies are rel the basepoint), a priori stronger than the classical homotopy-unital H-space; the iff is still exactly true: the forward direction follows a fortiori from Adams' theorem, which rules out even homotopy-unital multiplications, and the reverse direction transports the multiplications on the unit spheres of the reals, complexes, quaternions, and octonions, whose strict two-sided units make the required homotopies reflexive. Note that Mathlib has no octonions, so the reverse direction at n = 7 already requires building the octonion composition algebra, including norm multiplicativity. Both directions are forced by the iff, and for the forward direction the elementary exclusions (cup products for even n, Adem's Steenrod-operation argument reducing to n = 2^k - 1) still leave infinitely many cases n = 15, 31, 63, ... that need the full Hopf-invariant-one non-existence.
+- Source: J. F. Adams, 'On the non-existence of elements of Hopf invariant one', Ann. of Math. 72 (1960), 20-104; J. F. Adams and M. F. Atiyah, 'K-theory and the Hopf invariant', Quart. J. Math. Oxford 17 (1966), 31-38. See also A. Hatcher, 'Algebraic Topology', Section 4.B.
+- Informal solution: For n in {0, 1, 3, 7} the unit spheres of the reals, complexes, quaternions, and octonions carry norm-multiplicative products with strict two-sided units, which transport along the standard homeomorphisms. Conversely, an H-space multiplication on S^n yields via the Hopf construction a map S^{2n+1} -> S^{n+1} of Hopf invariant one, and Adams proved elements of Hopf invariant one exist in pi_{2m-1}(S^m) only for m = 1, 2, 4, 8. The short proof of Adams-Atiyah runs through complex K-theory: under the Hopf-invariant-one hypothesis, the psi^2 and psi^3 Adams operations on the reduced K-theory of the mapping cone force 2^t to divide 3^t - 1, where m = 2t (odd m > 1 is excluded by cup products), which pins t to 1, 2, or 4, i.e. m to 2, 4, or 8; the case m = 1 is elementary.
+
+Do not modify `Challenge.lean` or `Solution.lean`. Those files are part of the
+trusted benchmark and fixed by the repository.
+
+Write your solution in `Submission.lean` and any additional local modules under
+`Submission/`.
+
+Participants may use Mathlib freely. Any helper code not already available in
+Mathlib must be inlined into the submission workspace.
+
+Multi-file submissions are allowed through `Submission.lean` and additional local
+modules under `Submission/`.
+
+`lake test` runs comparator for this problem. The command expects a comparator
+binary in `PATH`, or in the `COMPARATOR_BIN` environment variable.

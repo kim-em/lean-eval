@@ -154,6 +154,17 @@
     "generated_path": "generated/bauer_extreme_point_uniqueness"
   },
   {
+    "id": "bender_suzuki",
+    "title": "Bender\u2013Suzuki theorem (classification of finite simple groups with a strongly-embedded subgroup)",
+    "test": false,
+    "submitter": "Tianjiao Nie",
+    "module": "LeanEval.GroupTheory.BenderSuzuki",
+    "holes": [
+      "bender_suzuki"
+    ],
+    "generated_path": "generated/bender_suzuki"
+  },
+  {
     "id": "bezout_projective_multiplicity",
     "title": "B\u00e9zout's theorem (projective, with multiplicity)",
     "test": false,
@@ -983,6 +994,17 @@
     "generated_path": "generated/green_tao"
   },
   {
+    "id": "hSpace_sphere_iff",
+    "title": "Adams: S^n is an H-space iff n = 0, 1, 3, 7",
+    "test": false,
+    "submitter": "Vasily Ilin",
+    "module": "LeanEval.Topology.HopfInvariantOne",
+    "holes": [
+      "hSpace_sphere_iff"
+    ],
+    "generated_path": "generated/hSpace_sphere_iff"
+  },
+  {
     "id": "hadwiger",
     "title": "Hadwiger's theorem",
     "test": false,
@@ -1301,6 +1323,17 @@
     "generated_path": "generated/kirk_normal_structure"
   },
   {
+    "id": "kollar_lieblich_olsson_sawin",
+    "title": "Topological reconstruction theorems for varieties",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.AlgebraicGeometry.TopologicalReconstruction",
+    "holes": [
+      "kollar_lieblich_olsson_sawin"
+    ],
+    "generated_path": "generated/kollar_lieblich_olsson_sawin"
+  },
+  {
     "id": "kolmogorov_arnold_superposition",
     "title": "Kolmogorov\u2013Arnold superposition theorem (non-universal Lorentz form)",
     "test": false,
@@ -1566,6 +1599,17 @@
     "generated_path": "generated/mergelyan_theorem"
   },
   {
+    "id": "mihailescu",
+    "title": "Mih\u0103ilescu's theorem",
+    "test": false,
+    "submitter": "Vasily Ilin",
+    "module": "LeanEval.NumberTheory.Mihailescu",
+    "holes": [
+      "mihailescu"
+    ],
+    "generated_path": "generated/mihailescu"
+  },
+  {
     "id": "milnor_exotic_sphere_seven",
     "title": "Milnor's exotic 7-sphere",
     "test": false,
@@ -1630,6 +1674,17 @@
       "morse_inequality"
     ],
     "generated_path": "generated/morse_inequality"
+  },
+  {
+    "id": "mostow_rigidity",
+    "title": "Mostow rigidity",
+    "test": false,
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.Geometry.MostowRigidity",
+    "holes": [
+      "mostow_rigidity"
+    ],
+    "generated_path": "generated/mostow_rigidity"
   },
   {
     "id": "mountain_pass",
@@ -1866,6 +1921,28 @@
       "pi3_sphere_two_mulEquiv_int"
     ],
     "generated_path": "generated/pi3_sphere_two_mulEquiv_int"
+  },
+  {
+    "id": "pi6_sphere_three_mulEquiv_zmod_twelve",
+    "title": "pi_6 of the 3-sphere is Z/12",
+    "test": false,
+    "submitter": "Vasily Ilin",
+    "module": "LeanEval.Topology.PiSixSphereThree",
+    "holes": [
+      "pi6_sphere_three_mulEquiv_zmod_twelve"
+    ],
+    "generated_path": "generated/pi6_sphere_three_mulEquiv_zmod_twelve"
+  },
+  {
+    "id": "pi_sphere_infinite_iff",
+    "title": "Serre finiteness for homotopy groups of spheres",
+    "test": false,
+    "submitter": "Vasily Ilin",
+    "module": "LeanEval.Topology.SerreFiniteness",
+    "holes": [
+      "pi_sphere_infinite_iff"
+    ],
+    "generated_path": "generated/pi_sphere_infinite_iff"
   },
   {
     "id": "pi_succ_sphere_n_mulEquiv_zmod_two",
@@ -2570,6 +2647,17 @@
       "watanabe_four_dim_smale_disproof"
     ],
     "generated_path": "generated/watanabe_four_dim_smale_disproof"
+  },
+  {
+    "id": "weak_goldbach",
+    "title": "Weak Goldbach theorem",
+    "test": false,
+    "submitter": "Vasily Ilin",
+    "module": "LeanEval.NumberTheory.WeakGoldbach",
+    "holes": [
+      "weak_goldbach"
+    ],
+    "generated_path": "generated/weak_goldbach"
   },
   {
     "id": "weak_morse_inequality",

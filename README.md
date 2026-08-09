@@ -78,6 +78,12 @@ The required fields are:
 The one-file-per-problem layout means two PRs adding distinct problems
 never conflict on the manifest.
 
+The manifest is the only entry point CI has into `LeanEval/`, so a module
+no manifest names is never built. `validate-manifest` therefore rejects any
+`.lean` file under `LeanEval/` that is neither named by some `module` field
+nor imported (directly or transitively) by a module that is, and rejects any
+file in `manifests/problems/` that is not a `.toml`.
+
 #### Multi-hole problems
 
 A problem may bundle several `def`s, `instance`s and `theorem`s — list
@@ -106,7 +112,8 @@ lake exe lean-eval check-problem-build
 ```
 
 `validate-manifest` checks that `@[eval_problem]` declarations and manifest entries
-match. `check-problem-build` builds the problem modules so warning-producing Lean changes
+match, and that no module under `LeanEval/` escapes the manifest's reach.
+`check-problem-build` builds the problem modules so warning-producing Lean changes
 do not slip through. Both catch the most common mistakes before a CI roundtrip;
 on a clean checkout, validating the full problem inventory can take some time.
 

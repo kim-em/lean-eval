@@ -1,0 +1,12 @@
+{
+  "id": "mihailescu",
+  "module": "LeanEval.NumberTheory.Mihailescu",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.Mihailescu.mihailescu",
+      "basename": "mihailescu",
+      "kind": "theorem",
+      "body": "/-- **Mih\u0103ilescu's theorem (formerly Catalan's conjecture).** The only\nconsecutive nontrivial perfect powers are `2 ^ 3 = 8` and `3 ^ 2 = 9`. -/\ntheorem mihailescu\n    {x y m n : \u2115}\n    (hx : 0 < x) (hy : 0 < y) (hm : 1 < m) (hn : 1 < n)\n    (h : x ^ m = y ^ n + 1) :\n    x = 3 \u2227 y = 2 \u2227 m = 2 \u2227 n = 3 := by\n  sorry"
+    }
+  ]
+}

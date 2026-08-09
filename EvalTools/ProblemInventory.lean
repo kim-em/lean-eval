@@ -13,9 +13,6 @@ structure InventoryEntry where
   kind : String
   deriving ToJson
 
-def parseName (text : String) : Name :=
-  text.splitOn "." |>.foldl Name.str .anonymous
-
 def lastComponent (name : Name) : String :=
   match name with
   | .str _ s => s
@@ -48,7 +45,7 @@ def inventoryForModule (env : Environment) (moduleName : Name) : Array Inventory
 
 def main (args : List String) : IO UInt32 := do
   initSearchPath (← findSysroot)
-  let moduleNames := args.map parseName
+  let moduleNames := args.map EvalTools.parseModuleName
   let env ← importModules (moduleNames.toArray.map fun moduleName => ({ module := moduleName } : Import)) {}
   let entries := moduleNames.foldl (fun acc moduleName => acc ++ inventoryForModule env moduleName) #[]
   IO.println <| Json.pretty <| toJson entries

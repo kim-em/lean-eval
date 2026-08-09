@@ -1,0 +1,12 @@
+{
+  "id": "pi6_sphere_three_mulEquiv_zmod_twelve",
+  "module": "LeanEval.Topology.PiSixSphereThree",
+  "holes": [
+    {
+      "name": "LeanEval.Topology.PiSixSphereThree.pi6_sphere_three_mulEquiv_zmod_twelve",
+      "basename": "pi6_sphere_three_mulEquiv_zmod_twelve",
+      "kind": "theorem",
+      "body": "/-- **\u03c0\u2086 of the 3-sphere.** Toda's tables give `\u03c0\u2086(\ud835\udd4a\u00b3) \u2245 \u2124/12`. -/\ntheorem pi6_sphere_three_mulEquiv_zmod_twelve\n    (x : Metric.sphere (0 : EuclideanSpace \u211d (Fin 4)) 1) :\n    Nonempty\n      (HomotopyGroup.Pi 6 (Metric.sphere (0 : EuclideanSpace \u211d (Fin 4)) 1) x \u2243*\n        Multiplicative (ZMod 12)) := by\n  sorry"
+    }
+  ]
+}

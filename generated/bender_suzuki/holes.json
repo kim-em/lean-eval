@@ -1,0 +1,12 @@
+{
+  "id": "bender_suzuki",
+  "module": "LeanEval.GroupTheory.BenderSuzuki",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.bender_suzuki",
+      "basename": "bender_suzuki",
+      "kind": "theorem",
+      "body": "/-- **Bender\u2013Suzuki theorem.** -/\ntheorem bender_suzuki {X : Type*} [Group X] [Finite X] [IsSimpleGroup X]\n    (M : Subgroup X) (h : IsStronglyEmbedded M) :\n    IsSimpleBenderGroup X := by\n  sorry"
+    }
+  ]
+}

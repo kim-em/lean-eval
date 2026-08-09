@@ -1,0 +1,12 @@
+{
+  "id": "kollar_lieblich_olsson_sawin",
+  "module": "LeanEval.AlgebraicGeometry.TopologicalReconstruction",
+  "holes": [
+    {
+      "name": "LeanEval.AlgebraicGeometry.TopologicalReconstruction.kollar_lieblich_olsson_sawin",
+      "basename": "kollar_lieblich_olsson_sawin",
+      "kind": "theorem",
+      "body": "/-- Theorem 1.4.3 in the reference. -/\n@[eval_problem] theorem kollar_lieblich_olsson_sawin (X Y : Scheme.{u}) (K L : Type u)\n    [Field K] [Field L] [CharZero K] [CharZero L] [IrreducibleSpace X] [IrreducibleSpace Y]\n    (norm_X : IsNormalScheme X) (f : X \u27f6 Spec (.of K)) (proj_f : IsProjectiveHom f)\n    (norm_Y : IsNormalScheme Y) (g : Y \u27f6 Spec (.of L)) (proj_g : IsProjectiveHom g)\n    (h : 4 \u2264 topologicalKrullDim X \u2228\n      (3 \u2264 topologicalKrullDim X \u2227 Algebra.EssFiniteType \u211a K \u2227 Algebra.EssFiniteType \u211a L) \u2228 \n      (2 \u2264 topologicalKrullDim X \u2227 Uncountable K \u2227 Uncountable L))\n    (homeo : X \u2243\u209c Y) : \u2203 iso : X \u2245 Y, (iso.hom : X \u2192 Y) = homeo := by\n  sorry"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "hSpace_sphere_iff",
+  "module": "LeanEval.Topology.HopfInvariantOne",
+  "holes": [
+    {
+      "name": "LeanEval.Topology.HopfInvariantOne.hSpace_sphere_iff",
+      "basename": "hSpace_sphere_iff",
+      "kind": "theorem",
+      "body": "/-- **Adams' Hopf-invariant-one theorem** (H-space form). The sphere `\ud835\udd4a\u207f`\nadmits an H-space structure if and only if `n = 0`, `1`, `3`, or `7`. -/\ntheorem hSpace_sphere_iff (n : \u2115) :\n    Nonempty (HSpace (Metric.sphere (0 : EuclideanSpace \u211d (Fin (n + 1))) 1)) \u2194\n      n = 0 \u2228 n = 1 \u2228 n = 3 \u2228 n = 7 := by\n  sorry"
+    }
+  ]
+}

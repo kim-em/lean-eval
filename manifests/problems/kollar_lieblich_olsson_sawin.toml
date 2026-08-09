@@ -1,0 +1,7 @@
+id = "kollar_lieblich_olsson_sawin"
+title = "Topological reconstruction theorems for varieties"
+test = false
+module = "LeanEval.AlgebraicGeometry.TopologicalReconstruction"
+holes = ["kollar_lieblich_olsson_sawin"]
+submitter = "Junyan Xu"
+source = "János Kollár, Max Lieblich, Martin Olsson, and Will Sawin. The Zariski topology, linear systems, and algebraic varieties."

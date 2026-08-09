@@ -1,0 +1,12 @@
+{
+  "id": "weak_goldbach",
+  "module": "LeanEval.NumberTheory.WeakGoldbach",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.WeakGoldbach.weak_goldbach",
+      "basename": "weak_goldbach",
+      "kind": "theorem",
+      "body": "/-- **Weak Goldbach theorem.** Every odd natural number greater than `5` is a\nsum of three primes, with repetition allowed. -/\ntheorem weak_goldbach (n : \u2115) (hn : 5 < n) (hodd : Odd n) :\n    \u2203 p q r : \u2115, p.Prime \u2227 q.Prime \u2227 r.Prime \u2227 n = p + q + r := by\n  sorry"
+    }
+  ]
+}

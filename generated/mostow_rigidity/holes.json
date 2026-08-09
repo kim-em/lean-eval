@@ -1,0 +1,12 @@
+{
+  "id": "mostow_rigidity",
+  "module": "LeanEval.Geometry.MostowRigidity",
+  "holes": [
+    {
+      "name": "LeanEval.Geometry.MostowRigidity.mostow_rigidity",
+      "basename": "mostow_rigidity",
+      "kind": "theorem",
+      "body": "theorem mostow_rigidity (n : \u2115) (hn : 3 \u2264 n) (\u0393 \u039b : Subgroup (PO n 1))\n    (disc_\u0393 : IsDiscrete (SetLike.coe \u0393)) (disc_\u039b : IsDiscrete (SetLike.coe \u039b))\n    [HasFundamentalDomain \u0393 (PO n 1)] [HasFundamentalDomain \u039b (PO n 1)]\n    (covol_\u0393 : covolume \u0393 (PO n 1) \u2260 \u22a4) (covol_\u039b : covolume \u039b (PO n 1) \u2260 \u22a4)\n    (f : \u0393 \u2243* \u039b) : \u2203 g : PO n 1, \u2200 \u03b3 : \u0393, f \u03b3 = g * \u03b3 * g\u207b\u00b9 := by\n  sorry"
+    }
+  ]
+}

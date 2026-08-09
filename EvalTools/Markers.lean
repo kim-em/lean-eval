@@ -32,6 +32,13 @@ lives in its own file `manifests/problems/<id>.toml` with top-level keys. -/
 def manifestRelativePath : System.FilePath :=
   "manifests" / "problems"
 
+/-- Read a manifest `module` field as a module name: every `.` separates
+components, so `LeanEval.Foo.Bar` is `LeanEval/Foo/Bar.lean` and never
+`LeanEval/Foo.Bar.lean`. The inventory and extractor executables resolve the
+same field the same way; the two must agree or they address different files. -/
+def parseModuleName (text : String) : Name :=
+  text.splitOn "." |>.foldl Name.str .anonymous
+
 /-- Walk up from `dir` searching for the manifest directory
 `manifests/problems/`. Returns the directory itself if found. -/
 partial def findManifestPath? (dir : System.FilePath) : IO (Option System.FilePath) := do

@@ -46,3 +46,8 @@ root = "EvalToolsTests.CheckComparatorInstallationTest"
 name = "test_generate"
 srcDir = "tests/lean"
 root = "EvalToolsTests.GenerateTest"
+
+[[lean_exe]]
+name = "test_module_coverage"
+srcDir = "tests/lean"
+root = "EvalToolsTests.ModuleCoverageTest"

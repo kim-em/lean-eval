@@ -195,6 +195,9 @@ jobs:
       - name: Run Generate Tests
         run: lake exe test_generate
 
+      - name: Run Module Coverage Tests
+        run: lake exe test_module_coverage
+
       - name: Run Comparator Installation Checks
         run: |
           lake exe test_check_comparator_installation
