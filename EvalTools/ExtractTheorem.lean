@@ -15,11 +15,12 @@ structure ExtractedTheorem where
   module : String
   sourceRange : SourceRange
   /-- Names of the explicit parameters bound by the declaration's *signature*,
-  in application order. This includes source-level `variable` parameters
-  exactly when Lean actually retained them in the declaration, and excludes
-  binders that belong to the statement itself (a leading `∀` in the
-  conclusion), which the generated delegation must not apply. -/
-  explicitParameters : Array String
+  in application order, or `none` when they could not be determined. This
+  includes source-level `variable` parameters exactly when Lean actually
+  retained them in the declaration, and excludes binders that belong to the
+  statement itself (a leading `∀` in the conclusion), which the generated
+  delegation must not apply. -/
+  explicitParameters : Option (Array String)
   /-- Names of declarations from the same module that appear (transitively) in the
   type or value of this theorem. Computed from the elaborated terms, so this captures
   uses introduced by typeclass synthesis (which the `.ilean` references metadata
@@ -38,7 +39,7 @@ def sorryBodyArity : Expr → Option Nat
   | e => if e.isSorry then some 0 else none
 
 /-- Names of the explicit parameters bound by the declaration's signature, in
-application order, or `#[]` when they cannot be determined.
+application order, or `none` when they cannot be determined.
 
 An eval-problem hole has a bare `sorry` body, so its elaborated value is one
 `fun` binder per signature binder — the declaration's own binders together with
@@ -48,22 +49,25 @@ with `∀` contributes `forallE` binders to the type but no lambda to the value,
 and applying those in the generated delegation would be wrong.
 
 The `sorry` body is what makes the count meaningful, so it is checked rather
-than assumed: a tactic proof can introduce conclusion binders of its own, and
-its lambdas say nothing about the signature. -/
-def signatureExplicitParameters (info : ConstantInfo) : Array String := Id.run do
-  let some arity := info.value? (allowOpaque := true) >>= sorryBodyArity | return #[]
-  let mut remaining := arity
-  let mut type := info.type
-  let mut names : Array String := #[]
-  while remaining > 0 do
-    match type with
-    | .forallE name _ body binderInfo =>
-        if binderInfo == .default && !name.isAnonymous then
-          names := names.push name.toString
-        type := body
-        remaining := remaining - 1
-    | _ => remaining := 0
-  return names
+than assumed. The check is necessary but not sufficient: `by intro x; sorry`
+also elaborates to a lambda over `sorryAx`, and only the source text says
+whether the body was a bare `sorry`. The generator decides that, and asks for
+this list only when it was. -/
+def signatureExplicitParameters (info : ConstantInfo) : Option (Array String) := do
+  let arity ← info.value? (allowOpaque := true) >>= sorryBodyArity
+  return Id.run do
+    let mut remaining := arity
+    let mut type := info.type
+    let mut names : Array String := #[]
+    while remaining > 0 do
+      match type with
+      | .forallE name _ body binderInfo =>
+          if binderInfo == .default && !name.isAnonymous then
+            names := names.push name.toString
+          type := body
+          remaining := remaining - 1
+      | _ => remaining := 0
+    return names
 
 def parseName (text : String) : Name :=
   text.splitOn "." |>.foldl Name.str .anonymous

@@ -132,12 +132,15 @@ private def parseExtractedTheorem (payload : String) : Except String ExtractedTh
   let endColumn ← range.getObjValAs? Nat "endColumn"
   let explicitParameters ← match json.getObjVal? "explicitParameters" with
     | .error _ => pure none
-    | .ok paramsJson => do
-        let paramsJson ← paramsJson.getArr?
-        let mut params : Array String := #[]
-        for paramJson in paramsJson do
-          params := params.push (← paramJson.getStr?)
-        pure (some params)
+    -- `null` for a declaration whose signature the extractor could not read.
+    | .ok paramsJson =>
+        match paramsJson.getArr? with
+        | .error _ => pure none
+        | .ok paramsJson => do
+            let mut params : Array String := #[]
+            for paramJson in paramsJson do
+              params := params.push (← paramJson.getStr?)
+            pure (some params)
   let depNames : Array String ←
     match json.getObjVal? "sameModuleDependencies" with
     | .error _ => pure #[]
@@ -674,7 +677,14 @@ Failing that — the `ci_regenerate_main_check` canary really is proved by
 only one. With a body that is not a `sorry` there is nothing left to tell an
 assignment in the statement apart from an assignment in the proof, so `none` is
 returned and the caller reports that it could not recover the statement. -/
-def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option Nat := Id.run do
+structure TheoremBody where
+  /-- Codepoint index of the `:=` that introduces the declaration's body. -/
+  marker : Nat
+  /-- Whether that body is a bare `sorry`, possibly behind `by`. -/
+  isBareSorry : Bool
+  deriving Inhabited
+
+def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option TheoremBody := Id.run do
   let mut i := start
   let mut roundDepth := 0
   let mut squareDepth := 0
@@ -723,8 +733,10 @@ def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option Nat := Id.r
     else
       i := i + 1
   return match sorryMarker with
-    | some marker => some marker
-    | none => if tacticMarkers == 1 then tacticMarker else none
+    | some marker => some { marker, isBareSorry := true }
+    | none =>
+        if tacticMarkers == 1 then tacticMarker.map ({ marker := ·, isBareSorry := false })
+        else none
 
 /-- Extract the theorem statement text from a sliced declaration body.
 The body marker is found lexically so direct `:= sorry` holes and flexible
@@ -735,13 +747,23 @@ def extractStatementText (problemId : String) (sourcePath : System.FilePath)
   let some headerEnd := Source.findTheoremHeader src 0 theoremName
     | throw <| IO.userError
         s!"Could not recover theorem statement text for '{problemId}' from {sourcePath}"
-  let some bodyPos := Source.findTheoremBodyMarker src headerEnd
+  let some body := Source.findTheoremBodyMarker src headerEnd
     | throw <| IO.userError
         s!"Could not recover theorem statement text for '{problemId}' from {sourcePath}"
-  if bodyPos < headerEnd then
+  if body.marker < headerEnd then
     throw <| IO.userError
       s!"Could not recover theorem statement text for '{problemId}' from {sourcePath}"
-  return (Source.slice src headerEnd bodyPos).trimAscii.toString
+  return (Source.slice src headerEnd body.marker).trimAscii.toString
+
+/-- True when the sliced declaration's body is a bare `sorry`, possibly behind
+`by`. Only then does the elaborated value carry one lambda per signature
+binder, so only then is the extractor's parameter list meaningful: `by intro x;
+sorry` elaborates to a lambda over `sorryAx` as well, but its lambda belongs to
+the statement. -/
+def hasBareSorryBody (declarationText : String) : Bool :=
+  match Source.findTheoremBodyMarker (Source.ofString declarationText) 0 with
+  | some body => body.isBareSorry
+  | none => false
 
 /-- Parse leading binders off a theorem-statement string. Returns pairs of
 `(opener, body)` for each leading `(...)`, `{...}`, or `[...]` group. -/
@@ -1288,22 +1310,23 @@ The extractor's list is only trusted when it agrees with what the source
 shows: it must end with `sourceArgs`, and every name ahead of them must be
 introduced by one of the re-emitted `variable` commands.
 
-When the two views disagree, `sourceArgs` alone is the right answer only if it
-cannot be missing anything — that is, if the extractor reports no more explicit
-parameters than the source signature accounts for. A longer report means there
-are parameters we cannot place (an inaccessible binder name, say), and
-delegating without them would under-apply; `none` is returned so the caller can
-fail rather than emit a workspace that does not compile. -/
+When the two views disagree there is no safe answer, because the disagreement
+is itself evidence that one of them is wrong: delegating on either would emit a
+workspace that does not compile. `none` is returned so the caller can fail
+instead.
+
+`signatureParams?` is `none` for a declaration the extractor could not read.
+The source binders are then all we have, and they are enough only when no outer
+`variable` command could have contributed a parameter we cannot see. -/
 def delegationArgs? (signatureParams? : Option (Array String))
     (variableNames sourceArgs : Array String) : Option (Array String) := Id.run do
-  let some params := signatureParams? | return some sourceArgs
-  if params.size ≥ sourceArgs.size then
-    let outerCount := params.size - sourceArgs.size
-    if params.extract outerCount params.size == sourceArgs
-        && (params.extract 0 outerCount).all (fun p => variableNames.contains p) then
-      return some params
-  if params.size > sourceArgs.size then return none
-  return some sourceArgs
+  let some params := signatureParams?
+    | return if variableNames.isEmpty then some sourceArgs else none
+  if params.size < sourceArgs.size then return none
+  let outerCount := params.size - sourceArgs.size
+  if params.extract outerCount params.size != sourceArgs then return none
+  if !(params.extract 0 outerCount).all (fun p => variableNames.contains p) then return none
+  return some params
 
 /-! ## Render ChallengeDeps.lean -/
 
@@ -1364,6 +1387,37 @@ themselves onto a single following declaration. -/
 private def scopingCommandKeywords : Array String :=
   #["set_option", "open", "attribute", "include", "omit", "local", "scoped"]
 
+/-- Split `[lowerBound, limit)` into lines, each paired with the tokens it
+contributes outside comments. Comment state is carried forward across lines, so
+a line inside a multi-line block comment contributes nothing — which is what
+makes it recognisable as trivia when the caller walks back over it. -/
+private def gapLineTokens (source : Source) (lowerBound limit : Nat) :
+    Array (Nat × Array String) := Id.run do
+  let mut lines : Array (Nat × Array String) := #[]
+  let mut lineStart := lowerBound
+  let mut text : String := ""
+  let mut depth : Nat := 0
+  let mut i := lowerBound
+  while i < limit do
+    if depth == 0 && Source.startsWithAt source i "--".toList then
+      while i < limit && source[i]! != '\n' do
+        i := i + 1
+    else if Source.startsWithAt source i "/-".toList then
+      depth := depth + 1
+      i := i + 2
+    else if depth > 0 && Source.startsWithAt source i "-/".toList then
+      depth := depth - 1
+      i := i + 2
+    else if source[i]! == '\n' then
+      lines := lines.push (lineStart, splitWhitespace text)
+      text := ""
+      i := i + 1
+      lineStart := i
+    else
+      if depth == 0 then text := text.push source[i]!
+      i := i + 1
+  return lines.push (lineStart, splitWhitespace text)
+
 /-- Move a removal range's start back over the command prefixes that scope onto
 the declaration being removed — `set_option … in`, `open … in`, and friends. A
 `.ilean` declaration range begins at the declaration proper, so such a prefix
@@ -1371,59 +1425,35 @@ is not covered by it and would otherwise be stranded with no command to apply
 to.
 
 A prefix is recognised by its last token being `in`, and is then followed back
-to the line opening the command, so prefixes spread over several lines are
-consumed whole. Blank and comment-only lines are crossed, but are only dropped
-if a prefix is found beyond them. `lowerBound` is the end of the previous
-declaration; the search never crosses it, so text belonging to a declaration we
-are keeping can never be consumed. -/
+to the line opening the command, so one spread over several lines is consumed
+whole, as is one sharing the declaration's own line. Blank and comment-only
+lines are crossed, but are only dropped if a prefix is found beyond them.
+`lowerBound` is the end of the previous declaration; the search never crosses
+it, so text belonging to a declaration we are keeping can never be consumed. -/
 def extendOverScopingPrefixes (source : Source) (lowerBound start : Nat) : Nat := Id.run do
-  -- Start of the line that position `i` sits on, clamped to `lowerBound`.
-  let lineStartAt : Nat → Nat := fun i => Id.run do
-    let mut lineStart := i
-    while lineStart > lowerBound && source[lineStart - 1]! != '\n' do
-      lineStart := lineStart - 1
-    return lineStart
-  let lineEndAt : Nat → Nat := fun i => Id.run do
-    let mut lineEnd := i
-    while lineEnd < source.size && source[lineEnd]! != '\n' do
-      lineEnd := lineEnd + 1
-    return lineEnd
-  let lastTokenIsIn : String → Bool := fun text => (commandTokens text).back? == some "in"
-  -- Walk back from the line holding a prefix's `in` to the line opening that
-  -- command, so a prefix spread over several lines is consumed whole. Stays
-  -- put if no opening line is found rather than guessing.
-  let commandStartAt : Nat → Nat := fun inLineStart => Id.run do
-    let mut lineStart := inLineStart
-    while true do
-      let opensCommand := scopingCommandKeywords.any fun keyword =>
-        (commandTokens (Source.slice source lineStart (lineEndAt lineStart)))[0]? == some keyword
-      if opensCommand then return lineStart
-      if lineStart ≤ lowerBound then return inLineStart
-      lineStart := lineStartAt (lineStart - 1)
-    return inLineStart
+  let lines := gapLineTokens source lowerBound start
+  let opensCommand : Nat → Bool := fun idx =>
+    match (lines[idx]!.2)[0]? with
+    | some token => scopingCommandKeywords.contains token
+    | none => false
   let mut result := start
-  let mut cursor := start
-  while cursor > lowerBound do
-    let lineStart := lineStartAt cursor
-    if lastTokenIsIn (Source.slice source lineStart cursor) then
-      -- The prefix shares the declaration's line: `set_option … in theorem …`.
-      result := commandStartAt lineStart
-      cursor := result
-    else if lineStart ≤ lowerBound then
+  let mut idx := lines.size
+  while idx > 0 do
+    let (lineStart, tokens) := lines[idx - 1]!
+    if tokens.isEmpty then
+      -- Trivia is crossed in the hope of a prefix beyond it, and only dropped
+      -- if one is found.
+      idx := idx - 1
+    else if tokens.back? != some "in" then
       return result
     else
-      let previousStart := lineStartAt (lineStart - 1)
-      let previous := Source.slice source previousStart (lineStart - 1)
-      let stripped := previous.trimAscii.toString
-      if stripped.isEmpty || stripped.startsWith "--" then
-        -- Trivia is crossed in the hope of a prefix beyond it, and only
-        -- dropped if one is found.
-        cursor := previousStart
-      else if lastTokenIsIn previous then
-        result := commandStartAt previousStart
-        cursor := result
-      else
-        return result
+      -- Follow the prefix back to the line that opens the command. Stay put
+      -- rather than guess if there is no such line within the gap.
+      let mut commandIdx := idx - 1
+      while commandIdx > 0 && !opensCommand commandIdx do
+        commandIdx := commandIdx - 1
+      result := if opensCommand commandIdx then lines[commandIdx]!.1 else lineStart
+      idx := commandIdx
   return result
 
 /-- Shared core of single- and multi-hole `ChallengeDeps.lean` rendering.
@@ -1849,7 +1879,9 @@ private def renderWorkspaceMultiHole (root : System.FilePath) (entry : EvalProbl
       | some extracted =>
           let variableNames :=
             variableBlockExplicitNames (extractContextVariables sourceText (some extracted) #[])
-          match delegationArgs? extracted.explicitParameters variableNames sourceArgs with
+          let signatureParams? :=
+            if hasBareSorryBody declText then extracted.explicitParameters else none
+          match delegationArgs? signatureParams? variableNames sourceArgs with
           | some args => pure args
           | none =>
               throw <| IO.userError
@@ -1957,7 +1989,9 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
     extractContextVariables sourceText (some extracted) theoremBinderNames
   let contextIncludeBlock :=
     extractContextIncludes sourceText (some extracted)
-  let some solutionArgs := delegationArgs? extracted.explicitParameters
+  let signatureParams? :=
+    if hasBareSorryBody declText then extracted.explicitParameters else none
+  let some solutionArgs := delegationArgs? signatureParams?
       (variableBlockExplicitNames contextVariablesBlock)
       (explicitBinderApplicationArgs theoremStatement)
     | throw <| IO.userError

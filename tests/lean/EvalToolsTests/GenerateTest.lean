@@ -157,6 +157,20 @@ def main : IO UInt32 := do
       | pure (some "no set_option in fixture")
     pure <| assertEq "start" (extendOverScopingPrefixes source 0 target) prefixStart
 
+  check "extendOverScopingPrefixes crosses a block comment" passes fails do
+    let text :=
+      "def helper : Nat := 0\n\n" ++
+      "set_option maxRecDepth 10000 in\n" ++
+      "/- reason\n" ++
+      "   spelled out -/\n" ++
+      "theorem target : True := by sorry\n"
+    let source := Source.ofString text
+    let some target := Source.find source 0 "theorem".toList
+      | pure (some "no theorem in fixture")
+    let some prefixStart := Source.find source 0 "set_option".toList
+      | pure (some "no set_option in fixture")
+    pure <| assertEq "start" (extendOverScopingPrefixes source 0 target) prefixStart
+
   check "extendOverScopingPrefixes leaves an unprefixed declaration alone" passes fails do
     let text := "def helper : Nat := 0\n\ntheorem target : True := by sorry\n"
     let source := Source.ofString text
@@ -195,11 +209,22 @@ def main : IO UInt32 := do
     pure <| assertEq "args"
       (delegationArgs? (some #["u", "hu"]) #[] #["u", "hu"]) (some #["u", "hu"])
 
-  -- The extractor reports nothing for a hole whose body is not a `sorry`, and
-  -- then the source signature is all we have — and all we need.
+  -- A hole whose body is not a `sorry` gets no report, and then the source
+  -- signature is all we have. That is enough when no `variable` is in scope.
   check "delegationArgs? falls back when nothing was reported" passes fails do
     pure <| assertEq "args"
-      (delegationArgs? (some #[]) #["n"] #["hn"]) (some #["hn"])
+      (delegationArgs? none #[] #["hn"]) (some #["hn"])
+
+  -- But with a `variable` in scope it is not: Lean may have retained one, and
+  -- the source signature does not say. Guessing would under-apply.
+  check "delegationArgs? refuses to guess past a variable" passes fails do
+    pure <| assertEq "args"
+      (delegationArgs? none #["n"] #["hn"]) none
+
+  -- An empty report is not the same as no report: it says, reliably, that the
+  -- declaration takes no explicit parameters.
+  check "delegationArgs? trusts an empty report" passes fails do
+    pure <| assertEq "args" (delegationArgs? (some #[]) #["n"] #[]) (some #[])
 
   -- A parameter no `variable` command introduces cannot be applied by the
   -- generated files, and dropping it would under-apply the delegation.
@@ -207,8 +232,6 @@ def main : IO UInt32 := do
     pure <| assertEq "args"
       (delegationArgs? (some #["x", "hn"]) #["n"] #["hn"]) none
 
-  check "delegationArgs? falls back without extractor data" passes fails do
-    pure <| assertEq "args" (delegationArgs? none #["n"] #["h"]) (some #["h"])
 
   -- An inaccessible binder name means the two views cannot be lined up. There
   -- is then no safe answer: dropping the parameters we cannot place would
