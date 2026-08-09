@@ -14,9 +14,11 @@ structure ExtractedTheorem where
   declarationName : String
   module : String
   sourceRange : SourceRange
-  /-- Names of the explicit parameters in the elaborated declaration type, in
-  application order. This includes source-level `variable` parameters exactly
-  when Lean actually retained them in the declaration. -/
+  /-- Names of the explicit parameters bound by the declaration's *signature*,
+  in application order. This includes source-level `variable` parameters
+  exactly when Lean actually retained them in the declaration, and excludes
+  binders that belong to the statement itself (a leading `∀` in the
+  conclusion), which the generated delegation must not apply. -/
   explicitParameters : Array String
   /-- Names of declarations from the same module that appear (transitively) in the
   type or value of this theorem. Computed from the elaborated terms, so this captures
@@ -29,11 +31,39 @@ structure ExtractedTheorem where
   kind : String
   deriving ToJson
 
-def explicitParameterNames : Expr → Array String
-  | .forallE name _ body binderInfo =>
-      let rest := explicitParameterNames body
-      if binderInfo == .default && !name.isAnonymous then #[name.toString] ++ rest else rest
-  | _ => #[]
+/-- The number of leading `fun` binders of `value`, if what they wrap is a bare
+`sorry`; `none` for any other body. -/
+def sorryBodyArity : Expr → Option Nat
+  | .lam _ _ body _ => (sorryBodyArity body).map (· + 1)
+  | e => if e.isSorry then some 0 else none
+
+/-- Names of the explicit parameters bound by the declaration's signature, in
+application order, or `#[]` when they cannot be determined.
+
+An eval-problem hole has a bare `sorry` body, so its elaborated value is one
+`fun` binder per signature binder — the declaration's own binders together with
+the `variable` binders Lean retained — wrapped around `sorryAx`. Counting those
+lambdas separates the signature from the statement: a conclusion that starts
+with `∀` contributes `forallE` binders to the type but no lambda to the value,
+and applying those in the generated delegation would be wrong.
+
+The `sorry` body is what makes the count meaningful, so it is checked rather
+than assumed: a tactic proof can introduce conclusion binders of its own, and
+its lambdas say nothing about the signature. -/
+def signatureExplicitParameters (info : ConstantInfo) : Array String := Id.run do
+  let some arity := info.value? (allowOpaque := true) >>= sorryBodyArity | return #[]
+  let mut remaining := arity
+  let mut type := info.type
+  let mut names : Array String := #[]
+  while remaining > 0 do
+    match type with
+    | .forallE name _ body binderInfo =>
+        if binderInfo == .default && !name.isAnonymous then
+          names := names.push name.toString
+        type := body
+        remaining := remaining - 1
+    | _ => remaining := 0
+  return names
 
 def parseName (text : String) : Name :=
   text.splitOn "." |>.foldl Name.str .anonymous
@@ -190,7 +220,7 @@ def extractTheorem (moduleNameText declNameText : String) : IO ExtractedTheorem 
         declarationName := toString resolvedDeclName
         module := moduleNameText
         sourceRange := sourceRange
-        explicitParameters := explicitParameterNames constantInfo.type
+        explicitParameters := signatureExplicitParameters constantInfo
         sameModuleDependencies := deps.map toString
         kind := kind
       }

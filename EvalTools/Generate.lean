@@ -659,19 +659,30 @@ private def Source.quotedIdentifierEnd (s : Source) (start : Nat) : Nat := Id.ru
   return s.size
 
 /-- Locate the body marker of an eval-problem theorem without assuming the
-literal spelling `:= by`. Candidates inside comments and strings are ignored;
-arbitrary trivia may follow `:=`; and both the usual `by ... sorry` body and a
-direct `sorry` body are accepted.
+literal spelling `:= by`. Candidates inside comments, strings, and brackets are
+ignored, so a default binder value such as `(h : P := by tac)` cannot be
+mistaken for the declaration body; arbitrary trivia may follow `:=`; and both
+the usual `by sorry` body and a direct `sorry` body are accepted.
 
-A direct `sorry` candidate is only accepted when it is the complete remaining
-body. Only top-level markers are considered, so default binder values and
-nested proof assignments cannot be mistaken for the declaration body. -/
+An eval-problem hole's body is a `sorry`, so a candidate whose body is exactly
+`sorry` (behind `by` or not) and runs to the end of the declaration wins over
+every other candidate: a *statement* may itself contain a top-level
+`haveI … := by …`, and that tactic block is not the body.
+
+Failing that — the `ci_regenerate_main_check` canary really is proved by
+`trivial` — a candidate opening a tactic block is used, but only if it is the
+only one. With a body that is not a `sorry` there is nothing left to tell an
+assignment in the statement apart from an assignment in the proof, so `none` is
+returned and the caller reports that it could not recover the statement. -/
 def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option Nat := Id.run do
   let mut i := start
   let mut roundDepth := 0
   let mut squareDepth := 0
   let mut braceDepth := 0
   let mut angleDepth := 0
+  let mut sorryMarker : Option Nat := none
+  let mut tacticMarker : Option Nat := none
+  let mut tacticMarkers := 0
   while i < s.size do
     if Source.startsWithAt s i "--".toList then
       while i < s.size && s[i]! != '\n' do
@@ -697,17 +708,23 @@ def Source.findTheoremBodyMarker (s : Source) (start : Nat) : Option Nat := Id.r
     else if roundDepth == 0 && squareDepth == 0 && braceDepth == 0 && angleDepth == 0
         && Source.startsWithAt s i ":=".toList then
       let bodyStart := Source.skipTrivia s (i + 2)
-      if Source.startsWithAt s bodyStart "sorry".toList
-          && Source.atWordEnd s (bodyStart + "sorry".length)
-          && Source.skipTrivia s (bodyStart + "sorry".length) == s.size then
-        return some i
-      else if Source.startsWithAt s bodyStart "by".toList
-          && Source.atWordEnd s (bodyStart + "by".length) then
-        return some i
+      let tacticBody := Source.startsWithAt s bodyStart "by".toList
+        && Source.atWordEnd s (bodyStart + "by".length)
+      let termStart :=
+        if tacticBody then Source.skipTrivia s (bodyStart + "by".length) else bodyStart
+      if Source.startsWithAt s termStart "sorry".toList
+          && Source.atWordEnd s (termStart + "sorry".length)
+          && Source.skipTrivia s (termStart + "sorry".length) == s.size then
+        sorryMarker := some i
+      else if tacticBody then
+        tacticMarker := some i
+        tacticMarkers := tacticMarkers + 1
       i := i + 2
     else
       i := i + 1
-  return none
+  return match sorryMarker with
+    | some marker => some marker
+    | none => if tacticMarkers == 1 then tacticMarker else none
 
 /-- Extract the theorem statement text from a sliced declaration body.
 The body marker is found lexically so direct `:= sorry` holes and flexible
@@ -1215,6 +1232,16 @@ in-scope `universe` commands restores them. -/
 def extractContextUniverses (source : String) (extracted? : Option ExtractedTheorem) : String :=
   extractScopedCommandBlocks source extracted? "universe" (fun _ => true)
 
+/-- Collect the `include` and `omit` commands in scope at the theorem. These
+decide which of the surrounding `variable` binders the declaration actually
+takes, so re-emitting the `variable` commands without them would give the
+generated declaration a different signature from the source one — and the
+delegation arguments derived from the source declaration would not fit. -/
+def extractContextIncludes (source : String) (extracted? : Option ExtractedTheorem) : String :=
+  extractScopedCommandBlocksWhere source extracted?
+    (fun stripped => startsWithKeyword stripped "include" || startsWithKeyword stripped "omit")
+    (fun _ => true)
+
 /-- Collect notation, syntax, and macro commands still in scope at the target
 declaration. Generated statements retain their source notation, so these
 commands must accompany them just like scoped variables and universes do. -/
@@ -1225,6 +1252,58 @@ def extractContextSyntaxDeclarations (source : String)
 def extractContextLocalSyntaxDeclarations (source : String)
     (extracted? : Option ExtractedTheorem) : String :=
   extractScopedCommandBlocksWhere source extracted? isLocalSyntaxContextDeclaration (fun _ => true)
+
+/-! ## Delegation arguments -/
+
+/-- Explicit (parenthesised) binder names introduced by the `variable` commands
+in `block`, the text produced by `extractContextVariables`. These are the outer
+parameters the generated files re-declare ahead of the restated signature, so
+they are the only names a delegation may legitimately apply beyond the
+declaration's own binders. -/
+def variableBlockExplicitNames (block : String) : Array String := Id.run do
+  let mut names : Array String := #[]
+  let mut current : Option String := none
+  for line in block.splitOn "\n" do
+    let stripped := line.trimAsciiStart.toString
+    if startsWithKeyword stripped "variable" then
+      if let some command := current then
+        names := names ++ explicitBinderApplicationArgs command
+      current := some (stripped.drop "variable".length).toString
+    else if let some command := current then
+      current := some (command ++ "\n" ++ line)
+  if let some command := current then
+    names := names ++ explicitBinderApplicationArgs command
+  return names
+
+/-- The arguments the generated delegation must apply to `Submission.<name>`.
+
+`sourceArgs` are the explicit binders parsed out of the declaration's own
+source signature. A module may introduce further explicit parameters through
+outer `variable` commands; Lean retains those in the elaborated declaration and
+the generated files re-declare them, so they precede `sourceArgs` in
+application order. `signatureParams?` is the extractor's report of the full
+list.
+
+The extractor's list is only trusted when it agrees with what the source
+shows: it must end with `sourceArgs`, and every name ahead of them must be
+introduced by one of the re-emitted `variable` commands.
+
+When the two views disagree, `sourceArgs` alone is the right answer only if it
+cannot be missing anything — that is, if the extractor reports no more explicit
+parameters than the source signature accounts for. A longer report means there
+are parameters we cannot place (an inaccessible binder name, say), and
+delegating without them would under-apply; `none` is returned so the caller can
+fail rather than emit a workspace that does not compile. -/
+def delegationArgs? (signatureParams? : Option (Array String))
+    (variableNames sourceArgs : Array String) : Option (Array String) := Id.run do
+  let some params := signatureParams? | return some sourceArgs
+  if params.size ≥ sourceArgs.size then
+    let outerCount := params.size - sourceArgs.size
+    if params.extract outerCount params.size == sourceArgs
+        && (params.extract 0 outerCount).all (fun p => variableNames.contains p) then
+      return some params
+  if params.size > sourceArgs.size then return none
+  return some sourceArgs
 
 /-! ## Render ChallengeDeps.lean -/
 
@@ -1276,6 +1355,77 @@ def applyEdits (sourceText : String) (edits : Array (Nat × Nat × String)) : St
     result := Source.slice src 0 start ++ replacement ++ Source.slice src stop src.size
   return result
 
+/-- The tokens of `line` with comments removed. -/
+private def commandTokens (line : String) : Array String :=
+  splitWhitespace (stripLineComment (stripSingleLineBlockComments line))
+
+/-- Commands that can be written as `<command> … in <declaration>` to scope
+themselves onto a single following declaration. -/
+private def scopingCommandKeywords : Array String :=
+  #["set_option", "open", "attribute", "include", "omit", "local", "scoped"]
+
+/-- Move a removal range's start back over the command prefixes that scope onto
+the declaration being removed — `set_option … in`, `open … in`, and friends. A
+`.ilean` declaration range begins at the declaration proper, so such a prefix
+is not covered by it and would otherwise be stranded with no command to apply
+to.
+
+A prefix is recognised by its last token being `in`, and is then followed back
+to the line opening the command, so prefixes spread over several lines are
+consumed whole. Blank and comment-only lines are crossed, but are only dropped
+if a prefix is found beyond them. `lowerBound` is the end of the previous
+declaration; the search never crosses it, so text belonging to a declaration we
+are keeping can never be consumed. -/
+def extendOverScopingPrefixes (source : Source) (lowerBound start : Nat) : Nat := Id.run do
+  -- Start of the line that position `i` sits on, clamped to `lowerBound`.
+  let lineStartAt : Nat → Nat := fun i => Id.run do
+    let mut lineStart := i
+    while lineStart > lowerBound && source[lineStart - 1]! != '\n' do
+      lineStart := lineStart - 1
+    return lineStart
+  let lineEndAt : Nat → Nat := fun i => Id.run do
+    let mut lineEnd := i
+    while lineEnd < source.size && source[lineEnd]! != '\n' do
+      lineEnd := lineEnd + 1
+    return lineEnd
+  let lastTokenIsIn : String → Bool := fun text => (commandTokens text).back? == some "in"
+  -- Walk back from the line holding a prefix's `in` to the line opening that
+  -- command, so a prefix spread over several lines is consumed whole. Stays
+  -- put if no opening line is found rather than guessing.
+  let commandStartAt : Nat → Nat := fun inLineStart => Id.run do
+    let mut lineStart := inLineStart
+    while true do
+      let opensCommand := scopingCommandKeywords.any fun keyword =>
+        (commandTokens (Source.slice source lineStart (lineEndAt lineStart)))[0]? == some keyword
+      if opensCommand then return lineStart
+      if lineStart ≤ lowerBound then return inLineStart
+      lineStart := lineStartAt (lineStart - 1)
+    return inLineStart
+  let mut result := start
+  let mut cursor := start
+  while cursor > lowerBound do
+    let lineStart := lineStartAt cursor
+    if lastTokenIsIn (Source.slice source lineStart cursor) then
+      -- The prefix shares the declaration's line: `set_option … in theorem …`.
+      result := commandStartAt lineStart
+      cursor := result
+    else if lineStart ≤ lowerBound then
+      return result
+    else
+      let previousStart := lineStartAt (lineStart - 1)
+      let previous := Source.slice source previousStart (lineStart - 1)
+      let stripped := previous.trimAscii.toString
+      if stripped.isEmpty || stripped.startsWith "--" then
+        -- Trivia is crossed in the hope of a prefix beyond it, and only
+        -- dropped if one is found.
+        cursor := previousStart
+      else if lastTokenIsIn previous then
+        result := commandStartAt previousStart
+        cursor := result
+      else
+        return result
+  return result
+
 /-- Shared core of single- and multi-hole `ChallengeDeps.lean` rendering.
 
 * `keepDeclarations` are the names whose source text we want to *retain*
@@ -1305,16 +1455,21 @@ def renderChallengeDepsCore (root : System.FilePath) (entry : EvalProblemMetadat
     let bodyStart := importPreludeLength sourceSrc
     let spans ← loadDeclSpans root entry sourceSrc
     let mut removeRangesRaw : Array (Nat × Nat) := #[]
+    -- End of the last declaration we have walked past, so that a removal never
+    -- reaches back into the text of the declaration before it.
+    let mut previousEnd := bodyStart
     for span in spans do
-      if keepDeclarations.contains span.name then continue
-      let declarationText := Source.slice sourceSrc span.start span.declEnd
-      if isSyntaxContextDeclaration declarationText then continue
-      match protectedRanges[span.name]? with
-      | some (s, e) => removeRangesRaw := removeRangesRaw.push (s, e)
       -- Delete only the declaration's precise `.ilean` range. Extending to the
       -- next declaration also deletes intervening scoped context commands such
       -- as `variable` and `local notation`, which kept helpers may require.
-      | none => removeRangesRaw := removeRangesRaw.push (span.start, span.declEnd)
+      let (start, stop) := match protectedRanges[span.name]? with
+        | some (s, e) => (s, e)
+        | none => (span.start, span.declEnd)
+      let declarationText := Source.slice sourceSrc span.start span.declEnd
+      if !keepDeclarations.contains span.name && !isSyntaxContextDeclaration declarationText then
+        removeRangesRaw := removeRangesRaw.push
+          (extendOverScopingPrefixes sourceSrc previousEnd start, stop)
+      previousEnd := max previousEnd (max span.declEnd stop)
     let removeRanges := removeRangesRaw.qsort
       (fun a b => a.1 < b.1 || (a.1 == b.1 && a.2 < b.2))
     let mut pieces : Array String := #[]
@@ -1689,10 +1844,18 @@ private def renderWorkspaceMultiHole (root : System.FilePath) (entry : EvalProbl
     let some lastEq := Source.rfind betweenSrc betweenSrc.size ":=".toList
       | throw <| IO.userError s!"Source decl for hole '{fullName}' has no `:=` body marker."
     let statement := Source.slice betweenSrc 0 lastEq
-    let explicitArgs := match extracteds.find? (fun e => e.declarationName == fullName) with
-      | some extracted => extracted.explicitParameters.getD
-          (explicitBinderApplicationArgs statement)
-      | none => explicitBinderApplicationArgs statement
+    let sourceArgs := explicitBinderApplicationArgs statement
+    let explicitArgs ← match extracteds.find? (fun e => e.declarationName == fullName) with
+      | some extracted =>
+          let variableNames :=
+            variableBlockExplicitNames (extractContextVariables sourceText (some extracted) #[])
+          match delegationArgs? extracted.explicitParameters variableNames sourceArgs with
+          | some args => pure args
+          | none =>
+              throw <| IO.userError
+                s!"Could not match the elaborated parameters of hole '{fullName}' against its \
+                   source signature; the generated delegation would under-apply it."
+      | none => pure sourceArgs
     let applied :=
       if explicitArgs.isEmpty then s!"Submission.{fullName}"
       else s!"Submission.{fullName} " ++ " ".intercalate explicitArgs.toList
@@ -1792,8 +1955,14 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
     extractContextLocalSyntaxDeclarations sourceText (some extracted)
   let contextVariablesBlock :=
     extractContextVariables sourceText (some extracted) theoremBinderNames
-  let solutionArgs := extracted.explicitParameters.getD
-    (explicitBinderApplicationArgs theoremStatement)
+  let contextIncludeBlock :=
+    extractContextIncludes sourceText (some extracted)
+  let some solutionArgs := delegationArgs? extracted.explicitParameters
+      (variableBlockExplicitNames contextVariablesBlock)
+      (explicitBinderApplicationArgs theoremStatement)
+    | throw <| IO.userError
+        s!"Could not match the elaborated parameters of '{extracted.declarationName}' against \
+           its source signature; the generated delegation would under-apply it."
   let solutionExact :=
     if solutionArgs.isEmpty then s!"Submission.{theoremName}"
     else s!"Submission.{theoremName} " ++ " ".intercalate solutionArgs.toList
@@ -1817,16 +1986,16 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
   let challengeFile :=
     challengeImport ++ contextOpenBlock ++ contextUniverseBlock ++
       (if hasChallengeDeps then contextLocalSyntaxBlock else contextSyntaxBlock) ++
-      contextVariablesBlock ++
+      contextVariablesBlock ++ contextIncludeBlock ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n"
   let solutionFile :=
     solutionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextLocalSyntaxBlock ++
-      contextVariablesBlock ++
+      contextVariablesBlock ++ contextIncludeBlock ++
     s!"theorem {theoremName} {theoremStatement} := by\n  exact {solutionExact}\n"
   let submissionFile :=
     submissionImports ++ contextOpenBlock ++ contextUniverseBlock ++
       (if hasChallengeDeps then contextLocalSyntaxBlock else contextSyntaxBlock) ++
-      contextVariablesBlock ++
+      contextVariablesBlock ++ contextIncludeBlock ++
     "namespace Submission\n\n" ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n\n" ++
     "end Submission\n"
