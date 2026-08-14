@@ -930,6 +930,10 @@ private def stripLineComment (s : String) : String :=
   | x :: _ => x
   | [] => s
 
+/-- The tokens of `line` with comments removed. -/
+private def commandTokens (line : String) : Array String :=
+  splitWhitespace (stripLineComment (stripSingleLineBlockComments line))
+
 /-- True if `stripped` is a scoped `open … in …` line — the single-command
 form that binds an open to one following expression. Detected by an `in`
 token appearing somewhere after the leading `open` keyword. Top-level opens
@@ -940,6 +944,11 @@ def isScopedOpenLine (stripped : String) : Bool := Id.run do
   for i in [1:toks.size] do
     if toks[i]! == "in" then return true
   return false
+
+/-- True if `block` is the single-command `<command> … in` form, which binds to
+the declaration following it rather than to the rest of the enclosing section. -/
+def isScopedCommandBlock (block : String) : Bool :=
+  (commandTokens block).back? == some "in"
 
 /-- True if the upcoming lines starting at `peekIdx` (0-indexed) form the
 continuation of a scoped `open … in` — that is, after any blank or
@@ -1262,7 +1271,10 @@ delegation arguments derived from the source declaration would not fit. -/
 def extractContextIncludes (source : String) (extracted? : Option ExtractedTheorem) : String :=
   extractScopedCommandBlocksWhere source extracted?
     (fun stripped => startsWithKeyword stripped "include" || startsWithKeyword stripped "omit")
-    (fun _ => true)
+    -- The `include … in` form binds to the declaration after it. Hoisting one
+    -- out of an earlier declaration would change our signature; the one that
+    -- belongs to our own declaration comes through `extractDeclarationPrefix`.
+    (fun block => !isScopedCommandBlock block)
 
 /-- Collect notation, syntax, and macro commands still in scope at the target
 declaration. Generated statements retain their source notation, so these
@@ -1378,10 +1390,6 @@ def applyEdits (sourceText : String) (edits : Array (Nat × Nat × String)) : St
     result := Source.slice src 0 start ++ replacement ++ Source.slice src stop src.size
   return result
 
-/-- The tokens of `line` with comments removed. -/
-private def commandTokens (line : String) : Array String :=
-  splitWhitespace (stripLineComment (stripSingleLineBlockComments line))
-
 /-- Commands that can be written as `<command> … in <declaration>` to scope
 themselves onto a single following declaration. -/
 private def scopingCommandKeywords : Array String :=
@@ -1455,6 +1463,29 @@ def extendOverScopingPrefixes (source : Source) (lowerBound start : Nat) : Nat :
       result := if opensCommand commandIdx then lines[commandIdx]!.1 else lineStart
       idx := commandIdx
   return result
+
+/-- The end of the last declaration ending at or before `offset`, or
+`bodyStart` if there is none. Bounds a backward scan so that it cannot reach
+into the text of another declaration. -/
+def previousDeclarationEnd (spans : Array DeclSpan) (bodyStart offset : Nat) : Nat :=
+  spans.foldl (init := bodyStart) fun acc span =>
+    if span.declEnd ≤ offset then max acc span.declEnd else acc
+
+/-- The command prefixes that scope onto the declaration starting at
+`declarationStart` (`include … in`, `open … in`, `set_option … in`, …), as text
+to re-emit ahead of a restated statement.
+
+These forms bind to one following declaration, which is why the context
+collectors pass over them: hoisting one out of an earlier declaration would
+change the meaning of ours. The one attached to our own declaration is a
+different matter, and `include … in` especially so, since it decides which of
+the surrounding `variable` binders the declaration takes. Dropping it gives the
+restated statement a different signature from the source, and the delegation
+derived from the source no longer fits. -/
+def extractDeclarationPrefix (source : Source) (lowerBound declarationStart : Nat) : String :=
+  let prefixStart := extendOverScopingPrefixes source lowerBound declarationStart
+  let text := (Source.slice source prefixStart declarationStart).trimAscii.toString
+  if text.isEmpty then "" else text ++ "\n"
 
 /-- Shared core of single- and multi-hole `ChallengeDeps.lean` rendering.
 
@@ -1989,6 +2020,11 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
     extractContextVariables sourceText (some extracted) theoremBinderNames
   let contextIncludeBlock :=
     extractContextIncludes sourceText (some extracted)
+  -- A prefix scoped onto the target declaration itself belongs with the
+  -- restated statement, not with the surrounding context.
+  let declarationSpans ← loadDeclSpans root entry src
+  let declarationPrefix := extractDeclarationPrefix src
+    (previousDeclarationEnd declarationSpans (importPreludeLength src) startOff) startOff
   let signatureParams? :=
     if hasBareSorryBody declText then extracted.explicitParameters else none
   let some solutionArgs := delegationArgs? signatureParams?
@@ -2020,17 +2056,17 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
   let challengeFile :=
     challengeImport ++ contextOpenBlock ++ contextUniverseBlock ++
       (if hasChallengeDeps then contextLocalSyntaxBlock else contextSyntaxBlock) ++
-      contextVariablesBlock ++ contextIncludeBlock ++
+      contextVariablesBlock ++ contextIncludeBlock ++ declarationPrefix ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n"
   let solutionFile :=
     solutionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextLocalSyntaxBlock ++
-      contextVariablesBlock ++ contextIncludeBlock ++
+      contextVariablesBlock ++ contextIncludeBlock ++ declarationPrefix ++
     s!"theorem {theoremName} {theoremStatement} := by\n  exact {solutionExact}\n"
   let submissionFile :=
     submissionImports ++ contextOpenBlock ++ contextUniverseBlock ++
       (if hasChallengeDeps then contextLocalSyntaxBlock else contextSyntaxBlock) ++
       contextVariablesBlock ++ contextIncludeBlock ++
-    "namespace Submission\n\n" ++
+    "namespace Submission\n\n" ++ declarationPrefix ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n\n" ++
     "end Submission\n"
   let mut files : Array (String × String) := #[

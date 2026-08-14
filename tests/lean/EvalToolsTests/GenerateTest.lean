@@ -187,6 +187,42 @@ def main : IO UInt32 := do
       | pure (some "no theorem in fixture")
     pure <| assertEq "start" (extendOverScopingPrefixes source target target) target
 
+  check "isScopedCommandBlock: include x in binds one declaration" passes fails do
+    pure <| assertEq "scoped" (isScopedCommandBlock "include x in") true
+
+  check "isScopedCommandBlock: include x binds the section" passes fails do
+    pure <| assertEq "scoped" (isScopedCommandBlock "include x") false
+
+  -- `include x in` decides which surrounding `variable` binders the
+  -- declaration takes, so a restated statement without it has a different
+  -- signature than the one the delegation was derived from.
+  check "extractDeclarationPrefix keeps a prefix on its own line" passes fails do
+    let text :=
+      "variable (n : \u2115)\n\n" ++
+      "include n in\n" ++
+      "theorem target : True := by sorry\n"
+    let source := Source.ofString text
+    let some target := Source.find source 0 "theorem".toList
+      | pure (some "no theorem in fixture")
+    pure <| assertEq "prefix" (extractDeclarationPrefix source 0 target) "include n in\n"
+
+  check "extractDeclarationPrefix keeps a prefix sharing the line" passes fails do
+    let text :=
+      "variable (n : \u2115)\n\n" ++
+      "include n in theorem target : True := by sorry\n"
+    let source := Source.ofString text
+    let some target := Source.find source 0 "theorem".toList
+      | pure (some "no theorem in fixture")
+    pure <| assertEq "prefix" (extractDeclarationPrefix source 0 target) "include n in\n"
+
+  -- A declaration with nothing scoped onto it must come out untouched.
+  check "extractDeclarationPrefix is empty without a prefix" passes fails do
+    let text := "variable (n : \u2115)\n\ntheorem target : True := by sorry\n"
+    let source := Source.ofString text
+    let some target := Source.find source 0 "theorem".toList
+      | pure (some "no theorem in fixture")
+    pure <| assertEq "prefix" (extractDeclarationPrefix source 0 target) ""
+
   check "variableBlockExplicitNames collects explicit binders only" passes fails do
     let block :=
       "variable (n : ℕ) {α : Type*} [Fintype α]\n" ++
