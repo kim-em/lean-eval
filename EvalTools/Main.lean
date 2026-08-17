@@ -21,9 +21,9 @@ def runRootCmd (p : Parsed) : IO UInt32 := do
   p.printHelp
   pure 0
 
-def runValidateManifestCmd (_ : Parsed) : IO UInt32 := do
+def runValidateManifestCmd (p : Parsed) : IO UInt32 := do
   let root ← requireRepoRoot
-  EvalTools.runValidateManifest root
+  EvalTools.runValidateManifest root (modulesBuilt := p.hasFlag "assume-modules-built")
 
 def runCheckProblemBuildCmd (_ : Parsed) : IO UInt32 := do
   let root ← requireRepoRoot
@@ -120,6 +120,9 @@ def runCheckEvalWorkflowCmd (_ : Parsed) : IO UInt32 := do
 def validateManifestCmd : Cmd := `[Cli|
   "validate-manifest" VIA runValidateManifestCmd;
   "Validate that the problem manifest matches the `@[eval_problem]` theorem inventory."
+
+  FLAGS:
+    "assume-modules-built"; "Skip rebuilding problem modules that a preceding check already built."
 ]
 
 def checkProblemBuildCmd : Cmd := `[Cli|

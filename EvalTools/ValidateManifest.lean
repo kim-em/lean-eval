@@ -14,14 +14,17 @@ The coverage check comes first because it is the only one that does not need a
 build, and because the inventory cross-check is blind to modules the manifest
 never names.
 
+`modulesBuilt` is an internal CI optimization for the case where
+`check-problem-build` has just successfully built the same source tree.
+
 The Python original also called `gp.validate_hole_shape`, a textual pre-check
 for typos in hole names. That check is purely redundant with the inventory
 cross-check (which goes through the elaborator), so it is dropped here. -/
-def runValidateManifest (root : System.FilePath) : IO UInt32 := do
+def runValidateManifest (root : System.FilePath) (modulesBuilt : Bool := false) : IO UInt32 := do
   try
     let entries ← loadManifest root
     checkProblemModuleCoverage root entries
-    validateManifestAgainstInventory root entries
+    validateManifestAgainstInventory root entries (buildModules := !modulesBuilt)
     IO.println "Manifest and @[eval_problem] declarations are consistent."
     return 0
   catch err =>

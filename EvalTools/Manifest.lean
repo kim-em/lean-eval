@@ -124,18 +124,21 @@ private def parseInventoryEntries (payload : String) :
 /-- Build the Lake targets and run the `eval_inventory` executable over every
 module referenced by `entries`.
 
-Build the inventory executable first, then each problem module separately.
-Passing every problem module to one `lake build` lets Lake schedule the entire
-catalog at once, which can exhaust machine resources on a clean checkout. -/
-def runInventoryTool (root : System.FilePath) (modules : Array String) :
+Build the inventory executable first, then (unless a preceding trusted step
+already did so) each problem module separately. Passing every problem module to
+one `lake build` lets Lake schedule the entire catalog at once, which can
+exhaust machine resources on a clean checkout. -/
+def runInventoryTool (root : System.FilePath) (modules : Array String)
+    (buildModules : Bool := true) :
     IO (Array ManifestInventoryEntry) := do
   let _ ← runCmdCheckedCaptured "lake"
     #["build", "eval_inventory"] root
     "Failed to build Lean problem inventory tool"
-  for moduleName in modules do
-    let _ ← runCmdCheckedCaptured "lake"
-      #["build", moduleName] root
-      s!"Failed to build Lean problem module '{moduleName}'"
+  if buildModules then
+    for moduleName in modules do
+      let _ ← runCmdCheckedCaptured "lake"
+        #["build", moduleName] root
+        s!"Failed to build Lean problem module '{moduleName}'"
   let binPath := root / ".lake" / "build" / "bin" / "eval_inventory"
   let out ← runCmdCheckedCaptured "lake"
     (#["env", binPath.toString] ++ modules) root
@@ -148,9 +151,10 @@ def runInventoryTool (root : System.FilePath) (modules : Array String) :
 manifest hole resolves to exactly one `@[eval_problem]`-tagged declaration,
 and every such declaration appears in the manifest. -/
 def validateManifestAgainstInventory
-    (root : System.FilePath) (entries : Array EvalProblemMetadata) : IO Unit := do
+    (root : System.FilePath) (entries : Array EvalProblemMetadata)
+    (buildModules : Bool := true) : IO Unit := do
   let modules := uniqueModules entries
-  let inventory ← runInventoryTool root modules
+  let inventory ← runInventoryTool root modules buildModules
   let mut byModule : Std.HashMap String (Array ManifestInventoryEntry) := {}
   for inv in inventory do
     byModule := byModule.insert inv.module

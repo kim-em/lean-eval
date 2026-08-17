@@ -5,9 +5,164 @@ on:
     branches: [main]
   pull_request:
 
+# A superseded five-hour run has no value. This also prevents a burst of PR
+# updates from consuming the entire hosted-runner pool with stale work.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  verify:
+  classify:
+    name: Classify changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      source_changed: ${{ steps.changes.outputs.source_changed }}
+      generated_changed: ${{ steps.changes.outputs.generated_changed }}
+      run_checks: ${{ steps.changes.outputs.run_checks }}
+      run_catalog: ${{ steps.changes.outputs.run_catalog }}
+    steps:
+      # actions/checkout pinned to 3d3c42e5 (= refs/tags/v7.0.1 as of 2026-07-30).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Audit workflow action pins
+        run: python scripts/action_pin_audit.py
+
+      - name: Python syntax checks
+        run: python -m py_compile scripts/*.py scripts/security_probes/*.py
+
+      - name: Classify changed paths
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          source_changed=false
+          generated_changed=false
+          infrastructure_changed=false
+
+          if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            source_changed=true
+            generated_changed=true
+            infrastructure_changed=true
+          else
+            mapfile -t changed_files < <(git diff --name-only "$BASE_SHA"..HEAD)
+            for path in "${changed_files[@]}"; do
+              case "$path" in
+                LeanEval/*|EvalTools/*|templates/*|manifests/problems/*|lakefile.toml|lake-manifest.json|lean-toolchain)
+                  source_changed=true
+                  ;;
+                generated/*)
+                  generated_changed=true
+                  ;;
+                .github/workflows/*|.github/actions/*|scripts/*|tests/*)
+                  infrastructure_changed=true
+                  ;;
+              esac
+            done
+          fi
+
+          run_checks=false
+          if [ "$source_changed" = true ] || [ "$generated_changed" = true ] \
+              || [ "$infrastructure_changed" = true ]; then
+            run_checks=true
+          fi
+
+          run_catalog=false
+          if [ "$source_changed" = true ] || [ "$generated_changed" = true ] \
+              || git diff --name-only "$BASE_SHA"..HEAD | grep -qx '.github/workflows/ci.yml'; then
+            run_catalog=true
+          fi
+
+          {
+            echo "source_changed=$source_changed"
+            echo "generated_changed=$generated_changed"
+            echo "run_checks=$run_checks"
+            echo "run_catalog=$run_catalog"
+          } >> "$GITHUB_OUTPUT"
+
+  checks:
+    name: Repository checks
+    needs: classify
+    if: needs.classify.outputs.run_checks == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Free up disk space
+        # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
+        # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      # actions/checkout pinned to 3d3c42e5 (= refs/tags/v7.0.1 as of 2026-07-30).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # leanprover/lean-action pinned to 38fbc41a (= refs/tags/v1.5.0, also v1 HEAD as of 2026-05-04).
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          use-mathlib-cache: true
+
+      # Run the warning-sensitive build first. Previously validate-manifest
+      # compiled the modules first, so the later warning scan saw an empty
+      # incremental build and could not actually detect warnings.
+      - name: Build problem modules without warnings
+        run: lake exe lean-eval check-problem-build
+
+      - name: Validate manifest
+        run: lake exe lean-eval validate-manifest --assume-modules-built
+
+      - name: Submission policy smoke check
+        run: lake exe lean-eval validate-submission --file generated/two_plus_two/Solution.lean
+
+      - name: Submission policy diff check
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t changed_files < <(git diff --name-only "$BASE_SHA".."$HEAD_SHA")
+          if [ "${#changed_files[@]}" -eq 0 ]; then
+            echo "No changed files; skipping submission diff validation."
+            exit 0
+          fi
+          for path in "${changed_files[@]}"; do
+            if [[ ! "$path" =~ ^generated/ ]]; then
+              echo "Diff includes repository source; skipping submission-only validation."
+              exit 0
+            fi
+          done
+          lake exe lean-eval validate-submission --base "$BASE_SHA" --head "$HEAD_SHA"
+
+      - name: Run Lean unit tests
+        run: |
+          lake exe test_validate_submission
+          lake exe test_generate
+          lake exe test_module_coverage
+          lake exe test_check_comparator_installation
+
+  security:
+    name: Security and scoring smoke tests
+    needs: classify
+    if: needs.classify.outputs.run_checks == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Free up disk space
         # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
@@ -36,13 +191,7 @@ jobs:
       # actions/setup-go pinned to b7ad1dad (= refs/tags/v7.0.0 as of 2026-07-30).
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
-          # Concrete Go version, not `stable`, so a runner-image bump cannot
-          # silently change the toolchain we install landrun with. setup-go
-          # v6+ sets GOTOOLCHAIN=local, so this is also the compiler actually
-          # used rather than a minimum that Go may silently replace.
           go-version: '1.25.12'
-          # This repository has no Go module dependency file for setup-go to
-          # hash; the only Go dependency is pinned directly in `go install`.
           cache: false
 
       - name: Install landrun
@@ -77,159 +226,150 @@ jobs:
       - name: Build nanoda
         run: |
           set -euo pipefail
-          # The external checker. WorkspaceTest forces `enable_nanoda: true`
-          # when it invokes comparator, so every scored Solution is replayed
-          # through nanoda's independent kernel and rejected unless `nanoda_bin`
-          # is on PATH. Built with the runner's stable cargo; the trust boundary
-          # is the pinned source commit, not the Rust compiler version.
           git clone https://github.com/robsimmons/nanoda_lib.git .ci/nanoda
           cd .ci/nanoda
-          # nanoda pinned to 68d5ca9 (robsimmons/nanoda_lib HEAD as of 2026-07-29,
-          # the fork comparator-live deploys). Bump procedure: SECURITY.md >
-          # "Bumping pinned dependencies".
+          # nanoda pinned to 68d5ca9 (robsimmons/nanoda_lib HEAD as of 2026-07-29).
+          # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
           git checkout 68d5ca9db226849b41a6fff59d796ff19d0a8840  # pin-audit: exempt -- SHA, see comment
           cargo build --release
           echo "$PWD/target/release" >> "$GITHUB_PATH"
 
-      - name: Audit workflow action pins
-        run: python scripts/action_pin_audit.py
-
-      # SECURITY: assert comparator's landrun sandbox actually denies
-      # writes outside .lake/. Catches landrun fail-open on novel
-      # kernels and policy regressions in comparator. See SECURITY.md
-      # > "Validations done at submission time" > sandbox-engaged.
+      # These probes stay in the mandatory path. Parallelization must not
+      # weaken the submission trust boundary.
       - name: Probe sandbox is engaged
         run: python scripts/sandbox_engaged_probe.py --require-tools
 
-      # SECURITY: assert env-var allowlist seen by Submission's
-      # elaboration is exactly {PATH, HOME, LEAN_ABORT_ON_PANIC}.
-      # Catches secret-env-var leakage to user code if comparator's
-      # envPass ever drifts. See SECURITY.md > "env allowlist".
       - name: Probe env-var allowlist
         run: python scripts/security_probes/env_dump_probe.py --require-tools
 
-      - name: Python Syntax Checks
-        run: python -m py_compile scripts/*.py scripts/security_probes/*.py
+      - name: Refresh smoke-test workspace
+        run: lake exe lean-eval generate --problem two_plus_two
 
-      - name: Validate Manifest
-        run: lake exe lean-eval validate-manifest
+      - name: Check comparator installation
+        run: lake exe lean-eval check-comparator-installation
 
-      - name: Build Problem Modules
-        run: lake exe lean-eval check-problem-build
-
-      # Decide whether to run workspace generation/build. Source-only PRs
-      # regenerate generated/ in the runner's working tree (the regenerate-main
-      # workflow is the only thing that commits generated/ to main); solver PRs
-      # build the committed tree as-is. Done early so that downstream steps
-      # which read generated/ (e.g. `lean-eval check-eval-workflow`) see a tree
-      # that matches the source.
-      - name: Detect changes
-        id: changes
-        run: |
-          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            echo "source_changed=true" >> "$GITHUB_OUTPUT"
-            echo "generated_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            CHANGED=$(git diff --name-only "$BASE"..HEAD)
-            if echo "$CHANGED" | grep -Eq '^(LeanEval/|EvalTools/|templates/|manifests/problems/.*\.toml$|lakefile\.toml$|lean-toolchain$)'; then
-              echo "source_changed=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "source_changed=false" >> "$GITHUB_OUTPUT"
-            fi
-            if echo "$CHANGED" | grep -q '^generated/'; then
-              echo "generated_changed=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "generated_changed=false" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-
-      - name: Regenerate workspaces from source
-        if: steps.changes.outputs.source_changed == 'true'
-        run: lake exe lean-eval generate
-
-      - name: Submission Policy Check
-        run: lake exe lean-eval validate-submission --file generated/two_plus_two/Solution.lean
-
-      # Submission diff validation is a PR-time contributor policy: it
-      # decides whether a PR that only touches `generated/` looks like a
-      # well-formed submission. On `push` to `main` the diffs we see are
-      # either merged PR results or the regenerator bot's
-      # `chore: regenerate generated/ workspaces` commit, neither of
-      # which the submission policy applies to. `main` itself is
-      # PR-protected for humans (see docs/ci-secrets.md), so we lose no
-      # meaningful coverage by gating this step on `pull_request`.
-      - name: Submission Policy Diff Check
-        if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-
-          mapfile -t CHANGED_FILES < <(git diff --name-only "$BASE_SHA..$HEAD_SHA")
-
-          if [ "${#CHANGED_FILES[@]}" -eq 0 ]; then
-            echo "No changed files in $BASE_SHA..$HEAD_SHA; skipping submission diff validation."
-            exit 0
-          fi
-
-          IS_SUBMISSION_DIFF=true
-          for path in "${CHANGED_FILES[@]}"; do
-            if [[ ! "$path" =~ ^generated/ ]]; then
-              IS_SUBMISSION_DIFF=false
-              break
-            fi
-          done
-
-          if [ "$IS_SUBMISSION_DIFF" = false ]; then
-            echo "Diff includes non-generated paths; treating this as repo development and skipping submission diff validation."
-            exit 0
-          fi
-
-          lake exe lean-eval validate-submission --base "$BASE_SHA" --head "$HEAD_SHA"
-
-      - name: Run Submission Policy Tests
-        run: lake exe test_validate_submission
-
-      - name: Run Generate Tests
-        run: lake exe test_generate
-
-      - name: Run Module Coverage Tests
-        run: lake exe test_module_coverage
-
-      - name: Run Comparator Installation Checks
-        run: |
-          lake exe test_check_comparator_installation
-          lake exe lean-eval check-comparator-installation
-
-      - name: Run Eval Workflow Check
+      - name: Run eval workflow smoke test
         run: lake exe lean-eval check-eval-workflow
 
-      # Download Mathlib cache once in the first workspace, then hard-link
-      # its .lake/packages tree into every other workspace so that each
-      # subsequent `lake build` skips the ~2 GB download + decompression.
-      - name: Prepare shared Mathlib cache for workspaces
-        if: steps.changes.outputs.source_changed == 'true' || steps.changes.outputs.generated_changed == 'true'
+  catalog:
+    name: Generated workspaces (shard ${{ matrix.shard }}/${{ strategy.job-total }})
+    needs: classify
+    if: needs.classify.outputs.run_catalog == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - name: Free up disk space
+        # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
+        # Bump procedure: SECURITY.md > "Bumping pinned dependencies".
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      # actions/checkout pinned to 3d3c42e5 (= refs/tags/v7.0.1 as of 2026-07-30).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # leanprover/lean-action pinned to 38fbc41a (= refs/tags/v1.5.0, also v1 HEAD as of 2026-05-04).
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          use-mathlib-cache: true
+
+      - name: Generate or verify this shard
+        id: shard
+        env:
+          SHARD_INDEX: ${{ matrix.shard }}
+          SHARD_COUNT: ${{ strategy.job-total }}
+          SOURCE_CHANGED: ${{ needs.classify.outputs.source_changed }}
+          GENERATED_CHANGED: ${{ needs.classify.outputs.generated_changed }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          FIRST=$(find generated -maxdepth 1 -mindepth 1 -type d -exec test -f '{}/lakefile.toml' \; -print | sort | head -1)
-          if [ -z "$FIRST" ]; then
-            echo "No generated workspaces found; skipping."
+          mapfile -t all_problems < <(
+            find manifests/problems -maxdepth 1 -type f -name '*.toml' -printf '%f\n' \
+              | sed 's/\.toml$//' | sort
+          )
+          selected=()
+          for i in "${!all_problems[@]}"; do
+            if (( i % SHARD_COUNT == SHARD_INDEX )); then
+              selected+=("${all_problems[$i]}")
+            fi
+          done
+          if [ "${#selected[@]}" -eq 0 ]; then
+            echo "Shard is empty."
             exit 0
           fi
-          echo "==> Fetching Mathlib cache in $FIRST"
-          (cd "$FIRST" && lake update && lake exe cache get)
-          for ws in generated/*/; do
-            [ -f "${ws}lakefile.toml" ] || continue
-            [ "$(realpath "$ws")" = "$(realpath "$FIRST/")" ] && continue
-            echo "==> Linking Mathlib packages into $ws"
-            mkdir -p "${ws}.lake"
-            rm -rf "${ws}.lake/packages"
-            cp -al "${FIRST}/.lake/packages" "${ws}.lake/packages"
-            cp "${FIRST}/lake-manifest.json" "${ws}lake-manifest.json"
+          printf 'Shard %s: %s\n' "$SHARD_INDEX" "${selected[*]}"
+
+          generate_mode="none"
+          if [ "$SOURCE_CHANGED" = true ]; then
+            generate_mode="write"
+          elif [ "$EVENT_NAME" = push ] && [ "$GENERATED_CHANGED" = true ]; then
+            generate_mode="check"
+          fi
+          if [ "$generate_mode" != none ]; then
+            for problem in "${selected[@]}"; do
+              if [ "$generate_mode" = check ]; then
+                lake exe lean-eval generate --problem "$problem" --check
+              else
+                lake exe lean-eval generate --problem "$problem"
+              fi
+            done
+          fi
+
+          # Every workspace has the same pinned Mathlib dependency. Reuse the
+          # root cache with symlinks instead of cloning/decompressing it once
+          # and hard-link-walking ~13 GB hundreds of times.
+          for problem in "${selected[@]}"; do
+            mkdir -p "generated/$problem/.lake"
+            ln -s "$GITHUB_WORKSPACE/.lake/packages" \
+              "generated/$problem/.lake/packages"
+          done
+          first="${selected[0]}"
+          (cd "generated/$first" && lake update)
+          for problem in "${selected[@]:1}"; do
+            cp "generated/$first/lake-manifest.json" \
+              "generated/$problem/lake-manifest.json"
           done
 
-      - name: Build Generated Workspaces
-        if: steps.changes.outputs.source_changed == 'true' || steps.changes.outputs.generated_changed == 'true'
-        run: lake exe lean-eval check-generated-builds
+          build_args=()
+          for problem in "${selected[@]}"; do
+            build_args+=(--problem "$problem")
+          done
+          lake exe lean-eval check-generated-builds "${build_args[@]}"
+
+  # Preserve the existing required-check name while making it an aggregate of
+  # every parallel branch. A green `verify` now means the entire fan-out passed.
+  verify:
+    name: verify
+    if: always()
+    needs: [classify, checks, security, catalog]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every CI branch to pass
+        env:
+          CLASSIFY_RESULT: ${{ needs.classify.result }}
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+          CATALOG_RESULT: ${{ needs.catalog.result }}
+        run: |
+          set -euo pipefail
+          for result in "$CLASSIFY_RESULT" "$CHECKS_RESULT" \
+              "$SECURITY_RESULT" "$CATALOG_RESULT"; do
+            if [ "$result" != success ] && [ "$result" != skipped ]; then
+              echo "A required CI branch ended with: $result" >&2
+              exit 1
+            fi
+          done
