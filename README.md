@@ -184,7 +184,7 @@ benchmark files.
 ### 1. Pick a problem
 
 Generated workspaces live under `generated/`, one directory per problem. The current
-catalog is summarized in [`generated/index.json`](/home/kim/lean-evals/generated/index.json).
+catalog is summarized in [`generated/index.json`](generated/index.json).
 
 Examples:
 
@@ -393,13 +393,13 @@ In practice, solvers should normally work in `Submission.lean` and `Submission/`
 
 ## Repository Layout
 
-- [`LeanEval/`](/home/kim/lean-evals/LeanEval): trusted authored problem statements
+- [`LeanEval/`](LeanEval): trusted authored problem statements
 - [`manifests/problems/`](manifests/problems/): one TOML file per problem, named `<id>.toml`
 - [`manifests/tags.toml`](manifests/tags.toml): stable tag registry
 - [`manifests/sets/`](manifests/sets/): versioned and optionally frozen named problem sets
-- [`generated/`](/home/kim/lean-evals/generated): generated comparator workspaces
-- [`scripts/`](/home/kim/lean-evals/scripts): generation, validation, and scoring helpers
-- [`PLAN.md`](/home/kim/lean-evals/PLAN.md): deferred design and roadmap notes
+- [`generated/`](generated): generated comparator workspaces
+- [`scripts/`](scripts): generation, validation, and scoring helpers
+- [`PLAN.md`](PLAN.md): deferred design and roadmap notes
 
 ## End-To-End Repo Checks
 
