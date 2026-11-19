@@ -1,0 +1,25 @@
+id = "babai_gi"
+title = "Quasipolynomial graph isomorphism assuming Schreier's hypothesis"
+group = "formalization-evaluation"
+status = "draft"
+visible = true
+statement_revision = 1
+tags = []
+module = "LeanEval.ComputerScience.BabaiGI"
+holes = ["BabaiGI.Schreier_implies_graph_isomorphism_quasipolynomial"]
+submitter = "Timothy Y. Chow"
+source = "L. Babai, Graph Isomorphism in Quasipolynomial Time, arXiv:1512.03547v2 (19 January 2016), Corollary 1.1.2 and Section 13.1."
+notes = """
+Babai proved that graph isomorphism is decidable in quasipolynomial time.
+The proof relies on Schreier's hypothesis, whose only known proof at the
+time of this writing relies on the classification of finite simple
+groups (CFSG). Therefore, here we assert only the weaker statement that
+if Schreier's hypothesis holds, then graph isomorphism can be decided in
+quasipolynomial time. This sidesteps the need to prove CFSG.
+
+Schreier's hypothesis states that every finite simple group has solvable
+outer automorphism group. Note that Babai's proof ostensibly depends on
+Cameron’s classification of large primitive permutation groups, which also
+depends on the CFSG, but he explains in Section 13 how the dependence on
+Cameron's result can be avoided.
+"""
