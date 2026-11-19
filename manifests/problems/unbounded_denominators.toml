@@ -1,0 +1,15 @@
+id = "unbounded_denominators"
+title = "Unbounded denominators conjecture"
+group = "formalization-evaluation"
+status = "active"
+visible = true
+statement_revision = 1
+tags = []
+module = "LeanEval.ComplexAnalysis.UnboundedDenominators"
+holes = ["unbounded_denominators"]
+submitter = "Junyan Xu"
+
+[[status_history]]
+status = "active"
+effective_date = "2026-09-24"
+reason = "policy"
