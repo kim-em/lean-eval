@@ -1,0 +1,12 @@
+id = "designs_exist"
+title = "The existence of designs"
+group = "formalization-evaluation"
+status = "draft"
+visible = true
+statement_revision = 1
+tags = []
+test = false
+module = "LeanEval.Combinatorics.DesignsExist"
+holes = ["keevash", "steiner_triple_asymptotics", "keevash_resolvable", "keevash_large_set", "keevash_complete_resolution", "keevash_sah_sawhney"]
+notes = "Keywords: probabilistic method, randomized algebraic constructions, absorption."
+submitter = "Junyan Xu"
