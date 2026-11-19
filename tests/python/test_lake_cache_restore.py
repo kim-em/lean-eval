@@ -18,6 +18,37 @@ WRAPPER = pathlib.Path(__file__).resolve().parents[2] / "scripts/lake_cache_curl
 @unittest.skipUnless(os.environ.get("LEAN_EVAL_LAKE_CACHE_TEST") == "1",
                      "requires the pinned Lean toolchain")
 class LakeCacheRestoreTests(unittest.TestCase):
+    def test_warm_cache_restores_paths_needed_by_runtime_imports(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            (root / "lakefile.toml").write_text(
+                'name = "warm-cache-probe"\n[[lean_lib]]\nname = "CacheProbe"\n')
+            (root / "CacheProbe.lean").write_text("def cacheProbe : Nat := 42\n")
+            (root / "UseCacheProbe.lean").write_text(
+                "import CacheProbe\nexample : cacheProbe = 42 := rfl\n")
+            (root / "cache.toml").write_text("")
+            env = dict(os.environ, LAKE_CONFIG=str(root / "cache.toml"),
+                       LAKE_CACHE_DIR=str(root / "cache"), LAKE_ARTIFACT_CACHE="true",
+                       LAKE_RESTORE_ARTIFACTS="false")
+
+            def lake(*args):
+                return subprocess.run(["lake", *args], cwd=root, env=env, check=False,
+                                      capture_output=True, text=True, timeout=60)
+
+            built = lake("build", "+CacheProbe")
+            self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+            shutil.rmtree(root / ".lake/build")
+            cached = lake("--no-build", "build", "+CacheProbe")
+            self.assertEqual(cached.returncode, 0, cached.stdout + cached.stderr)
+            self.assertFalse((root / ".lake/build/lib/lean/CacheProbe.olean").exists())
+            self.assertNotEqual(lake("env", "lean", "UseCacheProbe.lean").returncode, 0)
+            env["LAKE_RESTORE_ARTIFACTS"] = "true"
+            restored = lake("--no-build", "build", "+CacheProbe")
+            self.assertEqual(restored.returncode, 0, restored.stdout + restored.stderr)
+            self.assertTrue((root / ".lake/build/lib/lean/CacheProbe.olean").is_file())
+            imported = lake("env", "lean", "UseCacheProbe.lean")
+            self.assertEqual(imported.returncode, 0, imported.stdout + imported.stderr)
+
     def test_failed_download_can_be_retried_without_compilation_or_poisoned_cache(self):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)

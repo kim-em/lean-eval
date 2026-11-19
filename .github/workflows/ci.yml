@@ -87,6 +87,11 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
+          if [ "$BASE_SHA" != 0000000000000000000000000000000000000000 ] && [ -n "$BASE_SHA" ]; then
+            python scripts/problem_configurations.py --base "$BASE_SHA"
+          else
+            python scripts/problem_configurations.py
+          fi
           python scripts/select_ci_problems.py \
             --event "$GITHUB_EVENT_NAME" \
             --base "$BASE_SHA" \
@@ -208,7 +213,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [rc, stable]
+        configuration: [latest, rc, stable]
     steps:
       - name: Free up disk space
         # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
@@ -289,7 +294,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Require both toolchain sandbox and scoring checks
+      - name: Require all configuration sandbox and scoring checks
         env:
           RESULT: ${{ needs.security_toolchains.result }}
         run: |
@@ -432,14 +437,16 @@ jobs:
           retention-days: 1
 
   stable_catalog:
-    name: Stable catalog compilation (shard ${{ matrix.shard }}/${{ matrix.shard_count }})
+    name: Catalog compilation (${{ matrix.configuration }}, shard ${{ matrix.shard.shard }}/${{ matrix.shard.shard_count }})
     needs: classify
     if: needs.classify.outputs.run_catalog == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.classify.outputs.matrix) }}
+      matrix:
+        configuration: [rc, stable]
+        shard: ${{ fromJSON(needs.classify.outputs.matrix).include }}
     steps:
       - name: Free up disk space
         # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
@@ -460,8 +467,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Select stable toolchain and dependency pins
-        run: python scripts/prepare_toolchain.py stable --apply
+      - name: Select benchmark configuration
+        run: python scripts/prepare_toolchain.py "${{ matrix.configuration }}" --apply
 
       - name: Prepare solution-only package metadata
         run: python scripts/prepare_ci_dependencies.py
@@ -496,10 +503,16 @@ jobs:
 
       - name: Build problem modules without warnings
         env:
-          MODULES: ${{ matrix.modules }}
-          SHARD_INDEX: ${{ matrix.shard }}
+          MODULES: ${{ matrix.shard.modules }}
+          SHARD_INDEX: ${{ matrix.shard.shard }}
+          CONFIGURATION: ${{ matrix.configuration }}
         run: |
           set -euo pipefail
+          MODULES="$(python scripts/problem_configurations.py --configuration "$CONFIGURATION" --modules "$MODULES")"
+          if [ -z "$MODULES" ]; then
+            echo "No problems in this shard support $CONFIGURATION."
+            exit 0
+          fi
           IFS=',' read -r -a modules <<< "$MODULES"
           module_args=()
           for module in "${modules[@]}"; do

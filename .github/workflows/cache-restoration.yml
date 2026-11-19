@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [rc, stable]
+        configuration: [latest, rc, stable]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -65,7 +65,8 @@ jobs:
         env:
           LEAN_EVAL_LAKE_CACHE_TEST: '1'
         run: |
-          export ELAN_TOOLCHAIN="$(cat lean-toolchain)"
+          ELAN_TOOLCHAIN="$(cat lean-toolchain)"
+          export ELAN_TOOLCHAIN
           python -m unittest discover -v -s tests/python -p 'test_lake_cache_*.py'
           python -m unittest discover -v -s tests/python -p test_fetch_dependency_caches.py
 
@@ -78,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [rc, stable]
+        configuration: [latest, rc, stable]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -131,7 +132,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - name: Require both toolchain cache checks
+      - name: Require all configuration cache checks
         env:
           RESTORE_RESULT: ${{ needs.restore_toolchains.result }}
           MATHLIB_RESULT: ${{ needs.mathlib_cache.result }}

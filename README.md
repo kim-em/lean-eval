@@ -10,11 +10,62 @@ tooling generates one comparator workspace per problem under `generated/`.
 A submission is scored entirely by comparator results: a problem counts as solved iff
 comparator accepts the submitted solution.
 
-LeanEval supports **Lean v4.35.0** and **Lean v4.36.0-rc2**. The latter is the
-default checkout. Each configuration in `supported-toolchains.json` pins its own
-Mathlib, TauCeti, and transitive dependencies. CI requires the shared problem
-statements to compile on both toolchains without unexpected warnings; it does
-not compare their elaborated meanings across dependency versions.
+We intend to support three dependency configurations:
+
+| Configuration | Intended versions |
+| --- | --- |
+| `stable` | The most recent stable Lean release, with matching Mathlib and TauCeti pins. |
+| `rc` | The most recent Lean release candidate, with a fixed compatible Mathlib/TauCeti snapshot. |
+| `latest` (default) | The same most recent Lean RC toolchain, with newer compatible Mathlib and TauCeti commits that we try to keep fairly current. |
+
+To request an update, **@Kim Morrison on [Lean Zulip](https://leanprover.zulipchat.com/)**.
+Updates require compatible published dependency caches and passing CI, so a new
+Lean release can precede our adoption of it. These are three configurations;
+`rc` and `latest` normally share a Lean version and differ in library revisions.
+Every configuration pins exact commits, including all transitive dependencies;
+evaluation never follows a moving branch.
+
+Maintainers: follow the [configuration update runbook](docs/updating-configurations.md).
+
+The currently available configurations in `supported-toolchains.json` are:
+
+| Configuration | Lean | Mathlib | TauCeti |
+| --- | --- | --- | --- |
+| `stable` | `v4.35.0` | `07406378` | `1f9b4414` |
+| `rc` | `v4.36.0-rc2` | `2ddf59c8` | `be86813d` |
+| `latest` (default) | `v4.36.0-rc2` | `048fffa1` | `cd41bffc` |
+
+Lean `v4.36.0` stable and `v4.37.0-rc1` have been released, but matching
+Mathlib/TauCeti builds are not yet available for all three intended configurations.
+In particular, [TauCeti's stable upgrade](https://github.com/TauCetiProject/TauCeti/pull/43422)
+is still in progress. The table records actual support until those dependencies
+and their caches are ready.
+
+The `latest` configuration is the default checkout so it can build the full catalog.
+CI requires each problem to compile on every configuration it declares as supported
+without unexpected warnings; it does not compare their elaborated meanings
+across dependency versions. Cache restoration and sandbox/scoring checks also
+run on all three configurations. Mathlib's published cache must cover every module.
+
+Problems may declare one of these support levels in their manifest:
+
+```toml
+supported_configurations = ["latest"]
+# or ["latest", "rc"]
+# or ["latest", "rc", "stable"] (the default when omitted)
+```
+
+All problems must support `latest`. Authors can add a problem before it works on
+older configurations. Keep statements that need newer APIs in separate Lean
+modules from problems that must compile on older configurations; Lean compiles
+whole modules, including their imports. CI builds a module on every configuration
+needed by any problem in it.
+
+**Upgrades must preserve or increase each existing problem's supported
+configurations.** Fix problem sources as necessary for new Lean/Mathlib/TauCeti
+versions; do not narrow a problem's support declaration to make an upgrade pass.
+CI compares manifests with the base commit and rejects lost compatibility.
+Generation and submission evaluation enforce the declared support levels.
 
 To work on the stable configuration in an isolated directory:
 
@@ -27,13 +78,19 @@ lake exe lean-eval generate --problem two_plus_two
 lake exe lean-eval start-problem two_plus_two
 ```
 
-Use `rc` instead of `stable` for the default configuration. Existing build outputs
-are excluded from these copies. After selecting a configuration, regenerate each
+Use `rc` for the release-candidate snapshot, or `latest` for the default newer
+library snapshot. Existing build outputs are excluded from these copies.
+After selecting a configuration, regenerate each
 workspace you use so its pins and extracted statements match that configuration.
 The submission service reads the closest `lean-toolchain` at or above each
-submitted workspace and selects the corresponding approved configuration. Omit
-the file to use the default. Submit workspaces for different toolchains separately.
-Result verification receipts and archive sidecars record the selected toolchain and exact benchmark commit.
+submitted workspace and its exact Mathlib/TauCeti requirements in `lakefile.toml`
+to select an approved configuration. The dependency pins distinguish `rc` from
+`latest` even when their Lean toolchains are identical. Missing pins use the
+default configuration for the requested toolchain; unsupported combinations
+are rejected. Submit workspaces for different configurations separately.
+Result verification receipts and archive sidecars record the selected toolchain
+and exact benchmark commit. The retained source includes the dependency pins,
+so replay selects the same configuration from that benchmark commit.
 
 The main user-facing entrypoint is:
 
@@ -46,6 +103,8 @@ lake exe lean-eval --help
 Use this path if you are adding or editing benchmark problems.
 
 ### 1. Install and fetch dependencies
+
+Install Lean through elan and Python 3.11 or newer, then run:
 
 ```bash
 lake exe cache get

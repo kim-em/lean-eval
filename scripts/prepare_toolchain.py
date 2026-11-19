@@ -21,26 +21,29 @@ FILES = ("lean-toolchain", "lakefile.toml", "lake-manifest.json")
 def configurations(root: Path) -> tuple[str, dict[str, Path]]:
     data = json.loads((root / "supported-toolchains.json").read_text())
     result = {}
-    for toolchain, relative in data["configurations"].items():
+    for configuration, relative in data["configurations"].items():
         path = (root / relative).resolve()
         if not path.is_relative_to(root.resolve()):
             raise ValueError("toolchain configuration escapes the benchmark")
-        if (path / "lean-toolchain").read_text().strip() != toolchain:
-            raise ValueError(f"toolchain configuration disagrees with its pin: {toolchain}")
+        if configuration.startswith("leanprover/lean4:") and (
+                path / "lean-toolchain").read_text().strip() != configuration:
+            raise ValueError(f"toolchain configuration disagrees with its pin: {configuration}")
         for name in FILES:
             if (path / name).is_symlink() or not (path / name).is_file():
                 raise ValueError(f"missing regular configuration file: {path / name}")
-        result[toolchain] = path
-    if data["default"] not in result or data["stable"] not in result:
-        raise ValueError("default or stable toolchain has no configuration")
+        result[configuration] = path
+    if any(data[alias] not in result for alias in ("default", "stable", "rc", "latest") if alias in data):
+        raise ValueError("a configured default, stable, rc or latest alias has no configuration")
     return data["default"], result
 
 
 def prepare(root: Path, toolchain: str, destination: Path | None = None) -> Path:
     default, supported = configurations(root)
-    stable = json.loads((root / "supported-toolchains.json").read_text())["stable"]
+    registry = json.loads((root / "supported-toolchains.json").read_text())
+    stable = registry["stable"]
     toolchain = {"stable": stable, "default": default,
-                 "rc": default}.get(toolchain, toolchain)
+                 "rc": registry.get("rc", default),
+                 "latest": registry.get("latest", "latest")}.get(toolchain, toolchain)
     if toolchain not in supported:
         raise ValueError(f"unsupported toolchain {toolchain!r}; choose {', '.join(supported)}")
     # Read everything before mutation, including when the chosen configuration

@@ -73,6 +73,7 @@ class FetchDependencyCachesTests(unittest.TestCase):
         exports = dict(word.split("=", 1) for word in shlex.split(result.stdout)[1:])
         self.assertEqual(exports["CURL"], wrapper)
         self.assertEqual(exports["LAKE_ARTIFACT_CACHE"], "true")
+        self.assertEqual(exports["LAKE_RESTORE_ARTIFACTS"], "true")
         self.assertIn("503", result.stderr)
 
     def test_exhausted_cache_only_restore_fails_without_exporting_settings(self):

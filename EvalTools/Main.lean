@@ -64,7 +64,17 @@ def runGenerateCmd (p : Parsed) : IO UInt32 := do
   let problem? : Option String := p.flag? "problem" |>.map fun f => f.as! String
   let check := p.hasFlag "check"
   try
-    LeanEvalGenerator.Core.generate root problem? check
+    if let some problem := problem? then
+      EvalTools.requireSupportedProblem root problem
+      LeanEvalGenerator.Core.generate root problem? check
+    else
+      let supported ← EvalTools.configurationSelection root #["--list-problems"]
+      let entries ← loadManifest root
+      if supported.size == entries.size then
+        LeanEvalGenerator.Core.generate root none check
+      else
+        for problem in supported do
+          LeanEvalGenerator.Core.generate root (some problem) check
     return 0
   catch e =>
     IO.eprintln (toString e)
@@ -85,7 +95,12 @@ def runCheckGeneratedBuildsCmd (p : Parsed) : IO UInt32 := do
     | some flag => flag.as! (Array String)
     | none => #[]
   let root ← requireRepoRoot
-  EvalTools.runCheckGeneratedBuilds root problems
+  try
+    let supported ← EvalTools.supportedProblemSelection root problems
+    EvalTools.runCheckGeneratedBuilds root supported
+  catch err =>
+    IO.eprintln err
+    return 1
 
 def runStartProblemCmd (p : Parsed) : IO UInt32 := do
   let problemId : String := p.positionalArg! "problem-id" |>.as! String
@@ -94,6 +109,11 @@ def runStartProblemCmd (p : Parsed) : IO UInt32 := do
     IO.eprintln "start-problem accepts at most one destination path."
     return 1
   let root ← requireRepoRoot
+  try
+    EvalTools.requireSupportedProblem root problemId
+  catch err =>
+    IO.eprintln err
+    return 1
   let sourceDisplay := s!"generated/{problemId}"
   let sourcePath := root / "generated" / problemId
   let destinationStr? : Option String := destinations[0]?
@@ -130,7 +150,12 @@ def runRunEvalCmd (p : Parsed) : IO UInt32 := do
         let path : System.FilePath := raw
         if path.isAbsolute then path else root / raw
     | none => root / "workspaces"
-  EvalTools.runRunEval root selected workspacesRoot emitJson
+  try
+    let supported ← EvalTools.supportedProblemSelection root selected
+    EvalTools.runRunEval root supported workspacesRoot emitJson
+  catch err =>
+    IO.eprintln err
+    return 1
 
 def runValidateSubmissionCmd (p : Parsed) : IO UInt32 := do
   let base? : Option String := p.flag? "base" |>.map fun f => f.as! String

@@ -189,6 +189,7 @@ def is_full_catalog_sentinel(path: str) -> bool:
         or path == "scripts/prepare_toolchain.py"
         or path == "scripts/prepare_ci_dependencies.py"
         or path == "scripts/select_submission_toolchain.py"
+        or path == "scripts/problem_configurations.py"
         or path == "supported-toolchains.json"
         or path.startswith("toolchains/")
         or path in {"lakefile.toml", "lake-manifest.json", "lean-toolchain", "solution-dependencies.json"}

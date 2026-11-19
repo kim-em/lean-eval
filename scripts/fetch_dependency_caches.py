@@ -167,9 +167,13 @@ def prepare(project: Path, restore: bool) -> dict[str, str]:
                 output.write(f'name = "{library.prefix.lower()}-public"\nkind = "s3"\n')
                 output.write(f"artifactEndpoint = {json.dumps(artifacts)}\n")
                 output.write(f"revisionEndpoint = {json.dumps(revisions)}\n")
+        # Runtime importModules consumers (the extractor and inventory tools)
+        # need canonical .olean paths, even when subsequent builds hit a warm
+        # Lake cache populated by another configuration or checkout.
         settings = {"LAKE_CONFIG": str(config), "LAKE_ARTIFACT_CACHE": "true",
+                    "LAKE_RESTORE_ARTIFACTS": "true",
                     "CURL": str(SCRIPTS / "lake_cache_curl.py")}
-        env = dict(os.environ, **settings, LAKE_RESTORE_ARTIFACTS="true")
+        env = dict(os.environ, **settings)
         for library, _, _ in services:
             retry(["lake", "-v", "cache", "get", "--service", f"{library.prefix.lower()}-public",
                    "--repo", library.repo, "--package", library.package,

@@ -23,7 +23,9 @@ def runCheckProblemBuild (root : System.FilePath)
     (requestedModules : Array String := #[]) : IO UInt32 := do
   try
     let entries ← loadManifest root
-    let modules ← selectManifestModules entries requestedModules
+    let requested ← selectManifestModules entries requestedModules
+    let modules ← configurationSelection root
+      #["--modules", ",".intercalate requested.toList, "--json"]
     let mut disallowed := []
     for moduleName in modules do
       let output ← runCmdCheckedCaptured "lake" #["build", moduleName] root

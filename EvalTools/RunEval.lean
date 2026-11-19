@@ -224,10 +224,10 @@ def runRunEval (root : System.FilePath) (selectedIds : Array String)
     (workspacesRoot : System.FilePath) (emitJson : Bool) : IO UInt32 := do
   try
     let problems ← loadManifest root
-    -- Validate against the full manifest before filtering, matching
-    -- `run_eval.py`'s ordering (so per-module inventory checks aren't
-    -- short-circuited by `--problem`).
-    validateManifestAgainstInventory root problems
+    -- Validate every module supported on these dependencies before narrowing
+    -- to requested problems. Keep all metadata in each module for inventory.
+    let compatible ← compatibleManifestEntries root problems
+    validateManifestAgainstInventory root compatible
     let selected ← selectedProblems problems selectedIds
     -- `score_problems` builds the extractor on demand; pre-build here so the
     -- output stays clean of "Built ..." noise once scoring begins.

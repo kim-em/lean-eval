@@ -87,6 +87,92 @@ class SelectSubmissionToolchainTests(unittest.TestCase):
         self.assertEqual(MODULE.select(self.archive(files), self.root),
                          ("leanprover/lean4:v4.36.0-rc2", ["a"]))
 
+    def latest_configuration(self):
+        registry = self.root / "supported-toolchains.json"
+        data = json.loads(registry.read_text())
+        data["configurations"]["latest"] = "latest"
+        registry.write_text(json.dumps(data))
+        profile = self.root / "latest"
+        profile.mkdir()
+        (profile / "lean-toolchain").write_text("leanprover/lean4:v4.36.0-rc2\n")
+        (profile / "lake-manifest.json").write_text("{}")
+        for relative, revision in [("rc", "release"), ("latest", "newer")]:
+            (self.root / relative / "lakefile.toml").write_text(
+                f'[[require]]\nname = "mathlib"\nrev = "{revision}"\n')
+
+    def pinned_workspace(self, revision, problem="a", prefix="source/generated/a"):
+        return [(prefix + "/lakefile.toml",
+                 f'name = "{problem}"\n[[require]]\nname = "mathlib"\nrev = "{revision}"\n'),
+                (prefix + "/Submission.lean", "-- proof\n")]
+
+    def test_dependency_pins_distinguish_configurations_sharing_lean(self):
+        self.latest_configuration()
+        for revision, expected in [("release", "leanprover/lean4:v4.36.0-rc2"),
+                                   ("newer", "latest")]:
+            with self.subTest(revision=revision):
+                files = self.pinned_workspace(revision)
+                self.assertEqual(MODULE.select(self.archive(files), self.root), (expected, ["a"]))
+        with self.assertRaisesRegex(MODULE.ToolchainRequestError, "unsupported Mathlib/TauCeti"):
+            MODULE.select(self.archive(self.pinned_workspace("unapproved")), self.root)
+
+    def test_mixed_dependency_configurations_are_rejected_even_with_the_same_lean(self):
+        self.latest_configuration()
+        files = self.pinned_workspace("release") + self.pinned_workspace(
+            "newer", "b", "source/generated/b")
+        with self.assertRaisesRegex(MODULE.ToolchainRequestError, "one toolchain and dependency"):
+            MODULE.select(self.archive(files), self.root)
+
+    def test_tauceti_pins_can_distinguish_snapshots_with_the_same_mathlib(self):
+        self.latest_configuration()
+        for relative, revision in [("rc", "older-tauceti"), ("latest", "newer-tauceti")]:
+            (self.root / relative / "lakefile.toml").write_text(
+                '[[require]]\nname = "mathlib"\nrev = "shared-mathlib"\n'
+                f'[[require]]\nname = "TauCeti"\nrev = "{revision}"\n')
+        files = self.pinned_workspace("shared-mathlib")
+        files[0] = (files[0][0], files[0][1] +
+                    '[[require]]\nname = "TauCeti"\nrev = "newer-tauceti"\n')
+        self.assertEqual(MODULE.select(self.archive(files), self.root), ("latest", ["a"]))
+
+    def test_missing_or_duplicate_library_pins_are_rejected(self):
+        self.latest_configuration()
+        for requirement in ['[[require]]\nname = "mathlib"\n',
+                            '[[require]]\nname = "mathlib"\nrev = "release"\n' * 2]:
+            files = self.workspace()
+            files[0] = (files[0][0], files[0][1] + "\n" + requirement)
+            with self.subTest(requirement=requirement), self.assertRaisesRegex(
+                    MODULE.ToolchainRequestError, "one exact dependency pin"):
+                MODULE.select(self.archive(files), self.root)
+
+    def test_problem_support_is_enforced_before_evaluation(self):
+        self.latest_configuration()
+        (self.root / "manifests/problems/a.toml").write_text('supported_configurations = ["latest"]\n')
+        with self.assertRaisesRegex(MODULE.ToolchainRequestError, "does not support rc"):
+            MODULE.select(self.archive(self.pinned_workspace("release")), self.root)
+        self.assertEqual(MODULE.select(self.archive(self.pinned_workspace("newer")), self.root),
+                         ("latest", ["a"]))
+
+    def test_cli_applies_latest_pins_and_preserves_the_runner_toolchain_contract(self):
+        self.latest_configuration()
+        scripts = self.root / "scripts"
+        scripts.mkdir()
+        for name in ["prepare_toolchain.py", "select_submission_toolchain.py", "problem_configurations.py"]:
+            shutil.copyfile(ROOT / "scripts" / name, scripts / name)
+        archive = self.archive(self.pinned_workspace("newer"))
+        command = [sys.executable, str(scripts / "select_submission_toolchain.py"),
+                   "--source-tar", str(archive)]
+        archived = subprocess.run([*command, "--archive"], capture_output=True, text=True)
+        self.assertEqual(archived.returncode, 0, archived.stderr)
+        self.assertEqual(archived.stdout.strip(), "leanprover/lean4:v4.36.0-rc2")
+        for name in ["lean-toolchain", "lakefile.toml", "lake-manifest.json"]:
+            shutil.copyfile(self.root / "rc" / name, self.root / name)
+        stale = subprocess.run([*command, "--regenerate"], capture_output=True, text=True)
+        self.assertNotEqual(stale.returncode, 0)
+        self.assertIn("select the requested configuration", stale.stderr)
+        applied = subprocess.run([*command, "--expected", archived.stdout.strip(), "--apply"],
+                                 capture_output=True, text=True)
+        self.assertEqual(applied.returncode, 0, applied.stderr)
+        self.assertIn('rev = "newer"', (self.root / "lakefile.toml").read_text())
+
     def test_unsupported_pins_escaping_paths_symlinks_and_duplicates_fail_closed(self):
         cases = [self.workspace() + [("source/lean-toolchain", "leanprover/lean4:nightly")],
                  [("../lean-toolchain", "ignored")], self.workspace() + [("source/lean-toolchain", None)],
@@ -99,7 +185,7 @@ class SelectSubmissionToolchainTests(unittest.TestCase):
     def test_archive_retains_unsupported_requests_but_evaluation_rejects_them(self):
         scripts = self.root / "scripts"
         scripts.mkdir()
-        for name in ["prepare_toolchain.py", "select_submission_toolchain.py"]:
+        for name in ["prepare_toolchain.py", "select_submission_toolchain.py", "problem_configurations.py"]:
             shutil.copyfile(ROOT / "scripts" / name, scripts / name)
         archive = self.archive(self.workspace() + [
             ("source/lean-toolchain", "leanprover/lean4:nightly")])
