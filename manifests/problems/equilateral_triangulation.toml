@@ -1,0 +1,15 @@
+id = "equilateral_triangulation"
+title = "Non-compact Riemann surfaces are equilaterally triangulable"
+group = "formalization-evaluation"
+status = "active"
+visible = true
+statement_revision = 1
+tags = []
+module = "LeanEval.Geometry.EquilateralTriangulation"
+holes = ["bishop_rempe"]
+submitter = "Junyan Xu"
+
+[[status_history]]
+status = "active"
+effective_date = "2026-09-14"
+reason = "policy"
