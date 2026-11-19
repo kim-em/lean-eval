@@ -14,10 +14,12 @@ commutative ring `R` and `2n × 2n` symplectic matrix `A` over `R` (i.e.
 Taking determinants of `Aᵀ J A = J` only forces `(det A)² = 1`; the sign
 requires the Pfaffian argument (`det A = Pf(Aᵀ J A) / Pf(J) = 1`).
 
-mathlib has `Matrix.symplecticGroup l R` and proves `symplectic_det`
-(`IsUnit (det A)`) but the determinant-equals-one claim is an open TODO in
-`Mathlib/LinearAlgebra/SymplecticGroup.lean`. No formalization of the
-identity was found in any other proof assistant.
+mathlib has `Matrix.symplecticGroup l R` and `symplectic_det`
+(`IsUnit (det A)`). When this problem was written the determinant-equals-one
+claim was an open TODO in `Mathlib/LinearAlgebra/SymplecticGroup.lean`.
+Mathlib PR #40352 (merged 2026-07-07) added `SymplecticGroup.det_eq_one`,
+which is this statement, and the pinned Mathlib has included it since the
+toolchain bump of 2026-07-29. The hole is therefore a library lookup.
 -/
 
 open Matrix
