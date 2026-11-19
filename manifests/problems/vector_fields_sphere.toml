@@ -1,0 +1,15 @@
+id = "vector_fields_sphere"
+title = "Maximal number of linearly independent vector fields on a sphere"
+group = "formalization-evaluation"
+status = "active"
+visible = true
+statement_revision = 1
+tags = []
+module = "LeanEval.Topology.VectorFieldsSphere"
+holes = ["maxNumVecFieldsSphere_eq_radonHurwitz_sub_one"]
+submitter = "Junyan Xu"
+
+[[status_history]]
+status = "active"
+effective_date = "2026-09-24"
+reason = "policy"
