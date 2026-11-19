@@ -1,0 +1,18 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "LeanEval.Combinatorics.DesignsExist.keevash",
+    "LeanEval.Combinatorics.DesignsExist.steiner_triple_asymptotics",
+    "LeanEval.Combinatorics.DesignsExist.keevash_resolvable",
+    "LeanEval.Combinatorics.DesignsExist.keevash_large_set",
+    "LeanEval.Combinatorics.DesignsExist.keevash_complete_resolution",
+    "LeanEval.Combinatorics.DesignsExist.keevash_sah_sawhney"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": false
+}

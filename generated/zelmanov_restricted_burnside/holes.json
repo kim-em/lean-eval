@@ -1,0 +1,12 @@
+{
+  "id": "zelmanov_restricted_burnside",
+  "module": "LeanEval.GroupTheory.ZelmanovRestrictedBurnside",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.zelmanov_restricted_burnside",
+      "basename": "zelmanov_restricted_burnside",
+      "kind": "theorem",
+      "body": "/-- **Zelmanov's solution of the restricted Burnside problem.** For all\n$m, n \\ge 1$, there exists $B \\in \\mathbb{N}$ bounding the cardinality of\nevery finite $m$-generated group of exponent dividing $n$. -/\ntheorem zelmanov_restricted_burnside {m n : \u2115} (hm : 1 \u2264 m) (hn : 1 \u2264 n) :\n    \u2203 B : \u2115, \u2200 (Q : Type) [Group Q] [Finite Q],\n      (\u2203 g : Fin m \u2192 Q, Subgroup.closure (Set.range g) = \u22a4) \u2192\n      (\u2200 x : Q, x ^ n = 1) \u2192\n      Nat.card Q \u2264 B := by\n  sorry"
+    }
+  ]
+}

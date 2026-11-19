@@ -1,0 +1,40 @@
+name = "zelmanov_restricted_burnside"
+testDriver = "workspace_test"
+defaultTargets = ["Challenge", "Solution", "Submission"]
+allowNonModules = true
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "lean-pool"
+git = "https://github.com/Vilin97/lean-pool.git"
+rev = "e9d53e9cbcff8dfd0cc816ba94db7a26b082929f"
+
+[[require]]
+name = "cfsg"
+git = "https://github.com/AxiomMath/CFSG.git"
+rev = "5437cdc31389dd9aeaa5c2a9465a4e164f8dea33"
+
+[[require]]
+name = "Stacks"
+git = "https://github.com/AxiomMath/Stacks.git"
+rev = "c496df0d9beea9deaeabcea8492605f9a0a2313b"
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "048fffa1dbcd080d3058fab41d8c188168595c22"
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
+
+[[lean_lib]]
+name = "Submission"
+
+[[lean_exe]]
+name = "workspace_test"
+root = "WorkspaceTest"

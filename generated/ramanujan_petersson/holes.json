@@ -6,7 +6,7 @@
       "name": "LeanEval.NumberTheory.RamanujanTauProblem.ramanujan_petersson",
       "basename": "ramanujan_petersson",
       "kind": "theorem",
-      "body": "/-- **The Ramanujan\u2013Petersson conjecture for `\u03c4`** (Ramanujan 1916; proved by\nDeligne in 1974). For every prime `p`, `|\u03c4(p)| \u2264 2 p^(11/2)`. -/\ntheorem ramanujan_petersson :\n    \u2200 p : \u2115, Prime p \u2192 \u2016\u03c4 p\u2016 \u2264 2 * (p : \u211d) ^ ((11 : \u211d) / 2) := by\n  sorry"
+      "body": "/-- **Ramanujan's conjecture for `\u03c4`** (Ramanujan 1916; proved by Deligne in\n1974). For every prime `p`, `|\u03c4(p)| \u2264 2 p^(11/2)`. -/\ntheorem ramanujan_petersson :\n    \u2200 p : \u2115, Prime p \u2192 \u2016\u03c4 p\u2016 \u2264 2 * (p : \u211d) ^ ((11 : \u211d) / 2) := by\n  sorry"
     }
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "id": "hyperbolic_viscosity",
+  "module": "LeanEval.Analysis.PDE.HyperbolicViscosity",
+  "holes": [
+    {
+      "name": "LeanEval.Analysis.PDE.hyperbolic_viscosity",
+      "basename": "hyperbolic_viscosity",
+      "kind": "theorem",
+      "body": "/-- Total variation estimate for hyperbolic systems -/\ntheorem hyperbolic_viscosity (hn : 1 \u2264 n) (hK : IsCompact K) (h : IsHyperbolicOn n A K) :\n    \u2203 \u03b4 > 0, \u2203 C < \u22a4, HasTVEstimateWith n A K \u03b4 C := by\n  sorry"
+    }
+  ]
+}

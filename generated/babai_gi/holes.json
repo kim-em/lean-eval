@@ -1,0 +1,12 @@
+{
+  "id": "babai_gi",
+  "module": "LeanEval.ComputerScience.BabaiGI",
+  "holes": [
+    {
+      "name": "BabaiGI.Schreier_implies_graph_isomorphism_quasipolynomial",
+      "basename": "Schreier_implies_graph_isomorphism_quasipolynomial",
+      "kind": "theorem",
+      "body": "/-- This is Babai's result, with Schreier's hypothesis as an explicit premise. -/\ntheorem Schreier_implies_graph_isomorphism_quasipolynomial :\n    SchreierHypothesis \u2192 GraphIsomorphismIsQuasipolynomial := by\n    intro hSchreier\n    sorry"
+    }
+  ]
+}

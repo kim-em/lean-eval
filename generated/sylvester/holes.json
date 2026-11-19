@@ -1,0 +1,12 @@
+{
+  "id": "sylvester",
+  "module": "LeanEval.NumberTheory.Sylvester",
+  "holes": [
+    {
+      "name": "LeanEval.NumberTheory.sylvester",
+      "basename": "sylvester",
+      "kind": "theorem",
+      "body": "theorem sylvester (p : \u2115) (h : p.Prime) (h' : p % 9 \u2208 ({4, 7, 8} : Set \u2115)) :\n    (\u2203 a b : \u211a, p = a ^ 3 + b ^ 3) \u2227 (\u2203 a b : \u211a, p ^ 2 = a ^ 3 + b ^ 3) := by\n  sorry"
+    }
+  ]
+}

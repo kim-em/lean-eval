@@ -1,0 +1,12 @@
+{
+  "id": "vector_fields_sphere",
+  "module": "LeanEval.Topology.VectorFieldsSphere",
+  "holes": [
+    {
+      "name": "LeanEval.Topology.VectorFieldsSphere.maxNumVecFieldsSphere_eq_radonHurwitz_sub_one",
+      "basename": "maxNumVecFieldsSphere_eq_radonHurwitz_sub_one",
+      "kind": "theorem",
+      "body": "/-- The maximal number of pointwise linearly independent continuous vector fields on \ud835\udd4a\u207f\u207b\u00b9\nis \u03c1(n) - 1. -/\ntheorem maxNumVecFieldsSphere_eq_radonHurwitz_sub_one (n : \u2115+) :\n    maxNumVecFieldsSphere n = radonHurwitz n - 1 := by\n  sorry"
+    }
+  ]
+}

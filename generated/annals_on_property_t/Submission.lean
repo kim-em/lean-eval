@@ -2,6 +2,7 @@ import ChallengeDeps
 import Submission.Helpers
 
 open OnPropertyT
+open scoped Pointwise
 
 set_option autoImplicit false
 

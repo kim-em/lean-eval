@@ -1,0 +1,12 @@
+{
+  "id": "unbounded_denominators",
+  "module": "LeanEval.ComplexAnalysis.UnboundedDenominators",
+  "holes": [
+    {
+      "name": "LeanEval.ComplexAnalysis.unbounded_denominators",
+      "basename": "unbounded_denominators",
+      "kind": "theorem",
+      "body": "/-- In the statement we use the fact that if `[SL(2,\u2124) : \u0393] = n`, then `n!` is a period of `f`:\nin general, if `[G : H] = n` then the `n!`th power of every element of `G` is in `H`.\nMeromorphicity is required only at the rational cusps. The congruence level is positive:\n`CongruenceSubgroup.Gamma 0` is the trivial subgroup, which would make the conclusion vacuous. -/\ntheorem unbounded_denominators (\u0393 : Subgroup (Matrix.SpecialLinearGroup (Fin 2) \u2124)) [\u0393.FiniteIndex]\n    (k : \u2124) (f : SlashInvariantForm \u0393 k) (mdiff : MDiff f)\n    (bdd : UpperHalfPlane.IsBoundedAtImInfty f)\n    (mero : \u2200 c : OnePoint \u211a, IsMeromorphicAt (c.map ((\u2191) : \u211a \u2192 \u211d)) f k)\n    (int : \u2200 n, IsIntegral \u2124 (UpperHalfPlane.qExpansion \u0393.index.factorial f n)) :\n    \u2203 N > 0, \u2200 \u03b3 \u2208 CongruenceSubgroup.Gamma N, SlashAction.map k \u03b3 \u21d1f = f := by\n  sorry"
+    }
+  ]
+}

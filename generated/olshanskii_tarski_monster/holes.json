@@ -1,0 +1,12 @@
+{
+  "id": "olshanskii_tarski_monster",
+  "module": "LeanEval.GroupTheory.OlshanskiiTarskiMonster",
+  "holes": [
+    {
+      "name": "LeanEval.GroupTheory.olshanskii_tarski_monster",
+      "basename": "olshanskii_tarski_monster",
+      "kind": "theorem",
+      "body": "/-- **Ol'shanskii's Tarski monster group existence theorem.** For every prime\n$p > 10^{75}$, there exists an infinite group whose every proper nontrivial\nsubgroup is cyclic of order $p$. -/\ntheorem olshanskii_tarski_monster {p : \u2115} (hp : p.Prime) (hgt : 10 ^ 75 < p) :\n    \u2203 (G : Type) (_ : Group G),\n      Infinite G \u2227\n      \u2200 H : Subgroup G, H \u2260 \u22a5 \u2192 H \u2260 \u22a4 \u2192 IsCyclic H \u2227 Nat.card H = p := by\n  sorry"
+    }
+  ]
+}

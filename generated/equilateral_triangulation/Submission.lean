@@ -1,0 +1,15 @@
+import ChallengeDeps
+import Submission.Helpers
+
+open LeanEval.Geometry.EquilateralTriangulation
+
+namespace Submission
+
+theorem bishop_rempe {X : Type*} [TopologicalSpace X] [T2Space X] [ConnectedSpace X]
+    [SecondCountableTopology X] [ChartedSpace ℂ X] [IsManifold mℂ 1 X] (h : ¬ CompactSpace X) :
+    let S := Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1
+    ∃ (_ : ChartedSpace ℂ S) (_ : IsManifold mℂ 1 S) (f : X → S) (s : Set S),
+      ContMDiff mℂ mℂ 1 f ∧ IsBranchedCovering f ∧ IsCoveringMapOn f sᶜ ∧ s.ncard = 3 := by
+  sorry
+
+end Submission

@@ -24,12 +24,12 @@ rev = "c496df0d9beea9deaeabcea8492605f9a0a2313b"
 [[require]]
 name = "TauCeti"
 git = "https://github.com/TauCetiProject/TauCeti"
-rev = "be86813dc92e6bac8614c2c2dd34572145df09c0"
+rev = "cd41bffcb343151b3e58c89392e206b11fe78c1c"
 
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
-rev = "2ddf59c8f14245864e6c0ed227a2dab76b9efea2"
+rev = "048fffa1dbcd080d3058fab41d8c188168595c22"
 
 [[lean_lib]]
 name = "Challenge"

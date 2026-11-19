@@ -1030,6 +1030,21 @@
     "generated_path": "generated/aspherical_integer_homology_four_sphere"
   },
   {
+    "id": "babai_gi",
+    "title": "Quasipolynomial graph isomorphism assuming Schreier's hypothesis",
+    "group": "formalization-evaluation",
+    "status": "draft",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Timothy Y. Chow",
+    "module": "LeanEval.ComputerScience.BabaiGI",
+    "holes": [
+      "BabaiGI.Schreier_implies_graph_isomorphism_quasipolynomial"
+    ],
+    "generated_path": "generated/babai_gi"
+  },
+  {
     "id": "baer_suzuki",
     "title": "Baer\u2013Suzuki theorem",
     "group": "formalization-evaluation",
@@ -1708,6 +1723,26 @@
     "generated_path": "generated/derived_solidification_free_CW_homology"
   },
   {
+    "id": "designs_exist",
+    "title": "The existence of designs",
+    "group": "formalization-evaluation",
+    "status": "draft",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.Combinatorics.DesignsExist",
+    "holes": [
+      "keevash",
+      "steiner_triple_asymptotics",
+      "keevash_resolvable",
+      "keevash_large_set",
+      "keevash_complete_resolution",
+      "keevash_sah_sawhney"
+    ],
+    "generated_path": "generated/designs_exist"
+  },
+  {
     "id": "dimitrov",
     "title": "Dimitrov's lower bound for the house of a nonzero algebraic integer that is not a root of unity",
     "group": "formalization-evaluation",
@@ -1842,6 +1877,21 @@
       "equichordal_point_unique"
     ],
     "generated_path": "generated/equichordal_point_unique"
+  },
+  {
+    "id": "equilateral_triangulation",
+    "title": "Non-compact Riemann surfaces are equilaterally triangulable",
+    "group": "formalization-evaluation",
+    "status": "active",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.Geometry.EquilateralTriangulation",
+    "holes": [
+      "bishop_rempe"
+    ],
+    "generated_path": "generated/equilateral_triangulation"
   },
   {
     "id": "erdos_unit_distance_conjecture_false",
@@ -2596,6 +2646,21 @@
       "hurewicz_h1_abelianization"
     ],
     "generated_path": "generated/hurewicz_h1_abelianization"
+  },
+  {
+    "id": "hyperbolic_viscosity",
+    "title": "Total variation estimate for hyperbolic systems",
+    "group": "formalization-evaluation",
+    "status": "draft",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Joris van Winden",
+    "module": "LeanEval.Analysis.PDE.HyperbolicViscosity",
+    "holes": [
+      "hyperbolic_viscosity"
+    ],
+    "generated_path": "generated/hyperbolic_viscosity"
   },
   {
     "id": "instance_hole_example",
@@ -3521,6 +3586,21 @@
     "generated_path": "generated/nyquist_shannon_sampling"
   },
   {
+    "id": "olshanskii_tarski_monster",
+    "title": "Ol'shanskii's Tarski monster group existence theorem",
+    "group": "formalization-evaluation",
+    "status": "draft",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Edward Lockhart",
+    "module": "LeanEval.GroupTheory.OlshanskiiTarskiMonster",
+    "holes": [
+      "olshanskii_tarski_monster"
+    ],
+    "generated_path": "generated/olshanskii_tarski_monster"
+  },
+  {
     "id": "oppenheim_inequality",
     "title": "Oppenheim's inequality for Hadamard products",
     "group": "formalization-evaluation",
@@ -3942,7 +4022,7 @@
   },
   {
     "id": "ramanujan_petersson",
-    "title": "Ramanujan\u2013Petersson conjecture for the \u03c4-function (Deligne's theorem)",
+    "title": "Ramanujan's conjecture for the \u03c4-function (Deligne's theorem)",
     "group": "formalization-evaluation",
     "status": "active",
     "visible": true,
@@ -4424,6 +4504,21 @@
     "generated_path": "generated/substInv_X_sub_X_sq_eq_catalan"
   },
   {
+    "id": "sylvester",
+    "title": "Sylvester's conjecture",
+    "group": "formalization-evaluation",
+    "status": "active",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.NumberTheory.Sylvester",
+    "holes": [
+      "sylvester"
+    ],
+    "generated_path": "generated/sylvester"
+  },
+  {
     "id": "symAction_range_eq_centralizer_glAction",
     "title": "Schur-Weyl duality: S_k image equals centralizer of GL(V) image",
     "group": "formalization-evaluation",
@@ -4589,6 +4684,21 @@
     "generated_path": "generated/two_plus_two"
   },
   {
+    "id": "unbounded_denominators",
+    "title": "Unbounded denominators conjecture",
+    "group": "formalization-evaluation",
+    "status": "active",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.ComplexAnalysis.UnboundedDenominators",
+    "holes": [
+      "unbounded_denominators"
+    ],
+    "generated_path": "generated/unbounded_denominators"
+  },
+  {
     "id": "uniformization",
     "title": "Uniformization theorem for Riemann surfaces",
     "group": "formalization-evaluation",
@@ -4647,6 +4757,21 @@
       "variable_binder_example"
     ],
     "generated_path": "generated/variable_binder_example"
+  },
+  {
+    "id": "vector_fields_sphere",
+    "title": "Maximal number of linearly independent vector fields on a sphere",
+    "group": "formalization-evaluation",
+    "status": "active",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Junyan Xu",
+    "module": "LeanEval.Topology.VectorFieldsSphere",
+    "holes": [
+      "maxNumVecFieldsSphere_eq_radonHurwitz_sub_one"
+    ],
+    "generated_path": "generated/vector_fields_sphere"
   },
   {
     "id": "vinogradov_mean_value",
@@ -4872,6 +4997,21 @@
       "wigner_semicircle"
     ],
     "generated_path": "generated/wigner_semicircle"
+  },
+  {
+    "id": "zelmanov_restricted_burnside",
+    "title": "Zelmanov's solution of the restricted Burnside problem",
+    "group": "formalization-evaluation",
+    "status": "draft",
+    "visible": true,
+    "statement_revision": 1,
+    "tags": [],
+    "submitter": "Edward Lockhart",
+    "module": "LeanEval.GroupTheory.ZelmanovRestrictedBurnside",
+    "holes": [
+      "zelmanov_restricted_burnside"
+    ],
+    "generated_path": "generated/zelmanov_restricted_burnside"
   },
   {
     "id": "zhang_bounded_prime_gaps",
