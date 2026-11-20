@@ -56,8 +56,8 @@ The whole overhaul is complete only after production launch **and**:
   a terminal official-kernel-plus-nanoda replay record or a reviewed
   unavailable reason;
 - every recoverable historical private archive, and each exact retained public
-  archive needed to recover an incomplete legacy Result in that scope, has the
-  required per-submission envelope for replay;
+  archive needed to recover a legacy Result without a terminal disposition in
+  that scope, has the required per-submission envelope for replay;
 - the neutral open-problems tab exists (it may be empty initially);
 - the retained software-verification and editorial work is in its agreed
   state; and
@@ -373,9 +373,10 @@ lanes, but it does not delay initial production launch.
   visibility preserved, or unavailable for a reviewed reason. For unresolved
   records, a failed source URL does not establish permanent unavailability
   while an exact retained archive remains recoverable.
-- For an existing task, unresolved means queued or retryable-failed at the
-  packet's exact State head. Existing unavailable and nonretryable-failed
-  dispositions remain terminal; this recovery does not reopen them.
+- For an existing task, unresolved means queued or retryable-failed with fewer
+  than four attempts used at the packet's exact State head. Existing unavailable,
+  nonretryable-failed and exhausted dispositions remain terminal; this recovery
+  does not reopen them.
 - Use the smallest existing State event mechanism capable of recording the
   terminal disposition. Do not create a new aggregate transaction system unless
   an actual atomicity requirement is demonstrated.
@@ -397,7 +398,7 @@ lanes, but it does not delay initial production launch.
 - Verify the result; do not retain plaintext or migration credentials.
 
 Recovering an existing queued public task through its archive requires a
-reviewed, versioned source-recovery transition under its original authority.
+reviewed, versioned source-recovery transition.
 Preserve its Result and task identities, original source provenance,
 benchmark, toolchain, checker, measurement configuration and attempt count.
 Do not fabricate a failure or unavailable event to make that transition fit an

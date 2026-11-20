@@ -664,9 +664,10 @@ across five historical Lean toolchains.
       the separate retained-corpus migration, archive-capable profile and
       queued-source recovery bindings; preserve original public visibility,
       identities, provenance and attempts. Unresolved means queued or
-      retryable-failed at the bound State head; existing unavailable and
-      nonretryable-failed dispositions stay terminal. Hold the blocked task IDs
-      out of dispatch, or pause the lane, until recovery is ready. Recovery
+      retryable-failed with fewer than four attempts used at the bound State
+      head; existing unavailable, nonretryable-failed and exhausted dispositions
+      stay terminal. Hold the blocked task IDs out of dispatch, or pause the
+      lane, until recovery is ready. Recovery
       neither schedules release nor publishes source or archive bytes. Only
       the existing archive controller receives exact task-bound single-use
       unwrap authority. Switch compatible State/consumer
@@ -676,8 +677,8 @@ across five historical Lean toolchains.
       these blocked tasks stay queued.
 - [ ] At the issue-intake cutoff, freeze the final Results/State delta and
       classify every additional legacy accepted Result.
-- [ ] Migrate any recoverable retained legacy archive in that final delta to a
-      per-submission envelope without changing archive bytes, stable IDs,
+- [ ] Migrate any recoverable retained legacy archive needed for replay in that
+      final delta to a per-submission envelope without changing archive bytes, stable IDs,
       original visibility or publication consent. This includes originally
       public sources recovered from exact retained snapshots.
 - [ ] Drain the final public and private delta and prove both planners empty,
