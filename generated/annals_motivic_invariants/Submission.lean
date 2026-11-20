@@ -24,6 +24,7 @@ namespace Submission
 open _root_.AlgebraicGeometry
 open _root_.AlgebraicGeometry.Scheme
 open _root_.AlgebraicGeometry.Scheme.BirationalMap
+open _root_.AlgebraicGeometry.Scheme.BirationalMap.IsOver
 open _root_.AlgebraicGeometry.Scheme.BirationalMap.mk
 open _root_.AlgebraicGeometry.Scheme.Opens
 open _root_.AlgebraicGeometry.Scheme.PartialIso

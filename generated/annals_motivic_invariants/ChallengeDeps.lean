@@ -95,14 +95,17 @@ noncomputable instance : Group (X.BirationalMap X) where
 
 /-- A birational map between irreducible schemes `X` and `Y` over a base scheme `S`: a
 `BirationalMap` whose underlying forward rational map is an `S`-map.
-The inverse is then automatically an `S`-map too; see the instance below. -/
-abbrev IsOver (S : Scheme.{u}) [X.Over S] [Y.Over S] (f : X.BirationalMap Y) : Prop :=
-  f.hom.IsOver S
+The inverse is then automatically an `S`-map too; see `inv_compHom` below. -/
+class IsOver (S : Scheme.{u}) [X.Over S] [Y.Over S] (f : X.BirationalMap Y) : Prop where
+  /-- The forward rational map commutes with the structure maps to the base. -/
+  over : f.hom.compHom (Y ↘ S) = (X ↘ S).toRationalMap
 
-instance (S : Scheme.{u}) [X.Over S] [Y.Over S] (f : BirationalMap X Y) [hf : f.IsOver S] :
-    f.inv.IsOver S := by
-  simp [RationalMap.isOver_iff, ← RationalMap.isOver_iff.mp hf, ← RationalMap.comp_toRationalMap,
+lemma inv_compHom (S : Scheme.{u}) [X.Over S] [Y.Over S]
+    (f : BirationalMap X Y) (hf : f.IsOver S) :
+    f.inv.compHom (X ↘ S) = (Y ↘ S).toRationalMap := by
+  rw [← RationalMap.comp_toRationalMap, ← hf.over, ← RationalMap.comp_toRationalMap,
     ← RationalMap.comp_assoc]
+  simp only [f.inv_comp_hom_id, RationalMap.id_comp]
 
 end BirationalMap
 
@@ -159,9 +162,12 @@ variable (X) in
 that are defined over the base scheme `S`. -/
 def birationalAutOver (S : Scheme.{u}) [X.Over S] : Subgroup (X.BirationalMap X) where
   carrier := { f | f.IsOver S }
-  one_mem' := inferInstanceAs ((RationalMap.id X).IsOver S)
-  mul_mem' {f g} (_ : f.IsOver S) (_ : g.IsOver S) := inferInstanceAs ((f.hom.comp g.hom).IsOver S)
-  inv_mem' {f} (_ : f.IsOver S) := inferInstanceAs (f.inv.IsOver S)
+  one_mem' := ⟨by exact RationalMap.id_compHom _⟩
+  mul_mem' {f g} hf hg := ⟨by
+    change (f.hom.comp g.hom).compHom (X ↘ S) = (X ↘ S).toRationalMap
+    rw [← RationalMap.comp_toRationalMap, RationalMap.comp_assoc,
+      RationalMap.comp_toRationalMap, hg.over, RationalMap.comp_toRationalMap, hf.over]⟩
+  inv_mem' {f} hf := ⟨f.inv_compHom S hf⟩
 
 
 
