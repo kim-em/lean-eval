@@ -578,7 +578,10 @@ nanoda policy. Issue intake remains open until the announced cutoff, so the
 campaign has two finite parts: drain the current queues, then freeze and drain
 the append-only cutoff delta.
 
-The retained baseline inventory contains 1,301 accepted Result records.
+The retained baseline inventory contains 1,301 accepted Result records, bound by
+inventory SHA256 `bb405fbabe084e106ad5500b455a05ba1e1d54175d1964db3aebcc3b6ea3fce3`
+in submissions' `evidence/historical-replay/inventories/` and Results source
+`ae1a9714c5433b4c195b8fdfb5643893ecac8019`.
 Inventory membership does not imply that every non-v1 replay is terminal. Keep
 the completed frozen v1 task/disposition bindings immutable and finish the
 remaining non-v1 work. The append-only delta after this inventory may grow
@@ -660,14 +663,20 @@ across five historical Lean toolchains.
       any exact retained archive before unavailable classification. Prepare
       the separate retained-corpus migration, archive-capable profile and
       queued-source recovery bindings; preserve original public visibility,
-      identities, provenance and attempts. Switch compatible State/consumer
+      identities, provenance and attempts. Unresolved means queued or
+      retryable-failed at the bound State head; existing unavailable and
+      nonretryable-failed dispositions stay terminal. Hold the blocked task IDs
+      out of dispatch, or pause the lane, until recovery is ready. Recovery
+      neither schedules release nor publishes source or archive bytes. Only
+      the existing archive controller receives exact task-bound single-use
+      unwrap authority. Switch compatible State/consumer
       readers only with controllers paused and no running replay, then require
       the existing bounded first-real-task canary and cleanup checks before
-      continuing each changed archive image's lane. Do not require these
-      blocked queued tasks to finish before the adapter that recovers them.
+      continuing each changed archive image's lane. The adapter may land while
+      these blocked tasks stay queued.
 - [ ] At the issue-intake cutoff, freeze the final Results/State delta and
       classify every additional legacy accepted Result.
-- [ ] Migrate any recoverable retained archive in that final delta to a
+- [ ] Migrate any recoverable retained legacy archive in that final delta to a
       per-submission envelope without changing archive bytes, stable IDs,
       original visibility or publication consent. This includes originally
       public sources recovered from exact retained snapshots.
@@ -687,8 +696,11 @@ ordinary server-intake submissions is part of this campaign.
 - [x] Keep the legacy identity absent from GitHub and remove transient identity
       and plaintext scratch material.
 - [x] Leave the dedicated Encrypt-only migration role and protected environment
-      dormant except for a bounded final-delta migration; neither has replay,
-      production intake, release, or State-write authority.
+      dormant except for the separately bounded retained-corpus recovery and
+      final-delta migrations. Each requires its exact reviewed selection and
+      preservation checks, and removal of the installed custodian identity
+      after the run. Neither role nor environment has replay, production
+      intake, release, or State-write authority.
 - [x] Keep the offline legacy identity under custodian control. Its eventual
       destruction is an explicit future custodian decision, not part of this
       overhaul.
