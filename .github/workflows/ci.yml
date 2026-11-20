@@ -60,7 +60,7 @@ jobs:
         run: |
           python scripts/check_pipeline_toolchain_contract.py
           python scripts/check_pipeline_toolchain_contract.py \
-            --toolchain-file toolchains/v4.35.0/lean-toolchain
+            --toolchain-file toolchains/v4.36.0/lean-toolchain
 
       # Install the pinned Lean toolchain without building the project. The
       # dependency selector consumes a graph produced by Lean's header parser;

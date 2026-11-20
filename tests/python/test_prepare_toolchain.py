@@ -18,7 +18,7 @@ class PrepareToolchainTests(unittest.TestCase):
     def test_published_configurations_have_matching_dependency_pins(self):
         default, profiles = MODULE.configurations(ROOT)
         self.assertEqual(default, "latest")
-        self.assertEqual(set(profiles), {"leanprover/lean4:v4.35.0", "leanprover/lean4:v4.36.0-rc2", "latest"})
+        self.assertEqual(set(profiles), {"leanprover/lean4:v4.36.0", "leanprover/lean4:v4.36.0-rc2", "latest"})
         self.assertEqual((profiles["latest"] / "lean-toolchain").read_bytes(),
                          (profiles["leanprover/lean4:v4.36.0-rc2"] / "lean-toolchain").read_bytes())
         self.assertNotEqual((profiles["latest"] / "lake-manifest.json").read_bytes(),

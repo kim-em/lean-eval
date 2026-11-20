@@ -31,15 +31,13 @@ The currently available configurations in `supported-toolchains.json` are:
 
 | Configuration | Lean | Mathlib | TauCeti |
 | --- | --- | --- | --- |
-| `stable` | `v4.35.0` | `07406378` | `1f9b4414` |
+| `stable` | `v4.36.0` | `fc4f59e5` | `d91980bd` |
 | `rc` | `v4.36.0-rc2` | `2ddf59c8` | `be86813d` |
 | `latest` (default) | `v4.36.0-rc2` | `048fffa1` | `cd41bffc` |
 
-Lean `v4.36.0` stable and `v4.37.0-rc1` have been released, but matching
-Mathlib/TauCeti builds are not yet available for all three intended configurations.
-In particular, [TauCeti's stable upgrade](https://github.com/TauCetiProject/TauCeti/pull/43422)
-is still in progress. The table records actual support until those dependencies
-and their caches are ready.
+Stable pins TauCeti main at `d91980bd`, ahead of its release tag, with
+Mathlib’s `v4.36.0` release commit. Lean `v4.37.0-rc1` has been released;
+`rc` and `latest` still await compatible Mathlib/TauCeti builds for that toolchain.
 
 The `latest` configuration is the default checkout so it can build the full catalog.
 CI requires each problem to compile on every configuration it declares as supported
@@ -311,10 +309,10 @@ Each library must match the workspace's Lean toolchain and all transitive depend
 pins. Unused libraries require no artifact downloads.
 
 The public CFSG pin still uses v4.35.0-rc3. Stacks uses v4.35.0 with Mathlib
-`56a00585`, while LeanEval's stable configuration uses Mathlib `07406378` to
-match TauCeti's stable release. These library imports fail the cache compatibility
+`56a00585`, while LeanEval's stable configuration uses Mathlib `fc4f59e5` to
+match its pinned TauCeti commit. These library imports fail the cache compatibility
 check until matching dependency builds are published, including the Mathlib pin.
-Unused solution libraries do not prevent evaluation on either toolchain. The helper
+Unused solution libraries do not prevent evaluation on any supported configuration. The helper
 uses the published [CFSG cache](https://cfsg-downloads.axiommath.workers.dev/lake/lake-cache-get-fast.sh)
 and [Stacks cache](https://stacks-cache.axiommath.workers.dev/lake/lake-cache-get-fast.sh)
 endpoints by default. Set `STACKS_ARTIFACT_ENDPOINT` and `STACKS_REVISION_ENDPOINT`
