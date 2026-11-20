@@ -368,20 +368,35 @@ lanes, but it does not delay initial production launch.
   final Results/State delta when issue intake closes so later server Results
   cannot silently expand the historical campaign.
 - Every accepted legacy result in that frozen scope must be classified as
-  public-source replayable, private-archive replayable, or unavailable for a
-  reviewed reason.
+  Git-source replayable, retained-archive replayable with its original source
+  visibility preserved, or unavailable for a reviewed reason. For unresolved
+  records, a failed source URL does not establish permanent unavailability
+  while an exact retained archive remains recoverable.
 - Use the smallest existing State event mechanism capable of recording the
   terminal disposition. Do not create a new aggregate transaction system unless
   an actual atomicity requirement is demonstrated.
 
-### 9.2 Private archive migration
+### 9.2 Retained archive migration
 
-- Reconcile every recoverable legacy private archive/result binding and the
-  explicit orphan set.
+- Reconcile every recoverable legacy archive/result binding and the explicit
+  orphan set, including originally public sources recovered from their exact
+  retained snapshots.
 - Use a dedicated migration Wrap role and custodian-supplied legacy identity.
 - Rewrap the per-submission data key without changing archive bytes or stable
   IDs.
+- Preserve original public/private visibility and publication consent. An
+  archive snapshot is not a reconstructed Git commit or source tree.
 - Verify the result; do not retain plaintext or migration credentials.
+
+Recovering an existing queued public task through its archive requires a
+reviewed, versioned source-recovery transition under its original authority.
+Preserve its Result and task identities, original source provenance,
+benchmark, toolchain, checker, measurement configuration and attempt count.
+Do not fabricate a failure or unavailable event to make that transition fit an
+older schema. Prepare compatible State and consumer contracts together, pause
+controllers, and prove no replay is running before switching readers. Queued
+work and the completed frozen v1 dispositions remain intact. This is a finite
+execution-method repair within the existing corpus, not a new replay service.
 
 ### 9.3 Replay execution
 
@@ -395,7 +410,13 @@ lanes, but it does not delay initial production launch.
 
 Historical completion for this overhaul means every legacy result recorded
 before issue intake closes has a terminal replay record or reviewed unavailable
-reason. The campaign must use the retained ordinary official-kernel-plus-nanoda
+reason. As specified in section 3.4 and the retained plan, a terminal record may
+report orchestration failure under the bounded retry policy; it must never be
+presented as checker acceptance, successful replay verification or reviewed
+unavailability. This clarification authorizes no retry-cap increase, attempt
+reset or reopening of the frozen v1 baseline.
+
+The campaign must use the retained ordinary official-kernel-plus-nanoda
 path, may restore only finite task-scoped controller machinery, and must remove
 that machinery again after both queues and the final cutoff delta are terminal.
 

@@ -578,10 +578,17 @@ nanoda policy. Issue intake remains open until the announced cutoff, so the
 campaign has two finite parts: drain the current queues, then freeze and drain
 the append-only cutoff delta.
 
-The completed historical baseline contains 1,301 terminal in-scope records.
-At the 2026-09-13 reconciliation, 80 later legacy issue-intake records formed
-the append-only post-baseline delta. That delta may grow until issue intake is
-frozen; keep it separate from the already terminal historical baseline.
+The retained baseline inventory contains 1,301 accepted Result records.
+Inventory membership does not imply that every non-v1 replay is terminal. Keep
+the completed frozen v1 task/disposition bindings immutable and finish the
+remaining non-v1 work. The append-only delta after this inventory may grow
+until issue intake is frozen; keep its classification and execution bindings
+separate.
+
+Terminal failed orchestration records remain failed records under the existing
+bounded retry policy, including exhausted attempts. Report them separately
+from checker acceptances and reviewed-unavailable dispositions; do not reset
+attempts or invent an unavailable reason to empty a queue.
 
 ### 12.1 Frozen v1 scope
 
@@ -649,10 +656,21 @@ across five historical Lean toolchains.
       recording a terminal outcome or reviewed unavailability for each.
 - [ ] Drain the 562 private tasks through the same checker path without
       retaining plaintext source, keys, credentials, or task-scoped resources.
+- [ ] For unresolved public tasks whose Git source is inaccessible, reconcile
+      any exact retained archive before unavailable classification. Prepare
+      the separate retained-corpus migration, archive-capable profile and
+      queued-source recovery bindings; preserve original public visibility,
+      identities, provenance and attempts. Switch compatible State/consumer
+      readers only with controllers paused and no running replay, then require
+      the existing bounded first-real-task canary and cleanup checks before
+      continuing each changed archive image's lane. Do not require these
+      blocked queued tasks to finish before the adapter that recovers them.
 - [ ] At the issue-intake cutoff, freeze the final Results/State delta and
       classify every additional legacy accepted Result.
-- [ ] Migrate any recoverable private archive in that final delta to a
-      per-submission envelope without changing archive bytes or stable IDs.
+- [ ] Migrate any recoverable retained archive in that final delta to a
+      per-submission envelope without changing archive bytes, stable IDs,
+      original visibility or publication consent. This includes originally
+      public sources recovered from exact retained snapshots.
 - [ ] Drain the final public and private delta and prove both planners empty,
       production State valid, and no historical replay running.
 - [ ] Disable the replay gates and delete the temporary controller, runner,
