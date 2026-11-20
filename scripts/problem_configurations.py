@@ -11,10 +11,10 @@ import sys
 import tarfile
 import tomllib
 
-from prepare_toolchain import configurations
+from prepare_toolchain import SUPPORT_ROLES, configurations
 
 
-CONFIGURATIONS = ("latest", "rc", "stable", "previous-stable")
+CONFIGURATIONS = SUPPORT_ROLES
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -44,7 +44,7 @@ def load_problems(root: Path) -> dict[str, dict]:
 def current_configuration(root: Path) -> str:
     registry = json.loads((root / "supported-toolchains.json").read_text())
     _, profiles = configurations(root)
-    for alias in CONFIGURATIONS:
+    for alias in (*CONFIGURATIONS, *registry.get("variants", {})):
         profile = profiles.get(registry.get(alias, registry["default"] if alias == "rc" else alias))
         if profile is None:
             continue
@@ -59,32 +59,60 @@ def configuration_alias(root: Path, configuration: str) -> str:
     for alias in CONFIGURATIONS:
         if registry.get(alias, registry["default"] if alias == "rc" else alias) == configuration:
             return alias
+    if configuration in registry.get("variants", {}):
+        configurations(root)
+        return configuration
     raise ValueError(f"unknown configuration: {configuration}")
+
+
+def configuration_policy(root: Path, configuration: str) -> tuple[str, frozenset[str]]:
+    if configuration in CONFIGURATIONS:
+        return configuration, frozenset()
+    configurations(root)
+    registry = json.loads((root / "supported-toolchains.json").read_text())
+    variant = registry.get("variants", {}).get(configuration)
+    if variant is None:
+        raise ValueError(f"unknown configuration: {configuration}")
+    unavailable = frozenset(variant.get("unsupported_modules", []))
+    known = {p["module"] for p in load_problems(root).values()}
+    if unavailable - known:
+        raise ValueError(f"{configuration}: unknown unsupported modules: {', '.join(sorted(unavailable - known))}")
+    return variant["support_role"], unavailable
 
 
 def require_supported(root: Path, configuration: str, problems: list[str]) -> None:
     known = load_problems(root)
+    role, unavailable = configuration_policy(root, configuration)
     for name in problems:
         if name not in known:
             raise ValueError(f"unknown problem: {name}")
         supported = supported_configurations(known[name])
-        if configuration not in supported:
+        if role not in supported:
             raise ValueError(f"{name} does not support {configuration}; choose {', '.join(supported)}")
+        if unavailable and known[name]["module"] in unavailable:
+            raise ValueError(f"{name} is unavailable in {configuration}; choose {role}")
 
 
 def compatible_modules(root: Path, configuration: str, requested: list[str]) -> list[str]:
     problems = load_problems(root)
+    role, unavailable = configuration_policy(root, configuration)
     known = {problem["module"] for problem in problems.values()}
     unknown = set(requested) - known
     if unknown:
         raise ValueError(f"unknown problem modules: {', '.join(sorted(unknown))}")
     selected = set(requested) if requested else known
     return sorted({problem["module"] for problem in problems.values()
-                   if problem["module"] in selected and configuration in supported_configurations(problem)})
+                   if problem["module"] in selected and problem["module"] not in unavailable
+                   and role in supported_configurations(problem)})
 
 
 def check_no_regressions(root: Path, base: str) -> None:
     current = load_problems(root)
+    registry_path = root / "supported-toolchains.json"
+    variants = json.loads(registry_path.read_text()).get("variants", {}) if registry_path.is_file() else {}
+    previous_registry = subprocess.run(["git", "show", f"{base}:supported-toolchains.json"],
+                                       cwd=root, capture_output=True, text=True)
+    previous_variants = json.loads(previous_registry.stdout).get("variants", {}) if previous_registry.returncode == 0 else {}
     archive = subprocess.check_output(["git", "archive", base, "manifests/problems"], cwd=root)
     with tarfile.open(fileobj=io.BytesIO(archive)) as source:
         for member in source:
@@ -99,12 +127,21 @@ def check_no_regressions(root: Path, base: str) -> None:
             if lost:
                 raise ValueError(f"{path.stem}: compatibility would decrease for {', '.join(sorted(lost))}; "
                                  "fix the problem for the upgraded dependencies instead")
+            for name in variants.keys() & previous_variants.keys():
+                old, new = previous_variants[name], variants[name]
+                was_supported = (old["support_role"] in supported_configurations(previous)
+                                 and previous["module"] not in old.get("unsupported_modules", []))
+                is_supported = (new["support_role"] in supported_configurations(current[path.stem])
+                                and current[path.stem]["module"] not in new.get("unsupported_modules", []))
+                if was_supported and not is_supported:
+                    raise ValueError(f"{path.stem}: compatibility would decrease for {name}; "
+                                     "fix the problem for the upgraded dependencies instead")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--configuration", choices=(*CONFIGURATIONS, "current"), default="current")
+    parser.add_argument("--configuration", default="current", help="Support role, library variant, or current")
     parser.add_argument("--base")
     parser.add_argument("--modules", help="Filter a comma-separated list of modules; an empty list selects all")
     parser.add_argument("--problem", action="append", default=[])
@@ -121,8 +158,10 @@ def main() -> int:
             selected = compatible_modules(args.root, configuration, list(filter(None, args.modules.split(","))))
             print(json.dumps(selected) if args.json else ",".join(selected))
         elif args.list_problems:
+            role, unavailable = configuration_policy(args.root, configuration)
             print(json.dumps([name for name, problem in problems.items()
-                              if configuration in supported_configurations(problem)]))
+                              if role in supported_configurations(problem)
+                              and (not unavailable or problem["module"] not in unavailable)]))
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         parser.exit(1, f"problem_configurations: {error}\n")
     return 0

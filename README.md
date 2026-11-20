@@ -42,6 +42,7 @@ The currently available configurations in `supported-toolchains.json` are:
 | `previous-stable` | `v4.35.0` | `07406378` | `1f9b4414` |
 | `rc` | `v4.36.0` | `fc4f59e5` | `d91980bd` |
 | `latest` (default) | `v4.36.0` | `fc4f59e5` | `d91980bd` |
+| `stacks` (library variant) | `v4.35.0` | `56a00585` | `1f9b4414` (metadata only) |
 
 `stable`, `rc`, and `latest` currently use the Mathlib and TauCeti `v4.36.0`
 release commits; `previous-stable` retains the previously supported 4.35.0 pins.
@@ -49,11 +50,21 @@ Lean `v4.37.0-rc1` has been released; `rc` and `latest` remain on stable while
 awaiting compatible Mathlib/TauCeti builds for that toolchain.
 The superseded `v4.36.0-rc2` snapshot is retired from new evaluations.
 
+The `stacks` variant uses Stacks commit `c496df0d` and the exact Mathlib snapshot
+of its published olean cache. It follows each problem's `previous-stable` support
+declaration. The finite-simple-groups problem requires TauCeti's different
+Mathlib snapshot and remains available through the canonical `previous-stable`
+configuration. TauCeti and CFSG dependency metadata is retained for workspace
+generation; their incompatible artifacts are unused in this variant. Existing
+problem support on the four roles is preserved.
+
 The `latest` configuration is the default checkout so it can build the full catalog.
 CI requires each problem to compile on every configuration it declares as supported
 without unexpected warnings; it does not compare their elaborated meanings
 across dependency versions. Cache restoration and sandbox/scoring checks also
 run on all four configurations. Mathlib's published cache must cover every module.
+Registered library variants also run compilation, cache, and scoring checks for
+their compatible problem modules.
 
 Problems may declare one of these support levels in their manifest:
 
@@ -95,6 +106,7 @@ Use `rc` for the release-candidate snapshot (or its stable fallback), or `latest
 for the default current library snapshot. Existing build outputs are excluded
 from these copies.
 Use `previous-stable` to prepare the preceding stable release in the same way.
+Use `stacks` to prepare the cached Stacks library snapshot on that release.
 After selecting a configuration, regenerate each
 workspace you use so its pins and extracted statements match that configuration.
 The submission service reads the closest `lean-toolchain` at or above each
@@ -327,10 +339,18 @@ and restores only the imported modules and their transitive dependencies. It use
 Each library must match the workspace's Lean toolchain and all transitive dependency
 pins. Unused libraries require no artifact downloads.
 
-The public CFSG pin still uses v4.35.0-rc3. Stacks uses v4.35.0 with Mathlib
-`56a00585`, while LeanEval's stable configuration uses Mathlib `fc4f59e5` to
-match its pinned TauCeti commit. These library imports fail the cache compatibility
-check until matching dependency builds are published, including the Mathlib pin.
+Stacks imports are available in the `stacks` configuration, using Lean v4.35.0
+and Mathlib `56a00585`, exactly matching its published build. Prepare it with
+`python scripts/prepare_toolchain.py stacks --destination /tmp/lean-eval-stacks`,
+then generate the problem workspace and add imports such as
+`import StacksCore.Algebra.Algebra.Defs` to `Submission.lean`. Run the cache
+preparation command above in that workspace before building or testing it.
+Archived workspace pins select `stacks` automatically. Problems must support
+`previous-stable`; TauCeti-dependent statements use its canonical snapshot.
+
+The other configurations use different Lean/Mathlib pins, so their Stacks
+imports fail the cache compatibility check. The public CFSG pin still uses
+v4.35.0-rc3 and has no compatible configuration yet.
 Unused solution libraries do not prevent evaluation on any supported configuration. The helper
 uses the published [CFSG cache](https://cfsg-downloads.axiommath.workers.dev/lake/lake-cache-get-fast.sh)
 and [Stacks cache](https://stacks-cache.axiommath.workers.dev/lake/lake-cache-get-fast.sh)

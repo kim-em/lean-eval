@@ -215,7 +215,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [latest, rc, stable, previous-stable]
+        configuration: [latest, rc, stable, previous-stable, stacks]
     steps:
       - name: Free up disk space
         # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
@@ -264,6 +264,23 @@ jobs:
           bwrap_path=$(bash scripts/install_bwrap.sh "$RUNNER_TEMP/lean-eval-bwrap")
           echo "COMPARATOR_BWRAP=$bwrap_path" >> "$GITHUB_ENV"
 
+      - name: Restore the published Stacks solver cache
+        if: matrix.configuration == 'stacks'
+        env:
+          STACKS_ARTIFACT_ENDPOINT: ${{ vars.STACKS_ARTIFACT_ENDPOINT }}
+          STACKS_REVISION_ENDPOINT: ${{ vars.STACKS_REVISION_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          git -C .lake/packages/Stacks sparse-checkout set --no-cone \
+            /lean-toolchain /lakefile.toml /lake-manifest.json \
+            /StacksCore/Tactic/ /StacksCore/Algebra/Algebra/Defs.lean
+          mkdir -p .ci/stacks-cache
+          printf 'import StacksCore.Algebra.Algebra.Defs\n' > .ci/stacks-cache/Probe.lean
+          cp lean-toolchain lakefile.toml lake-manifest.json .ci/stacks-cache/
+          mkdir -p .ci/stacks-cache/.lake
+          ln -s "$GITHUB_WORKSPACE/.lake/packages" .ci/stacks-cache/.lake/packages
+          bash scripts/fetch_dependency_caches.sh --restore .ci/stacks-cache
+
       # These probes stay in the mandatory path. Parallelization must not
       # weaken the submission trust boundary.
       - name: Probe sandbox is engaged
@@ -288,6 +305,31 @@ jobs:
 
       - name: Run eval workflow smoke test
         run: lake exe lean-eval check-eval-workflow
+
+      - name: Score a submitted proof importing Stacks
+        if: matrix.configuration == 'stacks'
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          root = Path.cwd()
+          workspace = root / ".ci/stacks-workspaces/two_plus_two"
+          shutil.copytree(root / "generated/two_plus_two", workspace,
+                          ignore=shutil.ignore_patterns(".lake"))
+          (workspace / ".lake").mkdir()
+          (workspace / ".lake/packages").symlink_to(root / ".lake/packages", target_is_directory=True)
+          shutil.copyfile(root / "lake-manifest.json", workspace / "lake-manifest.json")
+          submission = workspace / "Submission.lean"
+          content = submission.read_text()
+          assert "  sorry\n" in content
+          submission.write_text("import StacksCore.Algebra.Algebra.Defs\n" +
+                                content.replace("  sorry\n", "  norm_num\n", 1))
+          PY
+          cache_env="$(env -u GITHUB_ENV bash scripts/fetch_dependency_caches.sh \
+            --restore .ci/stacks-workspaces/two_plus_two)"
+          eval "$cache_env"
+          lake env lean --run tests/lean/StacksImportSmoke.lean .ci/stacks-workspaces
 
   security:
     name: Security and scoring smoke tests
@@ -447,7 +489,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [rc, stable, previous-stable]
+        configuration: [rc, stable, previous-stable, stacks]
         shard: ${{ fromJSON(needs.classify.outputs.matrix).include }}
     steps:
       - name: Free up disk space
@@ -488,6 +530,9 @@ jobs:
           lint: false
 
       - name: Fetch imported dependency build caches
+        # All eligible Stacks-variant statements use Mathlib; the whole-root
+        # scan would also include its excluded TauCeti problem.
+        if: matrix.configuration != 'stacks'
         env:
           STACKS_ARTIFACT_ENDPOINT: ${{ vars.STACKS_ARTIFACT_ENDPOINT }}
           STACKS_REVISION_ENDPOINT: ${{ vars.STACKS_REVISION_ENDPOINT }}

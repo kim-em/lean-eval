@@ -16,6 +16,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = ("lean-toolchain", "lakefile.toml", "lake-manifest.json")
+SUPPORT_ROLES = ("latest", "rc", "stable", "previous-stable")
 
 
 def configurations(root: Path) -> tuple[str, dict[str, Path]]:
@@ -33,8 +34,24 @@ def configurations(root: Path) -> tuple[str, dict[str, Path]]:
                 raise ValueError(f"missing regular configuration file: {path / name}")
         result[configuration] = path
     if any(data[alias] not in result
-           for alias in ("default", "stable", "previous-stable", "rc", "latest") if alias in data):
+           for alias in ("default", *SUPPORT_ROLES) if alias in data):
         raise ValueError("a configured default, stable, previous-stable, rc or latest alias has no configuration")
+    variants = data.get("variants", {})
+    if not isinstance(variants, dict):
+        raise ValueError("configuration variants must be an object")
+    reserved = {"default", *SUPPORT_ROLES, *(data.get(role) for role in SUPPORT_ROLES)}
+    for name, variant in variants.items():
+        if name in reserved or name not in result or not isinstance(variant, dict):
+            raise ValueError(f"invalid configuration variant: {name}")
+        if variant.get("support_role") not in SUPPORT_ROLES or variant["support_role"] not in data:
+            raise ValueError(f"configuration variant {name} has no supported role")
+        canonical = result[data[variant["support_role"]]]
+        if (result[name] / "lean-toolchain").read_text().strip() != (canonical / "lean-toolchain").read_text().strip():
+            raise ValueError(f"configuration variant {name} must use its support role's Lean toolchain")
+        unavailable = variant.get("unsupported_modules", [])
+        if (not isinstance(unavailable, list) or any(not isinstance(m, str) or not m for m in unavailable)
+                or len(set(unavailable)) != len(unavailable)):
+            raise ValueError(f"configuration variant {name} has invalid unsupported modules")
     return data["default"], result
 
 

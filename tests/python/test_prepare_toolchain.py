@@ -18,7 +18,7 @@ class PrepareToolchainTests(unittest.TestCase):
     def test_published_configurations_have_matching_dependency_pins(self):
         default, profiles = MODULE.configurations(ROOT)
         self.assertEqual(default, "latest")
-        self.assertEqual(set(profiles), {"leanprover/lean4:v4.36.0", "leanprover/lean4:v4.35.0", "latest"})
+        self.assertEqual(set(profiles), {"leanprover/lean4:v4.36.0", "leanprover/lean4:v4.35.0", "latest", "stacks"})
         registry = json.loads((ROOT / "supported-toolchains.json").read_text())
         self.assertEqual(registry["rc"], registry["stable"])
         self.assertEqual(registry["previous-stable"], "leanprover/lean4:v4.35.0")
@@ -30,6 +30,11 @@ class PrepareToolchainTests(unittest.TestCase):
             lakefile = tomllib.loads((profile / "lakefile.toml").read_text())
             packages = {p["name"].strip("«»"): p for p in json.loads(
                 (profile / "lake-manifest.json").read_text())["packages"]}
+            # The generator requires every solution-policy entry in each root
+            # lakefile, even when that profile cannot use the library's cache.
+            solutions = json.loads((ROOT / "solution-dependencies.json").read_text())
+            requirements = {dependency["name"] for dependency in lakefile["require"]}
+            self.assertLessEqual({entry["name"] for entry in solutions}, requirements)
             for dependency in lakefile["require"]:
                 self.assertEqual(dependency["rev"], packages[dependency["name"]]["rev"])
 
@@ -92,6 +97,32 @@ class PrepareToolchainTests(unittest.TestCase):
             path.write_text(json.dumps(registry))
             with self.assertRaisesRegex(ValueError, "alias has no configuration"):
                 MODULE.configurations(root)
+
+    def test_library_variants_require_a_registered_snapshot_and_support_role(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.fixture(root)
+            path = root / "supported-toolchains.json"
+            data = json.loads(path.read_text())
+            data["previous-stable"] = data["stable"]
+            data["configurations"]["stacks"] = "stacks"
+            profile = root / "stacks"
+            profile.mkdir()
+            for name in MODULE.FILES:
+                content = (root / "stable" / name).read_text() if name == "lean-toolchain" else "stacks"
+                (profile / name).write_text(content)
+            data["variants"] = {"stacks": {"support_role": "previous-stable"}}
+            path.write_text(json.dumps(data))
+            MODULE.prepare(root, "stacks", root / ".lake/stacks-copy")
+            self.assertEqual((root / ".lake/stacks-copy/lakefile.toml").read_text(), "stacks")
+            for variants in [{"missing": {"support_role": "previous-stable"}},
+                             {"stable": {"support_role": "stable"}},
+                             {"stacks": {"support_role": "nightly"}},
+                             {"stacks": {"support_role": "previous-stable", "unsupported_modules": "bad"}}]:
+                data["variants"] = variants
+                path.write_text(json.dumps(data))
+                with self.subTest(variants=variants), self.assertRaises(ValueError):
+                    MODULE.configurations(root)
 
 
 if __name__ == "__main__":

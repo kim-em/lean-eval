@@ -73,6 +73,65 @@ class ProblemConfigurationsTests(unittest.TestCase):
     def test_checkout_configuration_uses_full_dependency_pins(self):
         self.assertEqual(policy.current_configuration(ROOT), "latest")
 
+    def test_library_variant_inherits_role_without_narrowing_the_canonical_snapshot(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.write_problem(root, "a")
+            self.write_problem(root, "b", ["latest"])
+            self.write_problem(root, "c")
+            profiles = {"latest": ("v4.36.0", "current"),
+                        "previous": ("v4.35.0", "tauceti"), "stacks": ("v4.35.0", "stacks")}
+            for directory, (lean, snapshot) in profiles.items():
+                profile = root / directory
+                profile.mkdir()
+                (profile / "lean-toolchain").write_text("leanprover/lean4:" + lean)
+                (profile / "lakefile.toml").write_text(snapshot)
+                (profile / "lake-manifest.json").write_text(snapshot)
+            registry = {"default": "latest", "latest": "latest",
+                        "stable": "leanprover/lean4:v4.36.0", "rc": "leanprover/lean4:v4.36.0",
+                        "previous-stable": "leanprover/lean4:v4.35.0",
+                        "configurations": {"latest": "latest", "leanprover/lean4:v4.36.0": "latest",
+                                           "leanprover/lean4:v4.35.0": "previous", "stacks": "stacks"},
+                        "variants": {"stacks": {"support_role": "previous-stable",
+                                                "unsupported_modules": ["LeanEval.C"]}}}
+            (root / "supported-toolchains.json").write_text(json.dumps(registry))
+            for name in ("lean-toolchain", "lakefile.toml", "lake-manifest.json"):
+                (root / name).write_bytes((root / "stacks" / name).read_bytes())
+            self.assertEqual(policy.current_configuration(root), "stacks")
+            self.assertEqual(policy.configuration_alias(root, "stacks"), "stacks")
+            self.assertEqual(policy.compatible_modules(root, "stacks", []), ["LeanEval.A"])
+            self.assertEqual(policy.compatible_modules(root, "previous-stable", []), ["LeanEval.A", "LeanEval.C"])
+            policy.require_supported(root, "previous-stable", ["c"])
+            policy.require_supported(root, "stacks", ["a"])
+            with self.assertRaisesRegex(ValueError, "unavailable in stacks; choose previous-stable"):
+                policy.require_supported(root, "stacks", ["c"])
+            with self.assertRaisesRegex(ValueError, "does not support stacks"):
+                policy.require_supported(root, "stacks", ["b"])
+            registry["variants"]["stacks"]["unsupported_modules"] = ["LeanEval.Typo"]
+            (root / "supported-toolchains.json").write_text(json.dumps(registry))
+            with self.assertRaisesRegex(ValueError, "unknown unsupported modules"):
+                policy.compatible_modules(root, "stacks", [])
+
+    def test_retained_variant_cannot_lose_compatible_problems(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.write_problem(root, "a")
+            self.write_problem(root, "b")
+            registry = {"variants": {"stacks": {"support_role": "previous-stable",
+                                                "unsupported_modules": ["LeanEval.B"]}}}
+            path = root / "supported-toolchains.json"
+            path.write_text(json.dumps(registry))
+            for args in [["init", "-q"], ["add", "."],
+                         ["-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "base"]]:
+                subprocess.run(["git", *args], cwd=root, check=True)
+            registry["variants"]["stacks"]["unsupported_modules"] = []
+            path.write_text(json.dumps(registry))
+            policy.check_no_regressions(root, "HEAD")
+            registry["variants"]["stacks"]["unsupported_modules"] = ["LeanEval.A", "LeanEval.B"]
+            path.write_text(json.dumps(registry))
+            with self.assertRaisesRegex(ValueError, "compatibility would decrease for stacks"):
+                policy.check_no_regressions(root, "HEAD")
+
 
 if __name__ == "__main__":
     unittest.main()

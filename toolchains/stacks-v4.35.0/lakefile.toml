@@ -1,0 +1,82 @@
+name = "lean-eval"
+defaultTargets = ["LeanEval"]
+# Generated benchmark statements retain legacy visibility rules.
+allowNonModules = true
+
+[leanOptions]
+autoImplicit = false
+
+# Available to generated solutions only. Generation rejects statement imports
+# from lean-pool; keep this before Mathlib so Mathlib owns shared pins.
+[[require]]
+name = "lean-pool"
+git = "https://github.com/Vilin97/lean-pool.git"
+rev = "e9d53e9cbcff8dfd0cc816ba94db7a26b082929f"
+
+# Keep all solution-library metadata required by the workspace generator.
+# This snapshot matches Stacks' published cache; CFSG imports remain unavailable.
+[[require]]
+name = "cfsg"
+git = "https://github.com/AxiomMath/CFSG.git"
+rev = "5437cdc31389dd9aeaa5c2a9465a4e164f8dea33"
+
+[[require]]
+name = "Stacks"
+git = "https://github.com/AxiomMath/Stacks.git"
+rev = "c496df0d9beea9deaeabcea8492605f9a0a2313b"
+
+# Retain the canonical TauCeti pin as dependency metadata. Its artifacts do not
+# match this Mathlib snapshot, so the TauCeti problem is excluded in the registry.
+# Mathlib comes last to own all shared transitive pins.
+[[require]]
+name = "TauCeti"
+git = "https://github.com/TauCetiProject/TauCeti"
+rev = "1f9b4414105d86e487a4ac4c3d3397076a44d0d2"
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "56a005855ea17e0b0958f73ec801ae140b0a1679"
+
+[[require]]
+name = "lean-eval-generator"
+git = "https://github.com/leanprover/lean-eval-generator.git"
+rev = "0b8cc2d141710a18515c53448f006c971dd8eeb4"
+
+[[lean_lib]]
+name = "LeanEval"
+
+[[lean_lib]]
+name = "EvalTools"
+
+[[lean_exe]]
+name = "extract_theorem"
+root = "EvalTools.ExtractTheorem"
+
+[[lean_exe]]
+name = "eval_inventory"
+root = "EvalTools.ProblemInventory"
+
+[[lean_exe]]
+name = "lean-eval"
+root = "EvalTools.Main"
+
+[[lean_exe]]
+name = "test_validate_submission"
+srcDir = "tests/lean"
+root = "EvalToolsTests.ValidateSubmissionTest"
+
+[[lean_exe]]
+name = "test_check_comparator_installation"
+srcDir = "tests/lean"
+root = "EvalToolsTests.CheckComparatorInstallationTest"
+
+[[lean_exe]]
+name = "test_generate"
+srcDir = "tests/lean"
+root = "EvalToolsTests.GenerateTest"
+
+[[lean_exe]]
+name = "test_module_coverage"
+srcDir = "tests/lean"
+root = "EvalToolsTests.ModuleCoverageTest"

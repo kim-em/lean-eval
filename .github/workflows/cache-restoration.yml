@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [latest, rc, stable, previous-stable]
+        configuration: [latest, rc, stable, previous-stable, stacks]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -79,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [latest, rc, stable, previous-stable]
+        configuration: [latest, rc, stable, previous-stable, stacks]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:

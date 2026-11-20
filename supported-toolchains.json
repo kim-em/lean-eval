@@ -3,10 +3,19 @@
   "configurations": {
     "leanprover/lean4:v4.36.0": "toolchains/v4.36.0",
     "latest": "toolchains/latest",
-    "leanprover/lean4:v4.35.0": "toolchains/v4.35.0"
+    "leanprover/lean4:v4.35.0": "toolchains/v4.35.0",
+    "stacks": "toolchains/stacks-v4.35.0"
   },
   "stable": "leanprover/lean4:v4.36.0",
   "rc": "leanprover/lean4:v4.36.0",
   "latest": "latest",
-  "previous-stable": "leanprover/lean4:v4.35.0"
+  "previous-stable": "leanprover/lean4:v4.35.0",
+  "variants": {
+    "stacks": {
+      "support_role": "previous-stable",
+      "unsupported_modules": [
+        "LeanEval.GroupTheory.ClassificationFiniteSimpleGroups"
+      ]
+    }
+  }
 }

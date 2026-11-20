@@ -189,6 +189,33 @@ class SelectSubmissionToolchainTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.ToolchainRequestError, "does not support previous-stable"):
             MODULE.select(self.archive(files), self.root)
 
+    def test_library_variant_selects_exact_pins_and_enforces_role_and_module_coverage(self):
+        path = self.root / "supported-toolchains.json"
+        data = json.loads(path.read_text())
+        data["previous-stable"] = data["stable"]
+        data["configurations"]["stacks"] = "stacks"
+        data["variants"] = {"stacks": {"support_role": "previous-stable",
+                                      "unsupported_modules": ["LeanEval.B"]}}
+        path.write_text(json.dumps(data))
+        profile = self.root / "stacks"
+        profile.mkdir()
+        (profile / "lean-toolchain").write_text(data["stable"])
+        (profile / "lake-manifest.json").write_text("{}")
+        (profile / "lakefile.toml").write_text('[[require]]\nname = "mathlib"\nrev = "stacks-release"\n')
+        (self.root / "stable/lakefile.toml").write_text('[[require]]\nname = "mathlib"\nrev = "tauceti-snapshot"\n')
+        for name in ("a", "b"):
+            (self.root / f"manifests/problems/{name}.toml").write_text(f'module = "LeanEval.{name.upper()}"\n')
+        files = self.pinned_workspace("stacks-release") + [("source/lean-toolchain", data["stable"])]
+        self.assertEqual(MODULE.select(self.archive(files), self.root), ("stacks", ["a"]))
+        blocked = self.pinned_workspace("stacks-release", "b", "source/generated/b") + [
+            ("source/lean-toolchain", data["stable"])]
+        with self.assertRaisesRegex(MODULE.ToolchainRequestError, "unavailable in stacks"):
+            MODULE.select(self.archive(blocked), self.root)
+        (self.root / "manifests/problems/a.toml").write_text(
+            'module = "LeanEval.A"\nsupported_configurations = ["latest", "rc", "stable"]\n')
+        with self.assertRaisesRegex(MODULE.ToolchainRequestError, "does not support stacks"):
+            MODULE.select(self.archive(files), self.root)
+
     def test_cli_applies_latest_pins_and_preserves_the_runner_toolchain_contract(self):
         self.latest_configuration()
         scripts = self.root / "scripts"

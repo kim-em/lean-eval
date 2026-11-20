@@ -33,6 +33,17 @@ using exactly its Mathlib revision and transitive dependency pins. A recent
 Mathlib commit alone is insufficient: TauCeti's artifacts must match the complete
 dependency set.
 
+Some solution libraries publish a different compatible Mathlib snapshot on the
+same Lean release. Register these as library variants, preserving the canonical
+four support roles. For example, `stacks` uses the published Lean 4.35.0/Mathlib
+release cache, while canonical `previous-stable` uses TauCeti's later Mathlib pin.
+The registry's `variants` entry assigns a `support_role` and lists any
+`unsupported_modules` requiring unavailable library artifacts.
+Retain all configured solution-library requires: the workspace generator validates
+them even when unused. A variant must use the same
+Lean toolchain as that role. Validate all remaining modules and real solver
+imports with compilation disabled for dependency restoration.
+
 The four names describe support roles, not necessarily four distinct versions.
 When adopting a stable release that supersedes the current RC, retire that RC,
 point `rc` at stable, and advance `latest` to the new stable snapshot in the same
@@ -142,8 +153,10 @@ root = pathlib.Path.cwd()
 path = root / "supported-toolchains.json"
 registry = json.loads(path.read_text())
 registry["rc"] = registry["stable"]
+retained = {registry[alias] for alias in ("default", "stable", "previous-stable", "rc", "latest")}
+retained.update(registry.get("variants", {}))
 for key in list(registry["configurations"]):
-    if key not in {registry[alias] for alias in ("default", "stable", "previous-stable", "rc", "latest")}:
+    if key not in retained:
         del registry["configurations"][key]
 path.write_text(json.dumps(registry, indent=2) + "\n")
 stable = root / registry["configurations"][registry["stable"]]
@@ -159,6 +172,10 @@ No selector special case is needed: matching identical snapshots prefer the
 default `latest`, including for problems declared `latest`-only. Keep all existing
 problem support declarations; coincident profiles must not lose support when
 they split again on adoption of the next RC.
+On stable promotion, update variants to their role's new Lean toolchain or
+retire those tied to the release leaving the support window. Archived evaluations
+retain the original variant through their benchmark commit. For a retained
+variant, the compatibility check rejects decreased problem coverage.
 
 Synchronize the root checkout with its default profile, and update the README's
 actual-support table and any release-adoption note:
@@ -196,13 +213,20 @@ breaks an existing problem, repair its statement source, imports, or API usage
 instead of reducing its support. Keep any required statement-revision and
 lifecycle metadata consistent with the catalog's existing rules.
 
+Do not put library-variant names in `supported_configurations`: they inherit the
+assigned role's declaration and apply their registry module restrictions. A new
+problem that omits `previous-stable` also declines `stacks`. Restrictions on a
+library variant do not narrow support on its canonical role.
+
 Keep incompatible declarations in separate source modules: a module must compile
 on every profile needed by any problem in it. The compatibility check rejects
 narrowed declarations, while compilation checks actual compatibility.
 
 ## 4. Validate each profile and its caches
 
-Repeat this sequence for `latest`, `rc`, `stable`, and `previous-stable`:
+Repeat this sequence for `latest`, `rc`, `stable`, `previous-stable`, and registered
+variants, currently `stacks`. Restore libraries only for eligible problem modules
+and submitted imports; a whole-root import scan includes excluded modules too.
 
 ```bash
 configuration=latest
@@ -212,7 +236,9 @@ cd "$validation_root/$configuration"
 python scripts/prepare_ci_dependencies.py
 lake exe cache get
 lake --no-build build Mathlib
-cache_env="$(bash scripts/fetch_dependency_caches.sh --restore .)" && eval "$cache_env"
+if [ "$configuration" != stacks ]; then
+  cache_env="$(bash scripts/fetch_dependency_caches.sh --restore .)" && eval "$cache_env"
+fi
 lake exe lean-eval check-problem-build
 lake exe lean-eval validate-manifest --assume-modules-built
 lake exe lean-eval generate
@@ -230,6 +256,8 @@ artifact cache from another checkout or profile.
 Run Lean unit tests and representative generated workspace builds, including
 problems changed during the upgrade and one importing TauCeti. CI also requires
 cache restoration and comparator sandbox/scoring checks on all four profiles.
+The Stacks variant additionally restores an actual Stacks import from the public
+cache and runs comparator/scoring smoke tests with that import in the submission.
 Unexpected warnings must be fixed; benchmark placeholder `sorry` warnings are
 the existing exception.
 
