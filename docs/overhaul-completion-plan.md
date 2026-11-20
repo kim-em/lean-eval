@@ -55,8 +55,9 @@ The whole overhaul is complete only after production launch **and**:
 - every legacy accepted result recorded before issue intake closes has either
   a terminal official-kernel-plus-nanoda replay record or a reviewed
   unavailable reason;
-- every recoverable historical private archive in that scope has the required
-  per-submission envelope for replay;
+- every recoverable historical private archive, and each exact retained public
+  archive needed to recover a legacy Result without a terminal disposition in
+  that scope, has the required per-submission envelope for replay;
 - the neutral open-problems tab exists (it may be empty initially);
 - the retained software-verification and editorial work is in its agreed
   state; and
@@ -368,20 +369,53 @@ lanes, but it does not delay initial production launch.
   final Results/State delta when issue intake closes so later server Results
   cannot silently expand the historical campaign.
 - Every accepted legacy result in that frozen scope must be classified as
-  public-source replayable, private-archive replayable, or unavailable for a
-  reviewed reason.
+  Git-source replayable, retained-archive replayable with its original source
+  visibility preserved, or unavailable for a reviewed reason. For unresolved
+  records, a failed source URL does not establish permanent unavailability
+  while an exact retained archive remains recoverable.
+- For an existing task, unresolved means queued or retryable-failed with fewer
+  than four attempts used at the packet's exact State head. Existing unavailable,
+  nonretryable-failed and exhausted dispositions remain terminal; this recovery
+  does not reopen them.
 - Use the smallest existing State event mechanism capable of recording the
   terminal disposition. Do not create a new aggregate transaction system unless
   an actual atomicity requirement is demonstrated.
 
-### 9.2 Private archive migration
+### 9.2 Retained archive migration
 
 - Reconcile every recoverable legacy private archive/result binding and the
-  explicit orphan set.
+  explicit orphan set, plus exact originally public archives needed to recover
+  legacy Results whose Git source is inaccessible and which lack an existing
+  terminal disposition. Public sources that remain replayable from Git do not
+  require archive migration.
 - Use a dedicated migration Wrap role and custodian-supplied legacy identity.
 - Rewrap the per-submission data key without changing archive bytes or stable
   IDs.
+- Preserve original public/private visibility and publication consent. An
+  archive snapshot is not a reconstructed Git commit or source tree.
+- Recovery creates no release schedule and publishes no archive bytes or
+  recovered source. Historical replay authority cannot enter the release queue.
 - Verify the result; do not retain plaintext or migration credentials.
+
+Recovering an existing queued public task through its archive requires a
+reviewed, versioned source-recovery transition.
+Preserve its Result and task identities, original source provenance,
+benchmark, toolchain, checker, measurement configuration and attempt count.
+Do not fabricate a failure or unavailable event to make that transition fit an
+older schema. Prepare compatible State and consumer contracts together, pause
+controllers, and prove no replay is running before switching readers. Queued
+work and the completed frozen v1 dispositions remain intact. This is a finite
+execution-method repair within the existing corpus, not a new replay service.
+Hold identified blocked task IDs out of dispatch until that recovery path is
+ready; pause the lane if it cannot safely restrict selection. Do not spend
+attempts retrying a source already known to need its retained snapshot.
+
+The existing archive replay controller performs any unwrap through its
+task-bound, single-use capability under the reviewed versioned recovery
+authority. Bind that authority to exactly the recovered task IDs and archives;
+the ordinary public Git controller receives no unwrap authority. The separate
+retained-corpus migration is finite and independently bound from the final
+cutoff delta; neither may expand the immutable baseline migration selection.
 
 ### 9.3 Replay execution
 
@@ -395,7 +429,14 @@ lanes, but it does not delay initial production launch.
 
 Historical completion for this overhaul means every legacy result recorded
 before issue intake closes has a terminal replay record or reviewed unavailable
-reason. The campaign must use the retained ordinary official-kernel-plus-nanoda
+reason. As specified in section 3.4 and the retained plan, a terminal record may
+report orchestration failure under the bounded retry policy; it must never be
+presented as checker acceptance, successful replay verification or reviewed
+unavailability. No retry-cap increase, attempt reset or reopening of the frozen
+v1 baseline is permitted. Pause and repair a lane-wide orchestration incident
+before continuing; its failed records do not establish checker acceptance.
+
+The campaign must use the retained ordinary official-kernel-plus-nanoda
 path, may restore only finite task-scoped controller machinery, and must remove
 that machinery again after both queues and the final cutoff delta are terminal.
 
