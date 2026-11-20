@@ -348,9 +348,19 @@ preparation command above in that workspace before building or testing it.
 Archived workspace pins select `stacks` automatically. Problems must support
 `previous-stable`; TauCeti-dependent statements use its canonical snapshot.
 
-The other configurations use different Lean/Mathlib pins, so their Stacks
-imports fail the cache compatibility check. The public CFSG pin still uses
-v4.35.0-rc3 and has no compatible configuration yet.
+CFSG imports are available in `previous-stable`, using CFSG commit `965a0775`
+on Lean v4.35.0 with Mathlib `07406378` and TauCeti `1f9b4414`, exactly matching
+its published cache. Prepare it with
+`python scripts/prepare_toolchain.py previous-stable --destination /tmp/lean-eval-cfsg`,
+then generate a problem workspace and add imports such as `import CFSG.Algebra.F4`.
+Run the cache preparation command above in that workspace before building or
+testing it. All problems declaring `previous-stable` support are eligible.
+
+These libraries currently require different Mathlib snapshots: use `stacks` for
+Stacks and `previous-stable` for CFSG, and submit their workspaces separately.
+The other configurations retain incompatible pins, so their imports fail the
+cache compatibility check. A future CFSG Lean v4.36.0 build can be adopted once
+its complete dependency pins and published cache have been validated.
 Unused solution libraries do not prevent evaluation on any supported configuration. The helper
 uses the published [CFSG cache](https://cfsg-downloads.axiommath.workers.dev/lake/lake-cache-get-fast.sh)
 and [Stacks cache](https://stacks-cache.axiommath.workers.dev/lake/lake-cache-get-fast.sh)

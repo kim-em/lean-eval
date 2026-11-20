@@ -44,6 +44,13 @@ them even when unused. A variant must use the same
 Lean toolchain as that role. Validate all remaining modules and real solver
 imports with compilation disabled for dependency restoration.
 
+CFSG currently needs no variant: its published Lean 4.35.0 build matches
+canonical `previous-stable`'s Mathlib and TauCeti pins. Update that profile's
+CFSG require and manifest entry together, including `configFile` if upstream
+moves between `lakefile.lean` and `lakefile.toml`. Keep the working core pins;
+a matching Lean version alone is insufficient. CI restores a CFSG module with
+compilation disabled and scores a CFSG-importing submission through both kernels.
+
 The four names describe support roles, not necessarily four distinct versions.
 When adopting a stable release that supersedes the current RC, retire that RC,
 point `rc` at stable, and advance `latest` to the new stable snapshot in the same
@@ -287,12 +294,19 @@ After a monitor exits, use `gh run view` or the run's jobs API for exact job sta
 and failure logs. Fix failures before merging. If prerequisite PRs must merge
 first, wait for them before adopting their final commits and caches.
 
-After merge, confirm the main-branch regeneration workflow passes and its
-generated workspaces use the default pins. The main-advance notification then
-triggers the leaderboard's benchmark-snapshot update and site deployment; confirm
-that snapshot records the new benchmark commit and default pins, and verify the
-live site. The submissions pipeline selects the benchmark's pinned configuration;
-this pin update does not require a Worker deployment.
+When default pins or statement sources change, confirm the main-branch
+regeneration workflow passes and its generated workspaces use the default pins.
+The main-advance notification then triggers the leaderboard's benchmark-snapshot
+update and site deployment; confirm the snapshot records the new benchmark
+commit and default pins, and verify the live site.
+
+An update confined to a nondefault profile, such as the CFSG pin in
+`previous-stable`, leaves the default workspaces and site snapshot unchanged;
+the path-filtered regeneration and notification workflows do not run for it.
+Verify the selected profile and real source-archive selection against the merged
+benchmark commit, including the cache-only restoration and scoring checks above.
+The submissions pipeline reads these benchmark-owned profiles directly; this
+pin update does not require a Worker deployment.
 
 Confirm source archive selection records the expected Lean toolchain and resolves
 the exact dependency pins to the intended profile. When checking a new real

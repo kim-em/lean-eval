@@ -151,10 +151,10 @@
       "type": "git",
       "subDir": null,
       "scope": "",
-      "rev": "5437cdc31389dd9aeaa5c2a9465a4e164f8dea33",
+      "rev": "965a0775e82217494217503621b843e1b0e1e337",
       "name": "cfsg",
       "manifestFile": "lake-manifest.json",
-      "inputRev": "5437cdc31389dd9aeaa5c2a9465a4e164f8dea33",
+      "inputRev": "965a0775e82217494217503621b843e1b0e1e337",
       "inherited": false,
       "configFile": "lakefile.toml"
     },

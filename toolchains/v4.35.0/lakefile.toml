@@ -15,12 +15,12 @@ rev = "e9d53e9cbcff8dfd0cc816ba94db7a26b082929f"
 
 # Large solution libraries. Their caches are fetched only when imported.
 # Keep these before TauCeti and Mathlib so the benchmark owns shared pins.
-# Their published pins currently predate this toolchain; cache preparation
-# rejects imports until the publishers provide matching builds (see README).
+# CFSG matches this Lean/Mathlib/TauCeti snapshot and has a published cache.
+# Stacks uses a different Mathlib pin; select its library variant (see README).
 [[require]]
 name = "cfsg"
 git = "https://github.com/AxiomMath/CFSG.git"
-rev = "5437cdc31389dd9aeaa5c2a9465a4e164f8dea33"
+rev = "965a0775e82217494217503621b843e1b0e1e337"
 
 [[require]]
 name = "Stacks"

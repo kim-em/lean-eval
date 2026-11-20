@@ -264,6 +264,12 @@ jobs:
           bwrap_path=$(bash scripts/install_bwrap.sh "$RUNNER_TEMP/lean-eval-bwrap")
           echo "COMPARATOR_BWRAP=$bwrap_path" >> "$GITHUB_ENV"
 
+      - name: Prepare CFSG solver source headers
+        if: matrix.configuration == 'previous-stable'
+        run: |
+          git -C .lake/packages/cfsg sparse-checkout set --no-cone \
+            /lean-toolchain /lakefile.toml /lake-manifest.json /CFSG/Algebra/F4.lean
+
       - name: Restore the published Stacks solver cache
         if: matrix.configuration == 'stacks'
         env:
@@ -306,15 +312,22 @@ jobs:
       - name: Run eval workflow smoke test
         run: lake exe lean-eval check-eval-workflow
 
-      - name: Score a submitted proof importing Stacks
-        if: matrix.configuration == 'stacks'
+      - name: Score a submitted proof importing an optional solution library
+        if: matrix.configuration == 'stacks' || matrix.configuration == 'previous-stable'
+        env:
+          SOLUTION_LIBRARY_IMPORT: ${{ matrix.configuration == 'stacks' && 'StacksCore.Algebra.Algebra.Defs' || 'CFSG.Algebra.F4' }}
+          CFSG_ARTIFACT_ENDPOINT: ${{ vars.CFSG_ARTIFACT_ENDPOINT }}
+          CFSG_REVISION_ENDPOINT: ${{ vars.CFSG_REVISION_ENDPOINT }}
+          STACKS_ARTIFACT_ENDPOINT: ${{ vars.STACKS_ARTIFACT_ENDPOINT }}
+          STACKS_REVISION_ENDPOINT: ${{ vars.STACKS_REVISION_ENDPOINT }}
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import os
           import shutil
           root = Path.cwd()
-          workspace = root / ".ci/stacks-workspaces/two_plus_two"
+          workspace = root / ".ci/solution-library-workspaces/two_plus_two"
           shutil.copytree(root / "generated/two_plus_two", workspace,
                           ignore=shutil.ignore_patterns(".lake"))
           (workspace / ".lake").mkdir()
@@ -323,13 +336,13 @@ jobs:
           submission = workspace / "Submission.lean"
           content = submission.read_text()
           assert "  sorry\n" in content
-          submission.write_text("import StacksCore.Algebra.Algebra.Defs\n" +
+          submission.write_text("import " + os.environ["SOLUTION_LIBRARY_IMPORT"] + "\n" +
                                 content.replace("  sorry\n", "  norm_num\n", 1))
           PY
           cache_env="$(env -u GITHUB_ENV bash scripts/fetch_dependency_caches.sh \
-            --restore .ci/stacks-workspaces/two_plus_two)"
+            --restore .ci/solution-library-workspaces/two_plus_two)"
           eval "$cache_env"
-          lake env lean --run tests/lean/StacksImportSmoke.lean .ci/stacks-workspaces
+          lake env lean --run tests/lean/SolutionLibraryImportSmoke.lean .ci/solution-library-workspaces
 
   security:
     name: Security and scoring smoke tests
