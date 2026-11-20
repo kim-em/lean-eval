@@ -14,10 +14,12 @@ import problem_configurations as policy
 
 class ProblemConfigurationsTests(unittest.TestCase):
     def test_only_nested_support_levels_are_accepted(self):
-        self.assertEqual(policy.supported_configurations({}), ("latest", "rc", "stable"))
-        for value in [["latest"], ["latest", "rc"], ["stable", "latest", "rc"]]:
+        self.assertEqual(policy.supported_configurations({}), ("latest", "rc", "stable", "previous-stable"))
+        for value in [["latest"], ["latest", "rc"], ["stable", "latest", "rc"],
+                      ["previous-stable", "stable", "latest", "rc"]]:
             self.assertEqual(set(policy.supported_configurations({"supported_configurations": value})), set(value))
-        for value in [[], ["rc"], ["latest", "stable"], ["latest", "latest"], ["nightly"], "latest", [False]]:
+        for value in [[], ["rc"], ["latest", "stable"], ["latest", "previous-stable"],
+                      ["latest", "latest"], ["nightly"], "latest", [False]]:
             with self.subTest(value=value), self.assertRaises(ValueError):
                 policy.supported_configurations({"supported_configurations": value})
 
@@ -34,15 +36,20 @@ class ProblemConfigurationsTests(unittest.TestCase):
             root = Path(temporary)
             self.write_problem(root, "a", ["latest"])
             self.write_problem(root, "b", ["latest", "rc"])
-            self.write_problem(root, "c")
-            for configuration, expected in [("latest", ["LeanEval.A", "LeanEval.B", "LeanEval.C"]),
-                                            ("rc", ["LeanEval.B", "LeanEval.C"]), ("stable", ["LeanEval.C"])]:
+            self.write_problem(root, "c", ["latest", "rc", "stable"])
+            self.write_problem(root, "d")
+            for configuration, expected in [("latest", ["LeanEval.A", "LeanEval.B", "LeanEval.C", "LeanEval.D"]),
+                                            ("rc", ["LeanEval.B", "LeanEval.C", "LeanEval.D"]),
+                                            ("stable", ["LeanEval.C", "LeanEval.D"]),
+                                            ("previous-stable", ["LeanEval.D"])]:
                 self.assertEqual(policy.compatible_modules(root, configuration, []), expected)
             self.assertEqual(policy.compatible_modules(root, "stable", ["LeanEval.A"]), [])
             with self.assertRaisesRegex(ValueError, "unknown problem modules"):
                 policy.compatible_modules(root, "stable", ["LeanEval.Typo"])
             with self.assertRaisesRegex(ValueError, "does not support stable"):
                 policy.require_supported(root, "stable", ["b"])
+            with self.assertRaisesRegex(ValueError, "does not support previous-stable"):
+                policy.require_supported(root, "previous-stable", ["c"])
 
     def test_upgrades_cannot_narrow_or_delete_existing_problem_support(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -56,7 +63,7 @@ class ProblemConfigurationsTests(unittest.TestCase):
             self.write_problem(root, "new", ["latest"])
             policy.check_no_regressions(root, "HEAD")
             self.write_problem(root, "a", ["latest", "rc"])
-            with self.assertRaisesRegex(ValueError, "compatibility would decrease for stable"):
+            with self.assertRaisesRegex(ValueError, "compatibility would decrease for previous-stable, stable"):
                 policy.check_no_regressions(root, "HEAD")
             self.write_problem(root, "a")
             (root / "manifests/problems/a.toml").unlink()

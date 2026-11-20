@@ -32,8 +32,9 @@ def configurations(root: Path) -> tuple[str, dict[str, Path]]:
             if (path / name).is_symlink() or not (path / name).is_file():
                 raise ValueError(f"missing regular configuration file: {path / name}")
         result[configuration] = path
-    if any(data[alias] not in result for alias in ("default", "stable", "rc", "latest") if alias in data):
-        raise ValueError("a configured default, stable, rc or latest alias has no configuration")
+    if any(data[alias] not in result
+           for alias in ("default", "stable", "previous-stable", "rc", "latest") if alias in data):
+        raise ValueError("a configured default, stable, previous-stable, rc or latest alias has no configuration")
     return data["default"], result
 
 
@@ -42,6 +43,7 @@ def prepare(root: Path, toolchain: str, destination: Path | None = None) -> Path
     registry = json.loads((root / "supported-toolchains.json").read_text())
     stable = registry["stable"]
     toolchain = {"stable": stable, "default": default,
+                 "previous-stable": registry.get("previous-stable", "previous-stable"),
                  "rc": registry.get("rc", default),
                  "latest": registry.get("latest", "latest")}.get(toolchain, toolchain)
     if toolchain not in supported:

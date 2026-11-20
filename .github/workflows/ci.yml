@@ -61,6 +61,8 @@ jobs:
           python scripts/check_pipeline_toolchain_contract.py
           python scripts/check_pipeline_toolchain_contract.py \
             --toolchain-file toolchains/v4.36.0/lean-toolchain
+          python scripts/check_pipeline_toolchain_contract.py \
+            --toolchain-file toolchains/v4.35.0/lean-toolchain
 
       # Install the pinned Lean toolchain without building the project. The
       # dependency selector consumes a graph produced by Lean's header parser;
@@ -213,7 +215,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [latest, rc, stable]
+        configuration: [latest, rc, stable, previous-stable]
     steps:
       - name: Free up disk space
         # jlumbroso/free-disk-space pinned to 54081f13 (= refs/tags/v1.3.1, also main HEAD as of 2026-05-04).
@@ -445,7 +447,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [rc, stable]
+        configuration: [rc, stable, previous-stable]
         shard: ${{ fromJSON(needs.classify.outputs.matrix).include }}
     steps:
       - name: Free up disk space

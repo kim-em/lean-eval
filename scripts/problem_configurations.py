@@ -14,7 +14,7 @@ import tomllib
 from prepare_toolchain import configurations
 
 
-CONFIGURATIONS = ("latest", "rc", "stable")
+CONFIGURATIONS = ("latest", "rc", "stable", "previous-stable")
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -25,7 +25,7 @@ def supported_configurations(problem: dict) -> tuple[str, ...]:
     supported = tuple(name for name in CONFIGURATIONS if name in value)
     if len(set(value)) != len(value) or set(value) != set(supported) or supported != CONFIGURATIONS[:len(supported)]:
         raise ValueError("supported_configurations must be ['latest'], ['latest', 'rc'], "
-                         "or ['latest', 'rc', 'stable']")
+                         "['latest', 'rc', 'stable'], or ['latest', 'rc', 'stable', 'previous-stable']")
     return supported
 
 

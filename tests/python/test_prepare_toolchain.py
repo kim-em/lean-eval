@@ -18,12 +18,13 @@ class PrepareToolchainTests(unittest.TestCase):
     def test_published_configurations_have_matching_dependency_pins(self):
         default, profiles = MODULE.configurations(ROOT)
         self.assertEqual(default, "latest")
-        self.assertEqual(set(profiles), {"leanprover/lean4:v4.36.0", "leanprover/lean4:v4.36.0-rc2", "latest"})
-        self.assertEqual((profiles["latest"] / "lean-toolchain").read_bytes(),
-                         (profiles["leanprover/lean4:v4.36.0-rc2"] / "lean-toolchain").read_bytes())
-        self.assertNotEqual((profiles["latest"] / "lake-manifest.json").read_bytes(),
-                            (profiles["leanprover/lean4:v4.36.0-rc2"] / "lake-manifest.json").read_bytes())
+        self.assertEqual(set(profiles), {"leanprover/lean4:v4.36.0", "leanprover/lean4:v4.35.0", "latest"})
+        registry = json.loads((ROOT / "supported-toolchains.json").read_text())
+        self.assertEqual(registry["rc"], registry["stable"])
+        self.assertEqual(registry["previous-stable"], "leanprover/lean4:v4.35.0")
         for name in MODULE.FILES:
+            self.assertEqual((profiles["latest"] / name).read_bytes(),
+                             (profiles[registry["stable"]] / name).read_bytes())
             self.assertEqual((profiles[default] / name).read_bytes(), (ROOT / name).read_bytes())
         for profile in profiles.values():
             lakefile = tomllib.loads((profile / "lakefile.toml").read_text())
@@ -74,6 +75,23 @@ class PrepareToolchainTests(unittest.TestCase):
             registry.write_text(json.dumps(value))
             with self.assertRaisesRegex(ValueError, "escapes"):
                 MODULE.prepare(root, "stable")
+
+    def test_previous_stable_alias_selects_its_own_snapshot(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "benchmark"
+            root.mkdir()
+            self.fixture(root)
+            path = root / "supported-toolchains.json"
+            registry = json.loads(path.read_text())
+            registry["previous-stable"] = registry["stable"]
+            path.write_text(json.dumps(registry))
+            destination = Path(temporary) / "previous-stable"
+            MODULE.prepare(root, "previous-stable", destination)
+            self.assertEqual((destination / "lakefile.toml").read_text(), "stable")
+            registry["previous-stable"] = "missing"
+            path.write_text(json.dumps(registry))
+            with self.assertRaisesRegex(ValueError, "alias has no configuration"):
+                MODULE.configurations(root)
 
 
 if __name__ == "__main__":
