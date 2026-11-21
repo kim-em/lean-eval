@@ -19,6 +19,7 @@ namespace Submission
 open _root_.LeanEval
 open _root_.LeanEval.AlgebraicGeometry
 open _root_.LeanEval.AlgebraicGeometry.Faltings
+open _root_.LeanEval.AlgebraicGeometry.Faltings.Adele
 open _root_.LeanEval.AlgebraicGeometry.Faltings.BundledFunctionField
 open _root_.LeanEval.AlgebraicGeometry.Faltings.Place
 open _root_.LeanEval.AlgebraicGeometry.Faltings.ValuationSubalgebra
@@ -46,12 +47,12 @@ variable (K F : Type*) [Field K] [Field F] [Algebra K F]
 
 variable (v : Place K F)
 
-instance : HasMemOrInvMem v where
+instance Place.instHasMemOrInvMem : HasMemOrInvMem v where
   mem_or_inv_mem := v.mem_or_inv_mem'
 
-instance : Algebra v F := inferInstanceAs (Algebra v.toSubalgebra F)
-instance : IsScalarTower K v F := inferInstanceAs (IsScalarTower K v.toSubalgebra F)
-instance : IsFractionRing v F := inferInstanceAs (IsFractionRing v.toValuationSubring F)
+instance Place.instAlgebra : Algebra v F := inferInstanceAs (Algebra v.toSubalgebra F)
+
+instance Place.instIsFractionRing : IsFractionRing v F := inferInstanceAs (IsFractionRing v.toValuationSubring F)
 
 
 variable {F}
@@ -83,7 +84,7 @@ def Adele.principal [BundledFunctionField K F] : F →+* Adele K F where
 
 variable (F)
 
-instance [BundledFunctionField K F] : Algebra F (Adele K F) where
+instance Adele.instAlgebraFunctionField [BundledFunctionField K F] : Algebra F (Adele K F) where
   smul x a := ⟨x • a, (Adele.principal K x * a).2⟩
   algebraMap := Adele.principal K
   commutes' _ _ := mul_comm ..
@@ -92,7 +93,7 @@ instance [BundledFunctionField K F] : Algebra F (Adele K F) where
 -- TODO: generalize this to RestrictedProduct
 
 
-instance [BundledFunctionField K F] : IsScalarTower K F (Adele K F) :=
+instance Adele.instIsScalarTower [BundledFunctionField K F] : IsScalarTower K F (Adele K F) :=
   .of_algebraMap_eq fun _ ↦ rfl
 
 
