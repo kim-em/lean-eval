@@ -33,14 +33,14 @@ Definition 1.1.4 and 1.1.8]. We omit the condition `toSubalgebra ≠ ⊥` since 
 @[ext] structure Place extends ValuationSubalgebra K F where
   ne_top : toSubalgebra ≠ ⊤
 
-instance : SetLike (Place K F) F where
+instance Place.instSetLike : SetLike (Place K F) F where
   coe v := v.carrier
   coe_injective _ _ := Place.ext
 
-instance : SMulMemClass (Place K F) K F where
+instance Place.instSMulMemClass : SMulMemClass (Place K F) K F where
   smul_mem {v} r _ h := v.smul_mem h r
 
-instance : SubringClass (Place K F) F where
+instance Place.instSubringClass : SubringClass (Place K F) F where
   mul_mem {v} := v.mul_mem
   one_mem {v} := v.one_mem
   add_mem {v} := v.add_mem
@@ -49,13 +49,13 @@ instance : SubringClass (Place K F) F where
 
 variable (v : Place K F)
 
-instance : HasMemOrInvMem v where
+instance Place.instHasMemOrInvMem : HasMemOrInvMem v where
   mem_or_inv_mem := v.mem_or_inv_mem'
 
-instance : Algebra v F := inferInstanceAs (Algebra v.toSubalgebra F)
-instance : IsScalarTower K v F := inferInstanceAs (IsScalarTower K v.toSubalgebra F)
-instance : IsFractionRing v F := inferInstanceAs (IsFractionRing v.toValuationSubring F)
-instance : ValuationRing v := inferInstanceAs (ValuationRing v.toValuationSubring)
+instance Place.instAlgebra : Algebra v F := inferInstanceAs (Algebra v.toSubalgebra F)
+instance Place.instIsScalarTower : IsScalarTower K v F := inferInstanceAs (IsScalarTower K v.toSubalgebra F)
+instance Place.instIsFractionRing : IsFractionRing v F := inferInstanceAs (IsFractionRing v.toValuationSubring F)
+instance Place.instValuationRing : ValuationRing v := inferInstanceAs (ValuationRing v.toValuationSubring)
 
 variable {F}
 
@@ -72,7 +72,7 @@ open scoped RestrictedProduct
 /-- [Stichtenoth, Definition 1.5.2]. -/
 abbrev Adele : Type _ := RestrictedProduct (fun _ ↦ F) (fun v : Place K F ↦ v) Filter.cofinite
 
-instance : CommRing (Adele K F) := RestrictedProduct.instCommRingCoeOfSubringClass ..
+instance Adele.instCommRing : CommRing (Adele K F) := RestrictedProduct.instCommRingCoeOfSubringClass ..
 
 open RestrictedProduct
 
@@ -88,14 +88,14 @@ def Adele.principal [BundledFunctionField K F] : F →+* Adele K F where
 
 variable (F)
 
-instance [BundledFunctionField K F] : Algebra F (Adele K F) where
+instance Adele.instAlgebraFunctionField [BundledFunctionField K F] : Algebra F (Adele K F) where
   smul x a := ⟨x • a, (Adele.principal K x * a).2⟩
   algebraMap := Adele.principal K
   commutes' _ _ := mul_comm ..
   smul_def' _ _ := rfl
 
 -- TODO: generalize this to RestrictedProduct
-instance : Algebra K (Adele K F) where
+instance Adele.instAlgebraConstants : Algebra K (Adele K F) where
   __ := RestrictedProduct.instModuleCoeOfSMulMemClass ..
   algebraMap.toFun x := ⟨fun _ ↦ algebraMap K F x, .of_forall fun _ ↦ algebraMap_mem ..⟩
   algebraMap.map_one' := by ext; exact (algebraMap K F).map_one
@@ -105,7 +105,7 @@ instance : Algebra K (Adele K F) where
   commutes' _ _ := mul_comm ..
   smul_def' _ _ := by ext; apply Algebra.smul_def
 
-instance [BundledFunctionField K F] : IsScalarTower K F (Adele K F) :=
+instance Adele.instIsScalarTower [BundledFunctionField K F] : IsScalarTower K F (Adele K F) :=
   .of_algebraMap_eq fun _ ↦ rfl
 
 /-- The $K$-subspace $\mathcal{A}_F(0)$, see [Stichtenoth, Definition 1.5.3]. -/
