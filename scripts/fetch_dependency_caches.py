@@ -43,7 +43,28 @@ def manifest(path: Path) -> dict[str, dict]:
     return {p["name"].strip("«»"): p for p in data["packages"]}
 
 
-def imported_modules(project: Path) -> dict[str, list[str]]:
+def variant_exclusions(project: Path) -> tuple[Path, ...]:
+    """Sources of problems the benchmark's configuration variant does not provide.
+
+    A variant such as `stacks` cannot build its `unsupported_modules`; scanning their imports would
+    demand caches the variant cannot use. Other projects and support roles scan everything.
+    """
+    if not (project / "supported-toolchains.json").is_file():
+        return ()
+    sys.path.insert(0, str(SCRIPTS))
+    from problem_configurations import configuration_policy, current_configuration, load_problems
+    sys.path.pop(0)
+    try:
+        _, unavailable = configuration_policy(project, current_configuration(project))
+    except ValueError:
+        return ()
+    return tuple(path.resolve() for name, problem in load_problems(project).items()
+                 if problem["module"] in unavailable
+                 for path in (project.joinpath(*problem["module"].split(".")).with_suffix(".lean"),
+                              project / "generated" / name))
+
+
+def imported_modules(project: Path, excluded: tuple[Path, ...] = ()) -> dict[str, list[str]]:
     paths = []
 
     def unreadable(error: OSError) -> None:
@@ -52,6 +73,8 @@ def imported_modules(project: Path) -> dict[str, list[str]]:
     for directory, subdirs, files in os.walk(project, onerror=unreadable):
         subdirs[:] = sorted(d for d in subdirs if d not in {".lake", ".git"})
         paths.extend(str(Path(directory) / f) for f in sorted(files) if f.endswith(".lean"))
+    paths = [p for p in paths if not any(e == Path(p).resolve() or e in Path(p).resolve().parents
+                                         for e in excluded)]
     with tempfile.TemporaryDirectory(prefix="lean-eval-imports-") as temporary:
         source_list = Path(temporary) / "paths.json"
         source_list.write_text(json.dumps(paths), encoding="utf-8")
@@ -94,7 +117,7 @@ def prepare(project: Path, restore: bool) -> dict[str, str]:
         print("fetch_dependency_caches: no supported packages in the manifest; nothing to fetch",
               file=sys.stderr)
         return {}
-    modules = imported_modules(project)
+    modules = imported_modules(project, variant_exclusions(project))
     for module, parts in list(modules.items()):
         library = next((lib for lib in available if belongs(module, lib)), None)
         if library is None:

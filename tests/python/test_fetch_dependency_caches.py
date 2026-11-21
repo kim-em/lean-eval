@@ -5,6 +5,7 @@ import os
 import pathlib
 import resource
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -221,6 +222,43 @@ class FetchDependencyCachesTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("compiled instead of downloaded", result.stderr)
         self.assertFalse(environment.exists())
+
+
+class BenchmarkVariantScanTests(unittest.TestCase):
+    """A benchmark root on a library variant ignores imports of the variant's unsupported problems."""
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.project = pathlib.Path(directory.name)
+        for name in ["supported-toolchains.json", "toolchains", "manifests/problems"]:
+            (shutil.copytree if (ROOT / name).is_dir() else shutil.copy)(ROOT / name, self.project / name)
+        self.registry = json.loads((ROOT / "supported-toolchains.json").read_text())
+        for path in (ROOT / "manifests/problems").glob("*.toml"):
+            module = tomllib.loads(path.read_text())["module"]
+            if module in self.registry["variants"]["stacks"]["unsupported_modules"]:
+                for source in [self.project.joinpath(*module.split(".")).with_suffix(".lean"),
+                               self.project / "generated" / path.stem / "ChallengeDeps.lean"]:
+                    source.parent.mkdir(parents=True, exist_ok=True)
+                    source.write_text("import TauCeti.Example\n")
+
+    def run_on(self, configuration):
+        profile = self.registry["configurations"][self.registry.get(configuration, configuration)]
+        for name in ["lean-toolchain", "lakefile.toml", "lake-manifest.json"]:
+            shutil.copy(self.project / profile / name, self.project / name)
+        return subprocess.run(["bash", str(SCRIPT), "--restore", str(self.project)],
+                              env=dict(os.environ, GITHUB_ENV=""), capture_output=True,
+                              text=True, check=False, timeout=90)
+
+    def test_stacks_root_skips_unsupported_problem_imports(self):
+        result = self.run_on("stacks")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("nothing to fetch", result.stderr)
+
+    def test_support_roles_still_scan_every_problem(self):
+        result = self.run_on("previous-stable")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("TauCeti", result.stderr)
 
 
 if __name__ == "__main__":
