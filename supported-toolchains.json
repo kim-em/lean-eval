@@ -4,10 +4,11 @@
     "leanprover/lean4:v4.36.0": "toolchains/v4.36.0",
     "latest": "toolchains/latest",
     "leanprover/lean4:v4.35.0": "toolchains/v4.35.0",
-    "stacks": "toolchains/stacks-v4.35.0"
+    "stacks": "toolchains/stacks-v4.35.0",
+    "leanprover/lean4:v4.37.0-rc1": "toolchains/v4.37.0-rc1"
   },
   "stable": "leanprover/lean4:v4.36.0",
-  "rc": "leanprover/lean4:v4.36.0",
+  "rc": "leanprover/lean4:v4.37.0-rc1",
   "latest": "latest",
   "previous-stable": "leanprover/lean4:v4.35.0",
   "variants": {

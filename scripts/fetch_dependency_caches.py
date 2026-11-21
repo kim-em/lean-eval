@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import resource
 import shlex
 import subprocess
 import sys
@@ -179,6 +180,16 @@ def prepare(project: Path, restore: bool) -> dict[str, str]:
                    "--repo", library.repo, "--package", library.package,
                    "--rev", packages[library.package]["rev"], "--mappings-only"], project, env, 3)
         if restore:
+            # leantar's recursive decoder needs more than the usual 8 MiB for
+            # TauCeti.Algebra.Lie.F4.ModularLattice on Lean 4.37.0-rc1.
+            # Raise only this helper's soft limit; Lake and its extractor inherit
+            # it. Respect a finite hard limit and never lower a larger allowance.
+            soft, hard = resource.getrlimit(resource.RLIMIT_STACK)
+            stack = 64 * 1024 * 1024
+            if hard != resource.RLIM_INFINITY:
+                stack = min(stack, hard)
+            if soft != resource.RLIM_INFINITY and soft < stack:
+                resource.setrlimit(resource.RLIMIT_STACK, (stack, hard))
             targets = sorted({m for m in modules if any(belongs(m, lib) for lib in needed)})
             print(f"fetch_dependency_caches: restoring {len(targets)} imported library module(s) "
                   "and their dependencies", file=sys.stderr)

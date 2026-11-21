@@ -256,6 +256,10 @@ keeping catalog validation small. The submission runner still uses full source
 checkouts. Missing dependency caches must fail rather than trigger dependency
 compilation. Mathlib's complete cache and imported TauCeti artifacts must restore
 for the exact selected Lean and dependency pins.
+The restore helper gives the stock archive extractor up to 64 MiB of stack
+(within the host's hard limit). Lean 4.37.0-rc1 needs this for deeply nested
+TauCeti proofs; calling `lake --no-build` directly with the usual 8 MiB stack
+can crash during extraction even when the archive is valid.
 Keep the helper's exported `LAKE_RESTORE_ARTIFACTS=true`: runtime extraction and
 inventory tools need canonical `.olean` paths even when builds reuse a warm
 artifact cache from another checkout or profile.

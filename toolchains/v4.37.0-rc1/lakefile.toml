@@ -1,0 +1,87 @@
+name = "lean-eval"
+defaultTargets = ["LeanEval"]
+# Generated benchmark statements retain legacy visibility rules.
+allowNonModules = true
+
+[leanOptions]
+autoImplicit = false
+
+# Available to generated solutions only. Generation rejects statement imports
+# from lean-pool; keep this before Mathlib so Mathlib owns shared pins.
+[[require]]
+name = "lean-pool"
+git = "https://github.com/Vilin97/lean-pool.git"
+rev = "e9d53e9cbcff8dfd0cc816ba94db7a26b082929f"
+
+# Large solution libraries. Their caches are fetched only when imported.
+# Keep these before TauCeti and Mathlib so the benchmark owns shared pins.
+# Their published pins currently predate this toolchain; cache preparation
+# rejects imports until the publishers provide matching builds (see README).
+[[require]]
+name = "cfsg"
+git = "https://github.com/AxiomMath/CFSG.git"
+rev = "5437cdc31389dd9aeaa5c2a9465a4e164f8dea33"
+
+[[require]]
+name = "Stacks"
+git = "https://github.com/AxiomMath/Stacks.git"
+rev = "c496df0d9beea9deaeabcea8492605f9a0a2313b"
+
+# TauCeti supplies the definitions in the classification of finite simple groups
+# problem. It is listed before Mathlib because Lake takes shared transitive
+# dependencies (batteries, aesop, ...) from the later require, and those must be
+# Mathlib's. The toolchain and the Mathlib rev below must be exactly the ones the
+# pinned TauCeti commit uses, so that TauCeti's published build outputs apply;
+# scripts/fetch_dependency_caches.sh checks this and fetches them.
+[[require]]
+name = "TauCeti"
+git = "https://github.com/TauCetiProject/TauCeti"
+rev = "e0e414ce57522ba17560057ad0d7f2edab91bf0c"
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "31ce06eaadf4a200c0e1407c5f10953cf606b8f8"
+
+[[require]]
+name = "lean-eval-generator"
+git = "https://github.com/leanprover/lean-eval-generator.git"
+rev = "0b8cc2d141710a18515c53448f006c971dd8eeb4"
+
+[[lean_lib]]
+name = "LeanEval"
+
+[[lean_lib]]
+name = "EvalTools"
+
+[[lean_exe]]
+name = "extract_theorem"
+root = "EvalTools.ExtractTheorem"
+
+[[lean_exe]]
+name = "eval_inventory"
+root = "EvalTools.ProblemInventory"
+
+[[lean_exe]]
+name = "lean-eval"
+root = "EvalTools.Main"
+
+[[lean_exe]]
+name = "test_validate_submission"
+srcDir = "tests/lean"
+root = "EvalToolsTests.ValidateSubmissionTest"
+
+[[lean_exe]]
+name = "test_check_comparator_installation"
+srcDir = "tests/lean"
+root = "EvalToolsTests.CheckComparatorInstallationTest"
+
+[[lean_exe]]
+name = "test_generate"
+srcDir = "tests/lean"
+root = "EvalToolsTests.GenerateTest"
+
+[[lean_exe]]
+name = "test_module_coverage"
+srcDir = "tests/lean"
+root = "EvalToolsTests.ModuleCoverageTest"

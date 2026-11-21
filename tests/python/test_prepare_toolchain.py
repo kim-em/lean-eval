@@ -18,13 +18,14 @@ class PrepareToolchainTests(unittest.TestCase):
     def test_published_configurations_have_matching_dependency_pins(self):
         default, profiles = MODULE.configurations(ROOT)
         self.assertEqual(default, "latest")
-        self.assertEqual(set(profiles), {"leanprover/lean4:v4.36.0", "leanprover/lean4:v4.35.0", "latest", "stacks"})
+        self.assertEqual(set(profiles), {"leanprover/lean4:v4.37.0-rc1", "leanprover/lean4:v4.36.0", "leanprover/lean4:v4.35.0", "latest", "stacks"})
         registry = json.loads((ROOT / "supported-toolchains.json").read_text())
-        self.assertEqual(registry["rc"], registry["stable"])
+        self.assertEqual(registry["rc"], "leanprover/lean4:v4.37.0-rc1")
+        self.assertEqual(registry["stable"], "leanprover/lean4:v4.36.0")
         self.assertEqual(registry["previous-stable"], "leanprover/lean4:v4.35.0")
         for name in MODULE.FILES:
             self.assertEqual((profiles["latest"] / name).read_bytes(),
-                             (profiles[registry["stable"]] / name).read_bytes())
+                             (profiles[registry["rc"]] / name).read_bytes())
             self.assertEqual((profiles[default] / name).read_bytes(), (ROOT / name).read_bytes())
         for profile in profiles.values():
             lakefile = tomllib.loads((profile / "lakefile.toml").read_text())

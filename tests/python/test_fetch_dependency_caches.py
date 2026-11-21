@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import resource
 import shlex
 import subprocess
 import sys
@@ -36,10 +37,11 @@ class FetchDependencyCachesTests(unittest.TestCase):
         tools.mkdir()
         (tools / "lake").write_text(
             f"#!{sys.executable}\n"
-            "import json,os,sys,pathlib\n"
+            "import json,os,sys,pathlib,resource\n"
             f"calls=pathlib.Path({str(self.calls)!r})\n"
             "previous=calls.read_text().splitlines() if calls.exists() else []\n"
             "with calls.open('a') as f: f.write(json.dumps({'args':sys.argv[1:],"
+            "'stack':resource.getrlimit(resource.RLIMIT_STACK)[0],"
             "'curl':os.environ.get('CURL'), 'config':pathlib.Path(os.environ['LAKE_CONFIG']).read_text()})+'\\n')\n"
             "if 'build' in sys.argv:\n"
             " count=sum('build' in json.loads(p)['args'] for p in previous)\n"
@@ -83,6 +85,20 @@ class FetchDependencyCachesTests(unittest.TestCase):
         self.assertIn("no compilation was permitted", result.stderr)
         calls = [json.loads(line) for line in self.calls.read_text().splitlines()]
         self.assertEqual(sum("build" in c["args"] for c in calls), 2)
+
+    def test_restore_inherits_enough_stack_for_deep_cached_proofs(self):
+        def limited_stack():
+            _, hard = resource.getrlimit(resource.RLIMIT_STACK)
+            resource.setrlimit(resource.RLIMIT_STACK, (8 * 1024 * 1024, hard))
+
+        result = subprocess.run(["bash", str(SCRIPT), "--restore", str(self.project)],
+                                env=self.env, capture_output=True, text=True,
+                                preexec_fn=limited_stack, timeout=90)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = [json.loads(line) for line in self.calls.read_text().splitlines()]
+        restore = next(c for c in calls if "build" in c["args"])
+        self.assertTrue(restore["stack"] == resource.RLIM_INFINITY or
+                        restore["stack"] >= 64 * 1024 * 1024)
 
     def test_pin_mismatch_stops_before_any_lake_command(self):
         (self.project / "lean-toolchain").write_text("leanprover/lean4:v4.34.0\n")
