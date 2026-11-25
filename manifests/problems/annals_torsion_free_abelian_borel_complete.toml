@@ -1,0 +1,23 @@
+id = "annals_torsion_free_abelian_borel_complete"
+title = "Torsion-free abelian groups are Borel complete"
+group = "formalization-evaluation"
+status = "draft"
+visible = true
+statement_revision = 1
+tags = ["annals"]
+module = "LeanEval.ModelTheory.TorsionFreeAbelianBorelComplete"
+holes = ["PaoliniShelah.tfab_borelComplete"]
+supported_configurations = ["latest"]
+submitter = "Kim Morrison"
+source = "G. Paolini and S. Shelah, `Torsion-free abelian groups are Borel complete`, Annals of Math, 199 (3) 2024, https://doi.org/10.4007/annals.2024.199.3.4 (arXiv:2102.12371). Main Theorem."
+notes = """
+Stated against Tau Ceti's coding spaces of countable structures. Groups with domain ω in the
+language {e, ·, ⁻¹} are points of the functional coding space
+`FunctionalConfiguration Language.group ℕ` (function tables with the product topology), and TFAB_ω
+is the set of configurations whose decoded operations satisfy the group axioms, commutativity and
+xⁿ = e → x = e for n ≥ 1, read as plain functions ℕ → ℕ. Graph_ω is Tau Ceti's `graphClass`
+(symmetric irreflexive adjacency on ℕ). Borel completeness (the paper's Definition 1.6) is Tau
+Ceti's `FunctionalConfiguration.BorelComplete`. The statement is the conjunction of Borel
+completeness and the paper's stronger form: a continuous map from `graphClass` to TFAB_ω, between
+subspaces, that preserves and reflects isomorphism.
+"""
