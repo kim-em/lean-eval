@@ -40,13 +40,14 @@ The currently available configurations in `supported-toolchains.json` are:
 | --- | --- | --- | --- |
 | `stable` | `v4.36.0` | `fc4f59e5` | `d91980bd` |
 | `previous-stable` | `v4.35.0` | `07406378` | `1f9b4414` |
-| `rc` | `v4.37.0-rc1` | `31ce06ea` | `e0e414ce` |
-| `latest` (default) | `v4.37.0-rc1` | `31ce06ea` | `e0e414ce` |
+| `rc` | `v4.37.0-rc1` | `31ce06ea` | `c14c0365` |
+| `latest` (default) | `v4.37.0-rc1` | `31ce06ea` | `c14c0365` |
 | `stacks` (library variant) | `v4.35.0` | `56a00585` | `1f9b4414` (metadata only) |
 
-`rc` and `latest` use TauCeti’s `v4.37.0-rc1` release commit and its exact
-Mathlib snapshot. `stable` remains on the Mathlib and TauCeti `v4.36.0` release
-commits; `previous-stable` retains the previously supported 4.35.0 pins.
+`rc` and `latest` use a TauCeti `main` commit built with Lean `v4.37.0-rc1`
+and its exact Mathlib snapshot. `stable` remains on the Mathlib and TauCeti
+`v4.36.0` release commits; `previous-stable` retains the previously supported
+4.35.0 pins.
 The superseded `v4.36.0-rc2` snapshot is retired from new evaluations.
 
 The `stacks` variant uses Stacks commit `c496df0d` and the exact Mathlib snapshot
