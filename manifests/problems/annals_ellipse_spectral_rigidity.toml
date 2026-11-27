@@ -1,0 +1,22 @@
+id = "annals_ellipse_spectral_rigidity"
+title = "One can hear the shape of ellipses of small eccentricity"
+group = "formalization-evaluation"
+status = "draft"
+visible = true
+statement_revision = 1
+tags = ["annals"]
+module = "LeanEval.Analysis.PDE.EllipseSpectralRigidity"
+holes = ["HezariZelditch.ellipse_spectrally_determined"]
+supported_configurations = ["latest"]
+submitter = "Kim Morrison"
+source = "H. Hezari and S. Zelditch, `One can hear the shape of ellipses of small eccentricity`, Annals of Math, 196 (3) 2022, https://doi.org/10.4007/annals.2022.196.3.4 (arXiv:1907.03882). Theorem 1.1."
+notes = """
+Stated against Tau Ceti's min-max eigenvalues of the Laplacian. The Dirichlet spectrum is
+`TauCeti.PDE.dirichletEigenvalue volume Ω (fun _ ↦ 1) 0 0 k` and the Neumann spectrum is
+`TauCeti.PDE.mixedEigenvalue volume Ω ∅ (fun _ ↦ 1) 0 0 k`, both the eigenvalues of -Δ listed from
+k = 0 in nondecreasing order with multiplicity; isospectral means these sequences agree. A smooth
+domain is a connected bounded open set {ρ < 0} for a C^∞ function ρ with nonvanishing derivative
+on {ρ = 0}. The ellipse with semi-axes a ≥ b > 0 is {(x₀/a)² + (x₁/b)² < 1}, of eccentricity
+√(1 - (b/a)²). One ε serves both boundary conditions, and isometric means the image of the ellipse
+under an isometry of the plane.
+"""
