@@ -1,0 +1,22 @@
+id = "annals_triangles_no_hot_spots"
+title = "Euclidean triangles have no hot spots"
+group = "formalization-evaluation"
+status = "draft"
+visible = true
+statement_revision = 1
+tags = ["annals"]
+module = "LeanEval.Analysis.PDE.HotSpotsTriangles"
+holes = ["JudgeMondal.triangle_no_hot_spots"]
+supported_configurations = ["latest"]
+submitter = "Kim Morrison"
+source = "C. Judge and S. Mondal, `Euclidean triangles have no hot spots`, Annals of Math, 191 (1) 2020, https://doi.org/10.4007/annals.2020.191.1.3, with `Erratum: Euclidean triangles have no hot spots`, Annals of Math, 195 (1) 2022, https://doi.org/10.4007/annals.2022.195.1.5 (arXiv:1802.01800). The hot spots conjecture for triangles."
+notes = """
+Stated against Tau Ceti's Neumann spectrum. The triangle is an `Affine.Triangle` in
+`EuclideanSpace ℝ (Fin 2)`; the closed triangle is the convex hull of its vertices and T its
+interior. The second Neumann eigenvalue is Tau Ceti's
+`PDE.mixedEigenvalue volume T ∅ (fun _ ↦ 1) 0 0 1` (min-max eigenvalues of -Δ with no Dirichlet
+part, indexed from 0), and a second Neumann eigenfunction is a nonzero u ∈ H¹(T) with
+∫ ∇u · ∇v = μ₂ ∫ u v for every v ∈ H¹(T). Since u is only defined almost everywhere, the conclusion
+is stated for any f continuous on the closed triangle and equal to u almost everywhere on T: every
+maximum or minimum point of f over the closed triangle lies on the boundary.
+"""
